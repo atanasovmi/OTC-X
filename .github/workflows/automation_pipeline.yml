@@ -36,6 +36,6 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add data/master_metrics.parquet logs/
+          git add data/master_trades.parquet data/daily_metrics.parquet logs/
           git commit -m "Automated daily OTC-X data update" || echo "No changes to commit"
           git push
