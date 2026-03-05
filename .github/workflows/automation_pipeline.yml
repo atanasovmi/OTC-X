@@ -1,4 +1,4 @@
-name: OTC-X Daily Liquidity Radar Pipeline
+name: OTC-X Daily Pipeline
 
 on:
   schedule:
