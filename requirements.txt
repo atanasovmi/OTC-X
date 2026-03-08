@@ -3,3 +3,4 @@ requests
 polars
 pyarrow
 streamlit
+plotly
