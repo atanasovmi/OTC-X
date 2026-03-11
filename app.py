@@ -398,8 +398,9 @@ def pct_cls(v) -> str:
 
 def score_badge(score: int) -> str:
     label = ANOMALY_LABELS.get(int(score), "Critical")
-    css_class = "bdg-clean"
-    if score == 1:
+    if score == 0:
+        css_class = "bdg-clean"
+    elif score == 1:
         css_class = "bdg-watch"
     elif score == 2:
         css_class = "bdg-alert"
@@ -407,7 +408,7 @@ def score_badge(score: int) -> str:
         css_class = "bdg-critical"
     elif score in (5, 6):
         css_class = "bdg-severe"
-    elif score >= 7:
+    else:
         css_class = "bdg-extreme"
     return f'<span class="bdg {css_class}">{label}</span>'
 
@@ -800,7 +801,7 @@ def chart_anomaly_severity_treemap(latest: pd.DataFrame) -> go.Figure:
 
     df["severity"] = df["anomaly_score"].map(ANOMALY_LABELS).fillna("Unknown")
     df["label"] = df["Name"].fillna(df["Isin"]).str[:28]
-    df["score_size"] = df["anomaly_score"].clip(lower=1)  # ensure non-zero for treemap
+    df["score_size"] = df["anomaly_score"]  # already >= 1 from filter above
 
     severity_order = ["Watch", "Alert", "Critical", "Severe", "Extreme"]
     df["sev_order"] = df["severity"].map({s: i for i, s in enumerate(severity_order)}).fillna(99)
@@ -1424,7 +1425,7 @@ def main() -> None:
         # ── 3D Explorer Section ──
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown(
-            '<div class="sec-hdr">3D Market Explorer — Interactive Virtual Reality</div>',
+            '<div class="sec-hdr">3D Market Explorer — Interactive Visualization</div>',
             unsafe_allow_html=True,
         )
         st.markdown(
@@ -1547,8 +1548,9 @@ def main() -> None:
         )
         st.markdown(
             '<div class="math-note">'
-            'S<sub>anomaly</sub> = 3·𝟙(V > 1.5·V̄₃₀) + 2·𝟙(N > 1.5·N̄₃₀) + 2·𝟙(|ΔP| > 5%)'
-            '&nbsp;&nbsp;∈ {0, …, 7}'
+            'S<sub>anomaly</sub> = 3·𝟙(V &gt; 1.5·V̄₃₀) + 2·𝟙(N &gt; 1.5·N̄₃₀) + 2·𝟙(|ΔP| &gt; 5%)'
+            '&nbsp;&nbsp;∈ {0, 2, 3, 4, 5, 7} &nbsp;·&nbsp; '
+            'Weights: volume=3, activity=2, price_gap=2'
             '</div>',
             unsafe_allow_html=True,
         )
