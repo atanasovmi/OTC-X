@@ -29,7 +29,7 @@ BRAND_DARK   = "#1A1A2E"
 GREEN_POS    = "#28A745"
 RED_NEG      = "#DC3545"
 BORDER_COL   = "#DEE2E6"
-MUTED        = "#6C757D"
+MUTED        = "#495057"   # darkened from #6C757D for readability on white
 PLOTLY_TPL   = "plotly_white"
 
 SECTOR_PALETTE = {
@@ -98,7 +98,7 @@ def inject_css() -> None:
         .otcx-logo span { color: #B22222; }
         .otcx-tagline {
             font-size: 0.65rem;
-            color: #6C757D;
+            color: #495057;
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.12em;
@@ -111,7 +111,7 @@ def inject_css() -> None:
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.14em;
-            color: #6C757D;
+            color: #495057;
             border-bottom: 1px solid #DEE2E6;
             padding-bottom: 0.45rem;
             margin-bottom: 0.8rem;
@@ -130,7 +130,7 @@ def inject_css() -> None:
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.12em;
-            color: #6C757D;
+            color: #495057;
             margin-bottom: 0.35rem;
         }
         .kpi-value {
@@ -141,7 +141,7 @@ def inject_css() -> None:
             margin-bottom: 0.2rem;
             font-family: 'IBM Plex Mono', monospace;
         }
-        .kpi-sub { font-size: 0.72rem; color: #6C757D; }
+        .kpi-sub { font-size: 0.72rem; color: #495057; }
         .c-pos { color: #28A745; font-weight: 600; }
         .c-neg { color: #DC3545; font-weight: 600; }
 
@@ -156,7 +156,7 @@ def inject_css() -> None:
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.09em;
-            color: #6C757D;
+            color: #495057;
             border-bottom: 2px solid #DEE2E6;
             padding: 0.55rem 0.7rem;
             text-align: right;
@@ -217,7 +217,7 @@ def inject_css() -> None:
             font-size: 0.82rem;
             font-weight: 500;
             letter-spacing: 0.02em;
-            color: #6C757D;
+            color: #495057;
             border-radius: 0;
             background: transparent;
             border-bottom: 2px solid transparent;
@@ -334,12 +334,18 @@ def load_data() -> tuple[pd.DataFrame, pd.DataFrame]:
 #  Chart Factory
 # ─────────────────────────────────────────────
 def _base_layout(**kwargs) -> dict:
+    _axis_defaults = dict(
+        tickfont=dict(color="#212529"),
+        title_font=dict(color="#212529"),
+    )
     base = dict(
         template=PLOTLY_TPL,
         paper_bgcolor="white",
         plot_bgcolor="white",
         font=dict(family="Inter", color="#212529"),
         margin=dict(l=4, r=4, t=16, b=4),
+        xaxis=_axis_defaults.copy(),
+        yaxis=_axis_defaults.copy(),
     )
     base.update(kwargs)
     return base
@@ -376,10 +382,12 @@ def chart_market_activity(df_hist: pd.DataFrame) -> go.Figure:
     fig.update_layout(**_base_layout(height=280, bargap=0.12,
                                       legend=dict(orientation="h", y=1.08,
                                                   font=dict(size=10))))
-    fig.update_xaxes(gridcolor="#F1F3F5")
+    fig.update_xaxes(gridcolor="#F1F3F5", tickfont=dict(color="#212529"))
     fig.update_yaxes(title_text="Volume (CHF)", gridcolor="#F1F3F5",
-                     secondary_y=False, tickformat=",.0f")
-    fig.update_yaxes(title_text="Trades", showgrid=False, secondary_y=True)
+                     secondary_y=False, tickformat=",.0f",
+                     tickfont=dict(color="#212529"))
+    fig.update_yaxes(title_text="Trades", showgrid=False, secondary_y=True,
+                     tickfont=dict(color="#212529"))
     return fig
 
 
@@ -438,10 +446,12 @@ def chart_top_movers(latest: pd.DataFrame, n: int = 14) -> go.Figure:
     )
     fig.add_vline(x=0, line_color=BORDER_COL, line_width=1)
     fig.update_layout(
-        **_base_layout(height=390,
+        **_base_layout(height=420,
+                       margin=dict(l=10, r=70, t=16, b=4),
                        xaxis=dict(title="Price Change (%)", tickformat="+.1f",
-                                  ticksuffix="%", gridcolor="#F1F3F5", zeroline=False),
-                       yaxis=dict(title=None, tickfont=dict(size=11)),
+                                  ticksuffix="%", gridcolor="#F1F3F5", zeroline=False,
+                                  tickfont=dict(color="#212529")),
+                       yaxis=dict(title=None, tickfont=dict(size=11, color="#212529")),
                        showlegend=False)
     )
     return fig
@@ -768,7 +778,7 @@ def render_header(latest_date: str) -> None:
           </div>
           <div style="margin-left:auto;display:flex;align-items:center;gap:2rem;">
             <span class="live-dot"><span class="dot"></span> Live</span>
-            <span style="font-size:0.72rem;color:#6C757D;">
+            <span style="font-size:0.72rem;color:#495057;">
               Last data: <strong>{latest_date}</strong>
             </span>
           </div>
@@ -963,14 +973,19 @@ def main() -> None:
 
         active_isins = df_filt[df_filt["trades_today"] > 0]["Isin"].tolist()
         if active_isins:
+            def _isin_label(x: str) -> str:
+                row = latest[latest["Isin"] == x]
+                if row.empty:
+                    return x
+                name = row["Name"].values[0]
+                if name and pd.notna(name):
+                    return f"{x} — {name}"
+                return x
+
             sel_isin = st.selectbox(
                 "Select security",
                 active_isins,
-                format_func=lambda x: (
-                    f"{x} — "
-                    + (latest[latest["Isin"] == x]["Name"].values[0]
-                       if not latest[latest["Isin"] == x].empty else x)
-                ),
+                format_func=_isin_label,
                 label_visibility="collapsed",
             )
             st.plotly_chart(chart_security_history(df_hist, sel_isin),
