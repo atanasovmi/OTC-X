@@ -195,6 +195,14 @@ def inject_css() -> None:
             font-weight: 500;
             font-family: 'IBM Plex Mono', monospace;
         }
+        .mkt-table td.isin a {
+            color: #B22222;
+            text-decoration: none;
+        }
+        .mkt-table td.isin a:hover {
+            text-decoration: underline;
+            color: #8B1A1A;
+        }
         .mkt-table td.name {
             font-family: 'Inter', sans-serif;
             font-weight: 500;
@@ -285,7 +293,7 @@ def inject_css() -> None:
         /* ── Math formula ── */
         .math-note {
             font-size: 0.72rem;
-            color: #495057;
+            color: #343A40;
             font-style: italic;
             font-family: 'IBM Plex Mono', monospace;
             margin-bottom: 0.5rem;
@@ -306,6 +314,44 @@ def inject_css() -> None:
         }
         div[data-testid="stMetricValue"] div {
             color: #1A1A2E !important;
+        }
+        /* Checkbox label text — override Streamlit grey */
+        .stCheckbox label p, .stCheckbox label span,
+        .stCheckbox [data-testid="stMarkdownContainer"] p {
+            color: #1A1A2E !important;
+        }
+        /* Selectbox / multiselect chosen value text */
+        [data-baseweb="select"] .css-1dimb5e-singleValue,
+        [data-baseweb="select"] [data-testid="stMarkdownContainer"],
+        [data-baseweb="tag"] span {
+            color: #1A1A2E !important;
+        }
+
+        /* ── Neutral Streamlit buttons — warm sand instead of bright red ── */
+        .stButton > button {
+            background-color: rgb(235, 226, 205) !important;
+            color: #1A1A2E !important;
+            border: 1px solid #C8BFA5 !important;
+            font-weight: 600 !important;
+            transition: all 0.15s ease !important;
+        }
+        .stButton > button:hover {
+            background-color: rgb(220, 210, 185) !important;
+            border-color: #B0A585 !important;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08) !important;
+        }
+        .stButton > button:focus {
+            box-shadow: 0 0 0 2px rgba(178,34,34,0.18) !important;
+        }
+        /* Download button — keep distinct with brand accent */
+        .stDownloadButton > button {
+            background-color: #B22222 !important;
+            color: #FFFFFF !important;
+            border: 1px solid #8B1A1A !important;
+            font-weight: 600 !important;
+        }
+        .stDownloadButton > button:hover {
+            background-color: #8B1A1A !important;
         }
 
         /* ── Misc ── */
@@ -480,7 +526,7 @@ def chart_market_activity(df_hist: pd.DataFrame) -> go.Figure:
     )
     fig.update_layout(**_base_layout(height=280, bargap=0.12,
                                       legend=dict(orientation="h", y=1.08,
-                                                  font=dict(size=10))))
+                                                  font=dict(size=10, color="#1A1A2E"))))
     fig.update_xaxes(gridcolor="#E9ECEF", tickfont=dict(color="#1A1A2E"))
     fig.update_yaxes(title_text="Volume (CHF)", gridcolor="#E9ECEF",
                      secondary_y=False, tickformat=",.0f",
@@ -576,8 +622,9 @@ def chart_volume_by_sector(latest: pd.DataFrame) -> go.Figure:
     )
     fig.update_layout(
         **_base_layout(height=320, margin=dict(l=4, r=90, t=16, b=4),
-                       xaxis=dict(title=None, gridcolor="#E9ECEF", zeroline=False),
-                       yaxis=dict(title=None, tickfont=dict(size=11)),
+                       xaxis=dict(title=None, gridcolor="#E9ECEF", zeroline=False,
+                                  tickfont=dict(color="#1A1A2E")),
+                       yaxis=dict(title=None, tickfont=dict(size=11, color="#1A1A2E")),
                        showlegend=False)
     )
     return fig
@@ -694,7 +741,17 @@ def chart_amihud_by_sector(df_hist: pd.DataFrame) -> go.Figure:
     return fig
 
 
-def chart_volatility_trend(df_hist: pd.DataFrame, n: int = 5) -> go.Figure:
+def chart_volatility_trend(df_hist: pd.DataFrame, n: int = 5,
+                           use_ewma: bool = False,
+                           selected_sector: str | None = None) -> go.Figure:
+    """Rolling volatility chart with optional EWMA smoothing and
+    hover-to-isolate interaction.
+
+    Parameters
+    ----------
+    use_ewma : If True, apply RiskMetrics EWMA (λ=0.94) instead of simple MA.
+    selected_sector : If set, highlight only this sector and dim others.
+    """
     top_sectors = (
         df_hist.groupby("Sektor")["trades_today"]
         .sum()
@@ -710,23 +767,42 @@ def chart_volatility_trend(df_hist: pd.DataFrame, n: int = 5) -> go.Figure:
     fig = go.Figure()
     for i, sector in enumerate(top_sectors):
         grp = agg[agg["Sektor"] == sector].copy()
-        grp["roll"] = grp["volatility_daily"].rolling(30, min_periods=1).mean()
+
+        if use_ewma:
+            # RiskMetrics EWMA: s_t = λ * s_{t-1} + (1 - λ) * v_t, λ = 0.94
+            grp["smoothed"] = grp["volatility_daily"].ewm(alpha=0.06, adjust=False).mean()
+        else:
+            grp["smoothed"] = grp["volatility_daily"].rolling(30, min_periods=1).mean()
+
+        # Determine visibility: if a sector is selected, dim others
+        is_highlighted = selected_sector is None or sector == selected_sector
+        opacity = 1.0 if is_highlighted else 0.12
+        width = 2.2 if (selected_sector and sector == selected_sector) else 1.5
+
         fig.add_trace(
             go.Scatter(
                 x=grp["Datum"],
-                y=grp["roll"],
+                y=grp["smoothed"],
                 mode="lines",
                 name=sector,
-                line=dict(color=palette[i % len(palette)], width=1.5),
+                line=dict(
+                    color=palette[i % len(palette)],
+                    width=width,
+                ),
+                opacity=opacity,
                 hovertemplate="%{x|%d.%m.%Y}: %{y:.4f}<extra>%{fullData.name}</extra>",
             )
         )
+
+    smoothing_label = "EWMA (λ=0.94)" if use_ewma else "30-Day SMA"
     fig.update_layout(
         **_base_layout(
             height=390,
             xaxis=dict(title=None, gridcolor="#E9ECEF"),
-            yaxis=dict(title="Avg Daily Volatility σ", gridcolor="#E9ECEF"),
-            legend=dict(orientation="h", y=-0.2, font=dict(size=10)),
+            yaxis=dict(title=f"Avg Daily Volatility σ ({smoothing_label})",
+                       gridcolor="#E9ECEF",
+                       title_font=dict(color="#1A1A2E")),
+            legend=dict(orientation="h", y=-0.2, font=dict(size=10, color="#1A1A2E")),
         )
     )
     return fig
@@ -1123,7 +1199,9 @@ def render_market_table(df: pd.DataFrame, n: int = 50) -> None:
         vola = r.get("volatility_daily", 0)
         rows += (
             f"<tr>"
-            f"<td class='isin'>{r['Isin']}</td>"
+            f"<td class='isin'><a href='https://www.otc-x.ch/security/{r['Isin']}' "
+            f"target='_blank' style='color:#B22222;text-decoration:none;'>"
+            f"{r['Isin']}</a></td>"
             f"<td class='name left'>{str(r.get('Name',''))[:34]}</td>"
             f"<td class='sektor left'>"
             f"{str(r.get('Sektor',''))[:22]}</td>"
@@ -1208,21 +1286,43 @@ def main() -> None:
             st.plotly_chart(chart_volume_by_sector(latest), use_container_width=True)
 
     # ══════════════════════════════════════════
-    # TAB 2 — Market Data
+    # TAB 2 — Market Data (Raw Data Explorer)
     # ══════════════════════════════════════════
     with tab2:
-        fc1, fc2, fc3 = st.columns([2, 1, 1])
+        st.markdown(
+            '<div class="sec-hdr">Data Explorer — Raw Market Data</div>',
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            '<div style="font-size:0.78rem;color:#1A1A2E;margin-bottom:0.8rem;">'
+            'Browse, filter, and download raw market data for offline analysis. '
+            'Click any <strong style="color:#B22222;">ISIN</strong> to view the security on '
+            '<a href="https://www.otc-x.ch" target="_blank" style="color:#B22222;">otc-x.ch</a>.'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+
+        # ── Filter controls ──
+        fc1, fc2, fc3, fc4 = st.columns([2, 1, 1, 1])
         with fc1:
             search = st.text_input(
                 "Search", placeholder="Name, ISIN or Sector…", label_visibility="collapsed"
             )
         with fc2:
-            sectors = ["All"] + sorted(latest["Sektor"].dropna().unique().tolist())
+            sectors = ["All Sectors"] + sorted(latest["Sektor"].dropna().unique().tolist())
             sel_sector = st.selectbox("Sector", sectors, label_visibility="collapsed")
         with fc3:
             sort_by = st.selectbox(
-                "Sort", ["Volume (CHF)", "Trades", "Price Change", "Anomaly Score",
-                         "Volatility"],
+                "Sort by",
+                ["Volume (CHF)", "Trades", "Price Change", "Anomaly Score",
+                         "Volatility", "Amihud λ", "Name"],
+                label_visibility="collapsed",
+            )
+        with fc4:
+            rows_to_show = st.selectbox(
+                "Rows",
+                [25, 50, 100, 200, "All"],
+                index=1,
                 label_visibility="collapsed",
             )
 
@@ -1234,27 +1334,95 @@ def main() -> None:
                 | df_filt["Name"].str.lower().str.contains(q, na=False)
                 | df_filt["Sektor"].str.lower().str.contains(q, na=False)
             ]
-        if sel_sector != "All":
+        if sel_sector != "All Sectors":
             df_filt = df_filt[df_filt["Sektor"] == sel_sector]
 
-        sort_col = {
+        sort_map = {
             "Volume (CHF)": "volume_today_chf",
             "Trades": "trades_today",
             "Price Change": "price_change_pct",
             "Anomaly Score": "anomaly_score",
             "Volatility": "volatility_daily",
-        }[sort_by]
-        df_filt = df_filt.sort_values(sort_col, ascending=False)
+            "Amihud λ": "amihud_daily",
+            "Name": "Name",
+        }
+        sort_col = sort_map[sort_by]
+        sort_asc = sort_by == "Name"
+        df_filt = df_filt.sort_values(sort_col, ascending=sort_asc)
 
-        st.markdown(
-            f'<div class="sec-hdr">Market Feed — {len(df_filt)} Securities</div>',
-            unsafe_allow_html=True,
-        )
-        render_market_table(df_filt, n=min(100, len(df_filt)))
+        n_display = len(df_filt) if rows_to_show == "All" else min(int(rows_to_show), len(df_filt))
+
+        # ── Summary bar ──
+        sum_vol = df_filt["volume_today_chf"].sum()
+        sum_trades = int(df_filt["trades_today"].sum())
+        avg_vola = df_filt["volatility_daily"].mean() if not df_filt.empty else 0
+        avg_amihud = df_filt["amihud_daily"].mean() if not df_filt.empty else 0
+
+        sm1, sm2, sm3, sm4, sm5 = st.columns(5)
+        summary_items = [
+            ("Securities", str(len(df_filt))),
+            ("Total Volume", fmt_chf(sum_vol)),
+            ("Total Trades", f"{sum_trades:,}"),
+            ("Avg σ", f"{avg_vola:.4f}"),
+            ("Avg λ", f"{avg_amihud:.6f}"),
+        ]
+        for col, (lbl, val) in zip([sm1, sm2, sm3, sm4, sm5], summary_items):
+            with col:
+                st.markdown(
+                    f'<div style="background:#FFFFFF;border:1px solid #CED4DA;'
+                    f'padding:0.6rem 0.9rem;text-align:center;">'
+                    f'<div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;'
+                    f'letter-spacing:0.1em;color:#343A40;">{lbl}</div>'
+                    f'<div style="font-size:1.1rem;font-weight:700;color:#1A1A2E;'
+                    f'font-family:IBM Plex Mono,monospace;">{val}</div>'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
+
+        st.markdown("<div style='height:0.5rem'></div>", unsafe_allow_html=True)
+
+        # ── CSV Download ──
+        csv_cols = ["Isin", "Name", "Sektor", "Datum", "price_last", "price_change_pct",
+                    "volume_today_chf", "volume_today_units", "trades_today",
+                    "volatility_daily", "amihud_daily", "anomaly_score",
+                    "spread_log_hl", "log_returns", "off_book_pct"]
+        csv_available = [c for c in csv_cols if c in df_filt.columns]
+        csv_data = df_filt[csv_available].copy()
+        if "Datum" in csv_data.columns:
+            csv_data["Datum"] = csv_data["Datum"].dt.strftime("%Y-%m-%d")
+
+        dl1, dl2 = st.columns([1, 4])
+        with dl1:
+            st.download_button(
+                label="⬇ Download CSV",
+                data=csv_data.to_csv(index=False).encode("utf-8"),
+                file_name="otcx_market_data.csv",
+                mime="text/csv",
+                use_container_width=True,
+            )
+        with dl2:
+            st.markdown(
+                f'<div style="font-size:0.72rem;color:#343A40;padding-top:0.6rem;">'
+                f'Showing <strong>{n_display}</strong> of <strong>{len(df_filt)}</strong> '
+                f'securities · {len(csv_available)} columns available for export'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+
+        # ── Data table ──
+        render_market_table(df_filt, n=n_display)
 
         st.markdown("<br>", unsafe_allow_html=True)
+
+        # ── Security Detail View ──
         st.markdown('<div class="sec-hdr">Security Detail View</div>',
                     unsafe_allow_html=True)
+        st.markdown(
+            '<div style="font-size:0.72rem;color:#1A1A2E;margin-bottom:0.4rem;">'
+            'Select a security to view its price history, volume profile, and key metrics.'
+            '</div>',
+            unsafe_allow_html=True,
+        )
 
         active_isins = df_filt[df_filt["trades_today"] > 0]["Isin"].tolist()
         if active_isins:
@@ -1409,18 +1577,72 @@ def main() -> None:
 
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown(
-            '<div class="sec-hdr">Rolling Volatility — Top Sectors (30-Day MA)</div>',
+            '<div class="sec-hdr">Rolling Volatility — Top Sectors</div>',
             unsafe_allow_html=True,
         )
+
+        vol_c1, vol_c2 = st.columns([3, 1])
+        with vol_c2:
+            use_ewma = st.checkbox(
+                "Use EWMA smoothing (λ = 0.94)",
+                value=False,
+                key="vol_ewma",
+                help="Exponentially Weighted Moving Average with RiskMetrics decay factor λ=0.94: sₜ = 0.94·sₜ₋₁ + 0.06·vₜ",
+            )
+        with vol_c1:
+            if use_ewma:
+                st.markdown(
+                    '<div class="math-note">'
+                    's<sub>t</sub> = λ · s<sub>t-1</sub> + (1 − λ) · v<sub>t</sub>'
+                    '&nbsp;&nbsp;with λ = 0.94 (RiskMetrics)'
+                    '</div>',
+                    unsafe_allow_html=True,
+                )
+            else:
+                st.markdown(
+                    '<div class="math-note">'
+                    'σ̄<sub>30d</sub> = (1/30) Σ σ<sub>daily</sub>'
+                    '</div>',
+                    unsafe_allow_html=True,
+                )
+
+        # Sector click-to-isolate
+        vol_hist_data = hist_filtered if hm_sectors else df_hist
+        top_vol_sectors = (
+            vol_hist_data.groupby("Sektor")["trades_today"]
+            .sum()
+            .nlargest(5)
+            .index.tolist()
+        )
+        selected_vol_sector = st.session_state.get("vol_selected_sector", None)
+
         st.markdown(
-            '<div class="math-note">'
-            'σ̄<sub>30d</sub> = (1/30) Σ σ<sub>daily</sub>'
+            '<div style="font-size:0.72rem;color:#1A1A2E;margin-bottom:0.5rem;">'
+            '👆 <strong>Click a sector below</strong> to isolate it. Click again to reset.'
             '</div>',
             unsafe_allow_html=True,
         )
-        st.plotly_chart(chart_volatility_trend(hist_filtered
-                                                if hm_sectors else df_hist),
-                        use_container_width=True)
+        vol_btn_cols = st.columns(len(top_vol_sectors))
+        for idx, sec_name in enumerate(top_vol_sectors):
+            with vol_btn_cols[idx]:
+                is_active = selected_vol_sector == sec_name
+                btn_label = f"● {sec_name}" if is_active else sec_name
+                if st.button(btn_label, key=f"vol_sec_{sec_name}",
+                             use_container_width=True):
+                    if selected_vol_sector == sec_name:
+                        st.session_state["vol_selected_sector"] = None
+                    else:
+                        st.session_state["vol_selected_sector"] = sec_name
+                    st.rerun()
+
+        st.plotly_chart(
+            chart_volatility_trend(
+                vol_hist_data,
+                use_ewma=use_ewma,
+                selected_sector=st.session_state.get("vol_selected_sector", None),
+            ),
+            use_container_width=True,
+        )
 
         # ── 3D Explorer Section ──
         st.markdown("<br>", unsafe_allow_html=True)
@@ -1594,7 +1816,9 @@ def main() -> None:
                 flag_str = ", ".join(flags) if flags else "—"
                 arows += (
                     f"<tr>"
-                    f"<td class='isin'>{r['Isin']}</td>"
+                    f"<td class='isin'><a href='https://www.otc-x.ch/security/{r['Isin']}' "
+                    f"target='_blank' style='color:#B22222;text-decoration:none;'>"
+                    f"{r['Isin']}</a></td>"
                     f"<td class='left' style='font-family:Inter;font-weight:500;"
                     f"color:#1A1A2E;'>{str(r.get('Name',''))[:30]}</td>"
                     f"<td class='sektor left'>{str(r.get('Sektor',''))[:20]}</td>"
