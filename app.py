@@ -333,25 +333,44 @@ def inject_css() -> None:
             color: #1A1A2E !important;
             border: 1px solid #C8BFA5 !important;
             font-weight: 600 !important;
-            transition: all 0.15s ease !important;
+            transition: background-color 0.2s ease, border-color 0.2s ease,
+                        color 0.2s ease !important;
         }
         .stButton > button:hover {
-            background-color: rgb(220, 210, 185) !important;
-            border-color: #B0A585 !important;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08) !important;
+            background-color: rgb(231, 221, 199) !important;
+            border-color: #B9AE8D !important;
+            box-shadow: none !important;
         }
         .stButton > button:focus {
-            box-shadow: 0 0 0 2px rgba(178,34,34,0.18) !important;
+            box-shadow: 0 0 0 2px rgba(185,174,141,0.35) !important;
         }
-        /* Download button — keep distinct with brand accent */
+        /* Download button — neutral style aligned with control buttons */
         .stDownloadButton > button {
-            background-color: #B22222 !important;
-            color: #FFFFFF !important;
-            border: 1px solid #8B1A1A !important;
+            background-color: rgb(235, 226, 205) !important;
+            color: #1A1A2E !important;
+            border: 1px solid #C8BFA5 !important;
             font-weight: 600 !important;
+            transition: background-color 0.2s ease, border-color 0.2s ease,
+                        color 0.2s ease !important;
         }
         .stDownloadButton > button:hover {
-            background-color: #8B1A1A !important;
+            background-color: rgb(231, 221, 199) !important;
+            border-color: #B9AE8D !important;
+            box-shadow: none !important;
+        }
+
+        /* Neutral multiselect / dropdown controls */
+        .stMultiSelect [data-baseweb="select"] > div,
+        .stSelectbox [data-baseweb="select"] > div {
+            background-color: rgb(247, 243, 234) !important;
+            border-color: #D8CFB7 !important;
+        }
+        .stMultiSelect [data-baseweb="tag"] {
+            background-color: rgb(235, 226, 205) !important;
+            border: 1px solid #C8BFA5 !important;
+        }
+        .stMultiSelect [data-baseweb="tag"] span {
+            color: #1A1A2E !important;
         }
 
         /* ── Misc ── */
@@ -1256,6 +1275,15 @@ def main() -> None:
         "  Analytics  ",
         "  Anomaly Monitor  ",
     ])
+    # Shared compact sort-label markup and responsive column layouts
+    sort_label_html = (
+        "<div style='font-size:0.62rem;font-weight:700;color:#343A40;"
+        "letter-spacing:0.08em;margin-bottom:0.15rem;'>Sort</div>"
+    )
+    market_filter_cols = [2, 1, 1, 0.7, 0.9]
+    # market_filter_cols: [search, sector, sort field, sort arrows, row count]
+    alert_sort_cols = [1.2, 0.7, 3.1]
+    # alert_sort_cols: [sort field, sort arrows, sort direction hint]
 
     # ══════════════════════════════════════════
     # TAB 1 — Overview
@@ -1303,7 +1331,7 @@ def main() -> None:
         )
 
         # ── Filter controls ──
-        fc1, fc2, fc3, fc4 = st.columns([2, 1, 1, 1])
+        fc1, fc2, fc3, fc4, fc5 = st.columns(market_filter_cols)
         with fc1:
             search = st.text_input(
                 "Search", placeholder="Name, ISIN or Sector…", label_visibility="collapsed"
@@ -1319,6 +1347,15 @@ def main() -> None:
                 label_visibility="collapsed",
             )
         with fc4:
+            st.markdown(sort_label_html, unsafe_allow_html=True)
+            up_col, down_col = st.columns(2)
+            with up_col:
+                if st.button("↑", key="mkt_sort_up", use_container_width=True):
+                    st.session_state["market_sort_asc"] = True
+            with down_col:
+                if st.button("↓", key="mkt_sort_down", use_container_width=True):
+                    st.session_state["market_sort_asc"] = False
+        with fc5:
             rows_to_show = st.selectbox(
                 "Rows",
                 [25, 50, 100, 200, "All"],
@@ -1347,7 +1384,7 @@ def main() -> None:
             "Name": "Name",
         }
         sort_col = sort_map[sort_by]
-        sort_asc = sort_by == "Name"
+        sort_asc = st.session_state.get("market_sort_asc", sort_by == "Name")
         df_filt = df_filt.sort_values(sort_col, ascending=sort_asc)
 
         n_display = len(df_filt) if rows_to_show == "All" else min(int(rows_to_show), len(df_filt))
@@ -1405,6 +1442,7 @@ def main() -> None:
                 f'<div style="font-size:0.72rem;color:#343A40;padding-top:0.6rem;">'
                 f'Showing <strong>{n_display}</strong> of <strong>{len(df_filt)}</strong> '
                 f'securities · {len(csv_available)} columns available for export'
+                f' &nbsp;|&nbsp; Sort direction: <strong>{"↑ Asc" if sort_asc else "↓ Desc"}</strong>'
                 f'</div>',
                 unsafe_allow_html=True,
             )
@@ -1784,14 +1822,10 @@ def main() -> None:
         selected_tier = st.session_state.get("anomaly_tier", None)
         if selected_tier and selected_tier in SEVERITY_TIERS:
             tier_scores = SEVERITY_TIERS[selected_tier]
-            alerts = latest[latest["anomaly_score"].isin(tier_scores)].sort_values(
-                "anomaly_score", ascending=False
-            )
+            alerts = latest[latest["anomaly_score"].isin(tier_scores)].copy()
             hdr_text = f"{selected_tier} Alerts — {len(alerts)} Securities"
         else:
-            alerts = latest[latest["anomaly_score"] >= 1].sort_values(
-                "anomaly_score", ascending=False
-            )
+            alerts = latest[latest["anomaly_score"] >= 1].copy()
             hdr_text = f"All Active Alerts — {len(alerts)} Securities"
 
         st.markdown(f'<div class="sec-hdr">{hdr_text}</div>', unsafe_allow_html=True)
@@ -1799,6 +1833,45 @@ def main() -> None:
         if alerts.empty:
             st.success("✓  No anomalies detected in this category.")
         else:
+            sort_c1, sort_c2, sort_c3 = st.columns(alert_sort_cols)
+            with sort_c1:
+                alert_sort_label = st.selectbox(
+                    "Sort Alerts by",
+                    ["Severity", "Volume (CHF)", "Trades", "Price Change", "Volatility", "Date"],
+                    label_visibility="collapsed",
+                    key="alert_sort_col",
+                )
+            with sort_c2:
+                st.markdown(sort_label_html, unsafe_allow_html=True)
+                aup_col, adown_col = st.columns(2)
+                with aup_col:
+                    if st.button("↑", key="alert_sort_up", use_container_width=True):
+                        st.session_state["alert_sort_asc"] = True
+                with adown_col:
+                    if st.button("↓", key="alert_sort_down", use_container_width=True):
+                        st.session_state["alert_sort_asc"] = False
+            with sort_c3:
+                alert_sort_asc = st.session_state.get("alert_sort_asc", False)
+                st.markdown(
+                    f"<div style='font-size:0.72rem;color:#343A40;padding-top:0.85rem;'>"
+                    f"Sort direction: <strong>{'↑ Asc' if alert_sort_asc else '↓ Desc'}</strong>"
+                    f"</div>",
+                    unsafe_allow_html=True,
+                )
+
+            alert_sort_map = {
+                "Severity": "anomaly_score",
+                "Volume (CHF)": "volume_today_chf",
+                "Trades": "trades_today",
+                "Price Change": "price_change_pct",
+                "Volatility": "volatility_daily",
+                "Date": "Datum",
+            }
+            alerts = alerts.sort_values(
+                alert_sort_map[alert_sort_label],
+                ascending=st.session_state.get("alert_sort_asc", False),
+            )
+
             # Detailed anomaly table with trigger flags
             display = alerts.head(min(80, len(alerts)))
             arows = ""
