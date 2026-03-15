@@ -775,14 +775,14 @@ def chart_amihud_by_sector(df_hist: pd.DataFrame) -> go.Figure:
 
 
 def chart_volatility_trend(df_hist: pd.DataFrame, n: int = 5,
-                           use_ewma: bool = False,
+                           show_raw_sma: bool = False,
                            selected_sector: str | None = None) -> go.Figure:
     """Rolling volatility chart with optional EWMA smoothing and
     hover-to-isolate interaction.
 
     Parameters
     ----------
-    use_ewma : If True, apply RiskMetrics EWMA (λ=0.94) instead of simple MA.
+    show_raw_sma : If True, show raw 30-day SMA instead of EWMA-smoothed series.
     selected_sector : If set, highlight only this sector and dim others.
     """
     top_sectors = (
@@ -792,7 +792,13 @@ def chart_volatility_trend(df_hist: pd.DataFrame, n: int = 5,
         .index.tolist()
     )
     df = df_hist[df_hist["Sektor"].isin(top_sectors)].copy()
-    agg = df.groupby(["Datum", "Sektor"])["volatility_daily"].mean().reset_index()
+    agg = (
+        df.groupby(["Datum", "Sektor"], as_index=False)
+        .agg(
+            volatility_daily=("volatility_daily", "mean"),
+            log_returns=("log_returns", "mean"),
+        )
+    )
     agg = agg.sort_values("Datum")
 
     palette = px.colors.qualitative.D3
@@ -801,11 +807,31 @@ def chart_volatility_trend(df_hist: pd.DataFrame, n: int = 5,
     for i, sector in enumerate(top_sectors):
         grp = agg[agg["Sektor"] == sector].copy()
 
-        if use_ewma:
-            # RiskMetrics EWMA: s_t = λ * s_{t-1} + (1 - λ) * v_t, λ = 0.94
-            grp["smoothed"] = grp["volatility_daily"].ewm(alpha=0.06, adjust=False).mean()
-        else:
+        if show_raw_sma:
             grp["smoothed"] = grp["volatility_daily"].rolling(30, min_periods=1).mean()
+        else:
+            # RiskMetrics EWMA by sector returns:
+            # σ_t² = λ·σ_{t-1}² + (1-λ)·r_{t-1}², λ=0.94
+            # Seed with variance of first 30 returns (or fewer when short history).
+            r = pd.to_numeric(grp["log_returns"], errors="coerce").to_numpy()
+            n_obs = len(r)
+            if n_obs > 0:
+                valid_idx = np.flatnonzero(~np.isnan(r))
+                if len(valid_idx) > 0:
+                    valid_r = r[valid_idx]
+                    seed_n = min(30, len(valid_r))
+                    seed_var = float(np.mean(np.square(valid_r[:seed_n])))
+                    ewma_var = np.empty(len(valid_r), dtype=float)
+                    ewma_var[:seed_n] = seed_var
+                    for t in range(seed_n, len(valid_r)):
+                        ewma_var[t] = 0.94 * ewma_var[t - 1] + 0.06 * (valid_r[t - 1] ** 2)
+                    smoothed = np.full(n_obs, np.nan, dtype=float)
+                    smoothed[valid_idx] = np.sqrt(ewma_var)
+                    grp["smoothed"] = smoothed
+                else:
+                    grp["smoothed"] = np.nan
+            else:
+                grp["smoothed"] = np.nan
 
         # Determine visibility: if a sector is selected, dim others
         is_highlighted = selected_sector is None or sector == selected_sector
@@ -827,7 +853,7 @@ def chart_volatility_trend(df_hist: pd.DataFrame, n: int = 5,
             )
         )
 
-    smoothing_label = "EWMA (λ=0.94)" if use_ewma else "30-Day SMA"
+    smoothing_label = "30-Day SMA" if show_raw_sma else "EWMA (λ=0.94)"
     fig.update_layout(
         **_base_layout(
             height=390,
@@ -1635,25 +1661,25 @@ def main() -> None:
 
         vol_c1, vol_c2 = st.columns([3, 1])
         with vol_c2:
-            use_ewma = st.checkbox(
-                "Use EWMA smoothing (λ = 0.94)",
+            show_raw_sma = st.checkbox(
+                "Show raw volatility (30d SMA)",
                 value=False,
-                key="vol_ewma",
-                help="Exponentially Weighted Moving Average with RiskMetrics decay factor λ=0.94: sₜ = 0.94·sₜ₋₁ + 0.06·vₜ",
+                key="vol_show_raw_sma",
+                help="When enabled, display raw 30-day SMA volatility instead of the EWMA-smoothed RiskMetrics series (λ=0.94).",
             )
         with vol_c1:
-            if use_ewma:
+            if show_raw_sma:
                 st.markdown(
                     '<div class="math-note">'
-                    's<sub>t</sub> = λ · s<sub>t-1</sub> + (1 − λ) · v<sub>t</sub>'
-                    '&nbsp;&nbsp;with λ = 0.94 (RiskMetrics)'
+                    'σ̄<sub>30d</sub> = (1/30) Σ σ<sub>daily</sub>'
                     '</div>',
                     unsafe_allow_html=True,
                 )
             else:
                 st.markdown(
                     '<div class="math-note">'
-                    'σ̄<sub>30d</sub> = (1/30) Σ σ<sub>daily</sub>'
+                    'σ<sub>t</sub><sup>2</sup> = λ · σ<sub>t-1</sub><sup>2</sup> + (1 − λ) · r<sub>t-1</sub><sup>2</sup>'
+                    '&nbsp;&nbsp;with λ = 0.94 (RiskMetrics)'
                     '</div>',
                     unsafe_allow_html=True,
                 )
@@ -1690,7 +1716,7 @@ def main() -> None:
         st.plotly_chart(
             chart_volatility_trend(
                 vol_hist_data,
-                use_ewma=use_ewma,
+                show_raw_sma=show_raw_sma,
                 selected_sector=st.session_state.get("vol_selected_sector", None),
             ),
             use_container_width=True,
