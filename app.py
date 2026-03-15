@@ -29,8 +29,8 @@ BRAND_DARK   = "#1A1A2E"
 GREEN_POS    = "#28A745"
 RED_NEG      = "#DC3545"
 BORDER_COL   = "#CED4DA"
-MUTED        = "#343A40"   # dark grey for strong contrast on white backgrounds
-MUTED_SEC    = "#495057"   # secondary muted — still high-contrast
+MUTED        = "#1A1A2E"   # near-black for maximum contrast on white backgrounds
+MUTED_SEC    = "#1A1A2E"   # near-black secondary text for maximum contrast
 PLOTLY_TPL   = "plotly_white"
 
 SECTOR_PALETTE = {
@@ -60,8 +60,7 @@ ANOMALY_COLORS: dict[int, str] = {
 # Severity tier grouping for clickable anomaly categories
 SEVERITY_TIERS = {
     "Clean":    [0],
-    "Watch":    [1],
-    "Alert":    [2],
+    "Alert":    [1, 2],
     "Critical": [3, 4],
     "Severe":   [5, 6],
     "Extreme":  [7],
@@ -110,7 +109,7 @@ def inject_css() -> None:
         .otcx-logo span { color: #B22222; }
         .otcx-tagline {
             font-size: 0.65rem;
-            color: #343A40;
+            color: #1A1A2E;
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.12em;
@@ -143,7 +142,7 @@ def inject_css() -> None:
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.12em;
-            color: #343A40;
+            color: #1A1A2E;
             margin-bottom: 0.35rem;
         }
         .kpi-value {
@@ -154,7 +153,7 @@ def inject_css() -> None:
             margin-bottom: 0.2rem;
             font-family: 'IBM Plex Mono', monospace;
         }
-        .kpi-sub { font-size: 0.72rem; color: #343A40; }
+        .kpi-sub { font-size: 0.72rem; color: #1A1A2E; }
         .c-pos { color: #28A745; font-weight: 600; }
         .c-neg { color: #DC3545; font-weight: 600; }
 
@@ -213,7 +212,7 @@ def inject_css() -> None:
         }
         .mkt-table td.sektor {
             font-size: 0.75rem;
-            color: #343A40;
+            color: #1A1A2E;
         }
         .mkt-table tr:hover { background: #F0F1F3; }
         .pos { color: #28A745 !important; }
@@ -260,7 +259,7 @@ def inject_css() -> None:
             font-size: 0.82rem;
             font-weight: 500;
             letter-spacing: 0.02em;
-            color: #343A40;
+            color: #1A1A2E;
             border-radius: 0;
             background: transparent;
             border-bottom: 2px solid transparent;
@@ -293,7 +292,7 @@ def inject_css() -> None:
         /* ── Math formula ── */
         .math-note {
             font-size: 0.72rem;
-            color: #343A40;
+            color: #1A1A2E;
             font-style: italic;
             font-family: 'IBM Plex Mono', monospace;
             margin-bottom: 0.5rem;
@@ -326,6 +325,53 @@ def inject_css() -> None:
         [data-baseweb="tag"] span {
             color: #1A1A2E !important;
         }
+
+        /* ── Comprehensive Streamlit text contrast overrides ── */
+        /* Placeholder text in all input/select widgets */
+        [data-baseweb="select"] [data-testid="stMarkdownContainer"] p,
+        [data-baseweb="select"] .css-1wa3eu0-placeholder,
+        [data-baseweb="select"] div[class*="placeholder"],
+        [data-baseweb="select"] div[aria-selected] span,
+        [data-baseweb="input"] input::placeholder,
+        .stTextInput input::placeholder,
+        .stTextInput input,
+        .stNumberInput input {
+            color: #1A1A2E !important;
+            opacity: 1 !important;
+            -webkit-text-fill-color: #1A1A2E !important;
+        }
+        /* All text inside selectbox/multiselect controls */
+        [data-baseweb="select"] div,
+        [data-baseweb="select"] span,
+        [data-baseweb="select"] p,
+        .stSelectbox div[data-baseweb="select"] > div > div,
+        .stMultiSelect div[data-baseweb="select"] > div > div {
+            color: #1A1A2E !important;
+        }
+        /* Dropdown menu items */
+        [data-baseweb="menu"] li,
+        [data-baseweb="menu"] li span,
+        [role="listbox"] li,
+        [role="option"] span,
+        [role="option"] {
+            color: #1A1A2E !important;
+        }
+        /* Toggle / checkbox description text */
+        .stCheckbox > label > div[data-testid="stMarkdownContainer"] {
+            color: #1A1A2E !important;
+        }
+        /* General text elements that Streamlit may render in grey */
+        .stMarkdown p, .stMarkdown span, .stMarkdown li,
+        .stMarkdown div, .stText, .stCaption {
+            color: #1A1A2E !important;
+        }
+        /* Streamlit expander header text */
+        .streamlit-expanderHeader p, .streamlit-expanderHeader span {
+            color: #1A1A2E !important;
+        }
+        /* Tooltip and help text */
+        .stTooltipIcon svg { color: #1A1A2E !important; }
+        div[data-testid="stTooltipContent"] p { color: #1A1A2E !important; }
 
         /* ── Neutral Streamlit buttons — warm sand instead of bright red ── */
         .stButton > button {
@@ -938,7 +984,7 @@ def chart_anomaly_severity_treemap(latest: pd.DataFrame) -> go.Figure:
     df["label"] = df["Name"].fillna(df["Isin"]).str[:28]
     df["score_size"] = df["anomaly_score"]  # already >= 1 from filter above
 
-    severity_order = ["Watch", "Alert", "Critical", "Severe", "Extreme"]
+    severity_order = ["Alert", "Critical", "Severe", "Extreme"]
     df["sev_order"] = df["severity"].map({s: i for i, s in enumerate(severity_order)}).fillna(99)
     df = df.sort_values(["sev_order", "anomaly_score"], ascending=[False, False])
 
@@ -1190,7 +1236,7 @@ def render_header(latest_date: str) -> None:
           </div>
           <div style="margin-left:auto;display:flex;align-items:center;gap:2rem;">
             <span class="live-dot"><span class="dot"></span> Live</span>
-            <span style="font-size:0.72rem;color:#343A40;">
+            <span style="font-size:0.72rem;color:#1A1A2E;">
               Last data: <strong>{latest_date}</strong>
             </span>
           </div>
@@ -1208,14 +1254,13 @@ def render_kpis(latest: pd.DataFrame) -> None:
     vol_spikes   = int(latest["volume_spike"].sum())
     act_spikes   = int(latest["activity_spike"].sum())
     critical     = int((latest["anomaly_score"] >= 3).sum())
-    alert        = int((latest["anomaly_score"] == 2).sum())
-    watch        = int((latest["anomaly_score"] == 1).sum())
+    alert        = int((latest["anomaly_score"] >= 1).sum())
     df_chg       = latest[latest["price_change_pct"] != 0]
     avg_chg      = df_chg["price_change_pct"].mean() if not df_chg.empty else 0.0
     advancing    = int((latest["price_change_pct"] > 0).sum())
     declining    = int((latest["price_change_pct"] < 0).sum())
 
-    c = st.columns(6)
+    c = st.columns(5)
     data = [
         ("Market Volume", fmt_chf(total_vol),
          f"{total_trades:,} trades today"),
@@ -1229,9 +1274,7 @@ def render_kpis(latest: pd.DataFrame) -> None:
          f"{act_spikes} activity spikes"),
         ("Anomaly Alerts", str(critical + alert),
          f'<span class="bdg bdg-critical">{critical} Critical</span>&nbsp;'
-         f'<span class="bdg bdg-alert">{alert} Alert</span>'),
-        ("Watch List", str(watch),
-         f'<span class="bdg bdg-watch">{watch} Watch</span>'),
+         f'<span class="bdg bdg-alert">{alert - critical} Alert</span>'),
     ]
     for col, (label, value, sub) in zip(c, data):
         with col:
@@ -1316,14 +1359,8 @@ def main() -> None:
         "  Anomaly Monitor  ",
     ])
     # Shared compact sort-label markup and responsive column layouts
-    sort_label_html = (
-        "<div style='font-size:0.62rem;font-weight:700;color:#343A40;"
-        "letter-spacing:0.08em;margin-bottom:0.15rem;'>Sort</div>"
-    )
-    market_filter_cols = [2, 1, 1, 0.7, 0.9]
-    # market_filter_cols: [search, sector, sort field, sort arrows, row count]
-    alert_sort_cols = [1.2, 0.7, 3.1]
-    # alert_sort_cols: [sort field, sort arrows, sort direction hint]
+    market_filter_cols = [2, 1, 1, 0.9]
+    # market_filter_cols: [search, sector, sort field, row count]
 
     # ══════════════════════════════════════════
     # TAB 1 — Overview
@@ -1371,7 +1408,7 @@ def main() -> None:
         )
 
         # ── Filter controls ──
-        fc1, fc2, fc3, fc4, fc5 = st.columns(market_filter_cols)
+        fc1, fc2, fc3, fc4 = st.columns(market_filter_cols)
         with fc1:
             search = st.text_input(
                 "Search", placeholder="Name, ISIN or Sector…", label_visibility="collapsed"
@@ -1387,15 +1424,6 @@ def main() -> None:
                 label_visibility="collapsed",
             )
         with fc4:
-            st.markdown(sort_label_html, unsafe_allow_html=True)
-            up_col, down_col = st.columns(2)
-            with up_col:
-                if st.button("↑", key="mkt_sort_up", use_container_width=True):
-                    st.session_state["market_sort_asc"] = True
-            with down_col:
-                if st.button("↓", key="mkt_sort_down", use_container_width=True):
-                    st.session_state["market_sort_asc"] = False
-        with fc5:
             rows_to_show = st.selectbox(
                 "Rows",
                 [25, 50, 100, 200, "All"],
@@ -1424,7 +1452,7 @@ def main() -> None:
             "Name": "Name",
         }
         sort_col = sort_map[sort_by]
-        sort_asc = st.session_state.get("market_sort_asc", sort_by == "Name")
+        sort_asc = sort_by == "Name"
         df_filt = df_filt.sort_values(sort_col, ascending=sort_asc)
 
         n_display = len(df_filt) if rows_to_show == "All" else min(int(rows_to_show), len(df_filt))
@@ -1449,7 +1477,7 @@ def main() -> None:
                     f'<div style="background:#FFFFFF;border:1px solid #CED4DA;'
                     f'padding:0.6rem 0.9rem;text-align:center;">'
                     f'<div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;'
-                    f'letter-spacing:0.1em;color:#343A40;">{lbl}</div>'
+                    f'letter-spacing:0.1em;color:#1A1A2E;">{lbl}</div>'
                     f'<div style="font-size:1.1rem;font-weight:700;color:#1A1A2E;'
                     f'font-family:IBM Plex Mono,monospace;">{val}</div>'
                     f'</div>',
@@ -1479,10 +1507,9 @@ def main() -> None:
             )
         with dl2:
             st.markdown(
-                f'<div style="font-size:0.72rem;color:#343A40;padding-top:0.6rem;">'
+                f'<div style="font-size:0.72rem;color:#1A1A2E;padding-top:0.6rem;">'
                 f'Showing <strong>{n_display}</strong> of <strong>{len(df_filt)}</strong> '
                 f'securities · {len(csv_available)} columns available for export'
-                f' &nbsp;|&nbsp; Sort direction: <strong>{"↑ Asc" if sort_asc else "↓ Desc"}</strong>'
                 f'</div>',
                 unsafe_allow_html=True,
             )
@@ -1797,8 +1824,7 @@ def main() -> None:
     with tab4:
         total = len(latest)
         clean = int((latest["anomaly_score"] == 0).sum())
-        watch = int((latest["anomaly_score"] == 1).sum())
-        alert_n = int((latest["anomaly_score"] == 2).sum())
+        alert_n = int((latest["anomaly_score"].isin([1, 2])).sum())
         critical_n = int(latest["anomaly_score"].isin([3, 4]).sum())
         severe_n = int(latest["anomaly_score"].isin([5, 6]).sum())
         extreme_n = int((latest["anomaly_score"] >= 7).sum())
@@ -1809,8 +1835,7 @@ def main() -> None:
 
         risk_tiers = [
             ("Clean",    clean,    "#28A745", "#155724", [0]),
-            ("Watch",    watch,    "#FFC107", "#664D03", [1]),
-            ("Alert",    alert_n,  "#FD7E14", "#6A3200", [2]),
+            ("Alert",    alert_n,  "#FD7E14", "#6A3200", [1, 2]),
             ("Critical", critical_n, "#DC3545", "#58151C", [3, 4]),
             ("Severe",   severe_n, "#7D1128", "#4A0E1E", [5, 6]),
             ("Extreme",  extreme_n, "#4A0010", "#3A0010", [7]),
@@ -1873,32 +1898,6 @@ def main() -> None:
         if alerts.empty:
             st.success("✓  No anomalies detected in this category.")
         else:
-            sort_c1, sort_c2, sort_c3 = st.columns(alert_sort_cols)
-            with sort_c1:
-                alert_sort_label = st.selectbox(
-                    "Sort Alerts by",
-                    ["Severity", "Volume (CHF)", "Trades", "Price Change", "Volatility", "Date"],
-                    label_visibility="collapsed",
-                    key="alert_sort_col",
-                )
-            with sort_c2:
-                st.markdown(sort_label_html, unsafe_allow_html=True)
-                aup_col, adown_col = st.columns(2)
-                with aup_col:
-                    if st.button("↑", key="alert_sort_up", use_container_width=True):
-                        st.session_state["alert_sort_asc"] = True
-                with adown_col:
-                    if st.button("↓", key="alert_sort_down", use_container_width=True):
-                        st.session_state["alert_sort_asc"] = False
-            with sort_c3:
-                alert_sort_asc = st.session_state.get("alert_sort_asc", False)
-                st.markdown(
-                    f"<div style='font-size:0.72rem;color:#343A40;padding-top:0.85rem;'>"
-                    f"Sort direction: <strong>{'↑ Asc' if alert_sort_asc else '↓ Desc'}</strong>"
-                    f"</div>",
-                    unsafe_allow_html=True,
-                )
-
             alert_sort_map = {
                 "Severity": "anomaly_score",
                 "Volume (CHF)": "volume_today_chf",
@@ -1907,10 +1906,7 @@ def main() -> None:
                 "Volatility": "volatility_daily",
                 "Date": "Datum",
             }
-            alerts = alerts.sort_values(
-                alert_sort_map[alert_sort_label],
-                ascending=st.session_state.get("alert_sort_asc", False),
-            )
+            alerts = alerts.sort_values("anomaly_score", ascending=False)
 
             # Detailed anomaly table with trigger flags
             display = alerts.head(min(80, len(alerts)))
@@ -1941,7 +1937,7 @@ def main() -> None:
                     f"<td class='{pct_cls(pct)}'>{fmt_pct(pct)}</td>"
                     f"<td>{r.get('volatility_daily', 0):.4f}</td>"
                     f"<td>{score_badge(score)}</td>"
-                    f"<td style='font-size:0.72rem;color:#343A40;'>{flag_str}</td>"
+                    f"<td style='font-size:0.72rem;color:#1A1A2E;'>{flag_str}</td>"
                     f"</tr>"
                 )
             ahtml = (
