@@ -1618,7 +1618,7 @@ def main() -> None:
 
         st.markdown(
             '<div style="font-size:0.72rem;color:#1A1A2E;margin-bottom:0.5rem;">'
-            '👆 <strong>Click a sector below</strong> to isolate it. Click again to reset.'
+            '<strong>Tip:</strong> Click a sector below to isolate it. Click again to reset.'
             '</div>',
             unsafe_allow_html=True,
         )
