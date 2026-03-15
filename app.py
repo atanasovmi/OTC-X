@@ -499,14 +499,26 @@ def load_data() -> tuple[pd.DataFrame, pd.DataFrame]:
 # ─────────────────────────────────────────────
 def _base_layout(**kwargs) -> dict:
     _axis_defaults = dict(
+        color="#1A1A2E",
         tickfont=dict(color="#1A1A2E"),
         title_font=dict(color="#1A1A2E"),
     )
+    # Preserve axis contrast defaults even when callers pass partial axis dicts
+    for axis_key in ("xaxis", "yaxis", "xaxis2", "yaxis2"):
+        if axis_key in kwargs and isinstance(kwargs[axis_key], dict):
+            merged_axis = _axis_defaults.copy()
+            merged_axis.update(kwargs[axis_key])
+            kwargs[axis_key] = merged_axis
     base = dict(
         template=PLOTLY_TPL,
         paper_bgcolor="white",
         plot_bgcolor="white",
         font=dict(family="Inter", color="#1A1A2E"),
+        hoverlabel=dict(
+            bgcolor="#FFFFFF",
+            bordercolor="#CED4DA",
+            font=dict(color="#1A1A2E"),
+        ),
         margin=dict(l=4, r=4, t=16, b=4),
         xaxis=_axis_defaults.copy(),
         yaxis=_axis_defaults.copy(),
@@ -549,9 +561,11 @@ def chart_market_activity(df_hist: pd.DataFrame) -> go.Figure:
     fig.update_xaxes(gridcolor="#E9ECEF", tickfont=dict(color="#1A1A2E"))
     fig.update_yaxes(title_text="Volume (CHF)", gridcolor="#E9ECEF",
                      secondary_y=False, tickformat=",.0f",
-                     tickfont=dict(color="#1A1A2E"))
+                     tickfont=dict(color="#1A1A2E"),
+                     title_font=dict(color="#1A1A2E"))
     fig.update_yaxes(title_text="Trades", showgrid=False, secondary_y=True,
-                     tickfont=dict(color="#1A1A2E"))
+                     tickfont=dict(color="#1A1A2E"),
+                     title_font=dict(color="#1A1A2E"))
     return fig
 
 
