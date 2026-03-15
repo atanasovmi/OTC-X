@@ -111,7 +111,7 @@ def inject_css() -> None:
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.14em;
-            color: #495057;
+            color: #1A1A2E;
             border-bottom: 1px solid #DEE2E6;
             padding-bottom: 0.45rem;
             margin-bottom: 0.8rem;
@@ -250,6 +250,48 @@ def inject_css() -> None:
         /* ── Misc ── */
         #MainMenu, footer, header { visibility: hidden; }
         .block-container { padding-top: 1rem; padding-bottom: 2rem; }
+
+        /* ── Dropdown / Selectbox overrides ── */
+        /* Dropdown popup/menu background → warm beige */
+        [data-baseweb="popover"] {
+            background-color: rgb(235, 226, 205) !important;
+            border: 1px solid #DEE2E6 !important;
+        }
+        [data-baseweb="menu"] {
+            background-color: rgb(235, 226, 205) !important;
+        }
+        [data-baseweb="menu"] li:hover,
+        [data-baseweb="menu"] li[aria-selected="true"] {
+            background-color: rgba(178, 34, 34, 0.08) !important;
+        }
+
+        /* Dropdown arrow → black so it's visible on beige/light bg */
+        [data-baseweb="select"] svg {
+            fill: #1A1A2E !important;
+            color: #1A1A2E !important;
+        }
+
+        /* Selectbox control background → beige to match dropdown */
+        [data-baseweb="select"] > div {
+            background-color: rgb(235, 226, 205) !important;
+            border-color: #DEE2E6 !important;
+            color: #1A1A2E !important;
+        }
+        [data-baseweb="select"] input {
+            color: #1A1A2E !important;
+        }
+        /* Text input field background */
+        .stTextInput > div > div {
+            background-color: rgb(235, 226, 205) !important;
+            border-color: #DEE2E6 !important;
+            color: #1A1A2E !important;
+        }
+        .stTextInput input {
+            color: #1A1A2E !important;
+        }
+        .stTextInput input::placeholder {
+            color: #495057 !important;
+        }
         </style>
         """,
         unsafe_allow_html=True,
@@ -333,6 +375,18 @@ def load_data() -> tuple[pd.DataFrame, pd.DataFrame]:
 # ─────────────────────────────────────────────
 #  Chart Factory
 # ─────────────────────────────────────────────
+def _deep_merge(base: dict, override: dict) -> dict:
+    """Recursively merge *override* into *base* so nested dicts are merged,
+    not replaced.  Returns a new dict; originals are untouched."""
+    merged = base.copy()
+    for k, v in override.items():
+        if k in merged and isinstance(merged[k], dict) and isinstance(v, dict):
+            merged[k] = _deep_merge(merged[k], v)
+        else:
+            merged[k] = v
+    return merged
+
+
 def _base_layout(**kwargs) -> dict:
     _axis_defaults = dict(
         tickfont=dict(color="#212529"),
@@ -347,6 +401,11 @@ def _base_layout(**kwargs) -> dict:
         xaxis=_axis_defaults.copy(),
         yaxis=_axis_defaults.copy(),
     )
+    # Deep-merge so that caller-supplied xaxis / yaxis dicts are merged with
+    # the dark-text defaults instead of replacing them.
+    for axis_key in ("xaxis", "yaxis", "xaxis2", "yaxis2"):
+        if axis_key in kwargs:
+            kwargs[axis_key] = _deep_merge(_axis_defaults, kwargs[axis_key])
     base.update(kwargs)
     return base
 
@@ -381,7 +440,7 @@ def chart_market_activity(df_hist: pd.DataFrame) -> go.Figure:
     )
     fig.update_layout(**_base_layout(height=280, bargap=0.12,
                                       legend=dict(orientation="h", y=1.08,
-                                                  font=dict(size=10))))
+                                                  font=dict(size=10, color="#212529"))))
     fig.update_xaxes(gridcolor="#F1F3F5", tickfont=dict(color="#212529"))
     fig.update_yaxes(title_text="Volume (CHF)", gridcolor="#F1F3F5",
                      secondary_y=False, tickformat=",.0f",
@@ -548,8 +607,8 @@ def chart_scatter_volume_price(latest: pd.DataFrame) -> go.Figure:
                 orientation="v",
                 x=1.01,
                 y=1,
-                font=dict(size=10),
-                title=dict(text="Sector", font=dict(size=10)),
+                font=dict(size=10, color="#212529"),
+                title=dict(text="Sector", font=dict(size=10, color="#212529")),
             ),
         )
     )
@@ -627,7 +686,7 @@ def chart_volatility_trend(df_hist: pd.DataFrame, n: int = 5) -> go.Figure:
             height=390,
             xaxis=dict(title=None, gridcolor="#F1F3F5"),
             yaxis=dict(title="Avg Daily Volatility σ", gridcolor="#F1F3F5"),
-            legend=dict(orientation="h", y=-0.2, font=dict(size=10)),
+            legend=dict(orientation="h", y=-0.2, font=dict(size=10, color="#212529")),
         )
     )
     return fig
@@ -755,7 +814,7 @@ def chart_security_history(df_hist: pd.DataFrame, isin: str) -> go.Figure:
     fig.update_layout(
         **_base_layout(
             height=460,
-            legend=dict(orientation="h", y=1.05, font=dict(size=10)),
+            legend=dict(orientation="h", y=1.05, font=dict(size=10, color="#212529")),
             xaxis2=dict(title=None, gridcolor="#F1F3F5"),
             yaxis=dict(title="Price (CHF)", gridcolor="#F1F3F5"),
             yaxis2=dict(title="Volume (CHF)", gridcolor="#F1F3F5"),
