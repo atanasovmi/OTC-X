@@ -1254,7 +1254,7 @@ def render_kpis(latest: pd.DataFrame) -> None:
     vol_spikes   = int(latest["volume_spike"].sum())
     act_spikes   = int(latest["activity_spike"].sum())
     critical     = int((latest["anomaly_score"] >= 3).sum())
-    alert        = int((latest["anomaly_score"] >= 1).sum())
+    alert_low    = int((latest["anomaly_score"].isin([1, 2])).sum())
     df_chg       = latest[latest["price_change_pct"] != 0]
     avg_chg      = df_chg["price_change_pct"].mean() if not df_chg.empty else 0.0
     advancing    = int((latest["price_change_pct"] > 0).sum())
@@ -1272,9 +1272,9 @@ def render_kpis(latest: pd.DataFrame) -> None:
          f'<span class="c-neg">▼{declining}</span>&nbsp;dec'),
         ("Volume Spikes", str(vol_spikes),
          f"{act_spikes} activity spikes"),
-        ("Anomaly Alerts", str(critical + alert),
+        ("Anomaly Alerts", str(critical + alert_low),
          f'<span class="bdg bdg-critical">{critical} Critical</span>&nbsp;'
-         f'<span class="bdg bdg-alert">{alert - critical} Alert</span>'),
+         f'<span class="bdg bdg-alert">{alert_low} Alert</span>'),
     ]
     for col, (label, value, sub) in zip(c, data):
         with col:
