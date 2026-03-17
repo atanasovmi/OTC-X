@@ -1186,8 +1186,8 @@ def main() -> None:
             rc = st.columns(5)
             for col, (lbl, val, border, txt) in zip(rc, [
                 ("Clean",    clean,   "#28A745", "#28A745"),
-                ("Alert",    alert,   "#FD7E14", "#7D3C00"),
-                ("Critical", crit,    "#DC3545", "#721C24"),
+                ("Alert",    alert,   "#FD7E14", "#FD7E14"),
+                ("Critical", crit,    "#DC3545", "#DC3545"),
                 ("Severe",   severe,  "#7D1128", "#7D1128"),
                 ("Extreme",  extreme, "#4A0010", "#4A0010"),
             ]):
