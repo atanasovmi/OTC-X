@@ -55,6 +55,13 @@ ANOMALY_COLORS: dict[int, str] = {
     3: "#DC3545", 4: "#DC3545", 5: "#7D1128",
     6: "#7D1128", 7: "#4A0010",
 }
+TIER_SCORES: dict[str, list[int]] = {
+    "clean":    [0],
+    "alert":    [1, 2],
+    "critical": [3, 4],
+    "severe":   [5, 6],
+    "extreme":  [7, 8, 9, 10],
+}
 
 
 def _hex_to_rgba(hex_color: str, alpha: float = 1.0) -> str:
@@ -1169,11 +1176,11 @@ def main() -> None:
 
         with col_risk:
             total  = len(latest)
-            clean  = int((latest["anomaly_score"] == 0).sum())
-            alert  = int(latest["anomaly_score"].isin([1, 2]).sum())
-            crit   = int(latest["anomaly_score"].isin([3, 4]).sum())
-            severe = int(latest["anomaly_score"].isin([5, 6]).sum())
-            extreme = int((latest["anomaly_score"] >= 7).sum())
+            clean   = int(latest["anomaly_score"].isin(TIER_SCORES["clean"]).sum())
+            alert   = int(latest["anomaly_score"].isin(TIER_SCORES["alert"]).sum())
+            crit    = int(latest["anomaly_score"].isin(TIER_SCORES["critical"]).sum())
+            severe  = int(latest["anomaly_score"].isin(TIER_SCORES["severe"]).sum())
+            extreme = int(latest["anomaly_score"].isin(TIER_SCORES["extreme"]).sum())
             st.markdown('<div class="sec-hdr">Risk Summary</div>',
                         unsafe_allow_html=True)
             rc = st.columns(5)
@@ -1199,34 +1206,27 @@ def main() -> None:
 
         # ── Severity filter toggle group ──
         _tiers = [
-            ("clean",    "Show Clean",    0),
-            ("alert",    "Show Alert",    1),
-            ("critical", "Show Critical", 2),
-            ("severe",   "Show Severe",   3),
-            ("extreme",  "Show Extreme",  4),
+            ("clean",    "Show Clean"),
+            ("alert",    "Show Alert"),
+            ("critical", "Show Critical"),
+            ("severe",   "Show Severe"),
+            ("extreme",  "Show Extreme"),
         ]
         # Initialise session state for each tier (all except Clean on by default)
-        for key, _, _ in _tiers:
+        for key, _ in _tiers:
             if f"show_{key}" not in st.session_state:
                 st.session_state[f"show_{key}"] = key != "clean"
 
         filter_cols = st.columns(len(_tiers))
-        for col, (key, label, _) in zip(filter_cols, _tiers):
+        for col, (key, label) in zip(filter_cols, _tiers):
             with col:
                 st.checkbox(label, key=f"show_{key}")
 
         # Build mask from active tiers
-        _score_ranges: dict[str, list[int]] = {
-            "clean":    [0],
-            "alert":    [1, 2],
-            "critical": [3, 4],
-            "severe":   [5, 6],
-            "extreme":  [7, 8, 9, 10],
-        }
         active_scores: list[int] = []
-        for key, _, _ in _tiers:
+        for key, _ in _tiers:
             if st.session_state.get(f"show_{key}", False):
-                active_scores.extend(_score_ranges[key])
+                active_scores.extend(TIER_SCORES[key])
 
         if not active_scores:
             st.info("Select at least one severity tier above to display alerts.")
