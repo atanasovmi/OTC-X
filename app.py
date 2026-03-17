@@ -206,6 +206,81 @@ def inject_css() -> None:
         .bdg-alert    { background: #FFE0CC; color: #7D3C00; }
         .bdg-critical { background: #F8D7DA; color: #721C24; }
 
+        /* ── Severity Filter Toggle Group ── */
+        /* Collapse gaps between the five Show toggle columns */
+        .stHorizontalBlock:has(.st-key-show_clean) {
+            gap: 0 !important;
+        }
+        .st-key-show_clean,
+        .st-key-show_alert,
+        .st-key-show_critical,
+        .st-key-show_severe,
+        .st-key-show_extreme {
+            padding: 0 !important;
+        }
+        .st-key-show_clean .stCheckbox,
+        .st-key-show_alert .stCheckbox,
+        .st-key-show_critical .stCheckbox,
+        .st-key-show_severe .stCheckbox,
+        .st-key-show_extreme .stCheckbox {
+            margin: 0 !important;
+        }
+        /* Make checkbox labels look like connected toggle buttons */
+        .st-key-show_clean [data-baseweb="checkbox"],
+        .st-key-show_alert [data-baseweb="checkbox"],
+        .st-key-show_critical [data-baseweb="checkbox"],
+        .st-key-show_severe [data-baseweb="checkbox"],
+        .st-key-show_extreme [data-baseweb="checkbox"] {
+            background: rgb(235, 226, 205);
+            border: 1px solid #DEE2E6;
+            border-right: none;
+            padding: 0.45rem 0.9rem;
+            margin: 0;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+        .st-key-show_clean [data-baseweb="checkbox"] {
+            border-radius: 6px 0 0 6px;
+        }
+        .st-key-show_extreme [data-baseweb="checkbox"] {
+            border-radius: 0 6px 6px 0;
+            border-right: 1px solid #DEE2E6;
+        }
+        /* Label text styling */
+        .st-key-show_clean [data-baseweb="checkbox"] p,
+        .st-key-show_alert [data-baseweb="checkbox"] p,
+        .st-key-show_critical [data-baseweb="checkbox"] p,
+        .st-key-show_severe [data-baseweb="checkbox"] p,
+        .st-key-show_extreme [data-baseweb="checkbox"] p {
+            font-size: 0.72rem !important;
+            font-weight: 600 !important;
+            letter-spacing: 0.04em;
+            color: #1A1A2E !important;
+            white-space: nowrap;
+        }
+        /* Active (checked) state — coloured background per tier */
+        .st-key-show_clean [data-baseweb="checkbox"][aria-checked="true"]    { background: #28A745; border-color: #28A745; }
+        .st-key-show_alert [data-baseweb="checkbox"][aria-checked="true"]    { background: #FD7E14; border-color: #FD7E14; }
+        .st-key-show_critical [data-baseweb="checkbox"][aria-checked="true"] { background: #DC3545; border-color: #DC3545; }
+        .st-key-show_severe [data-baseweb="checkbox"][aria-checked="true"]   { background: #7D1128; border-color: #7D1128; }
+        .st-key-show_extreme [data-baseweb="checkbox"][aria-checked="true"]  { background: #4A0010; border-color: #4A0010; }
+        .st-key-show_clean [data-baseweb="checkbox"][aria-checked="true"] p,
+        .st-key-show_alert [data-baseweb="checkbox"][aria-checked="true"] p,
+        .st-key-show_critical [data-baseweb="checkbox"][aria-checked="true"] p,
+        .st-key-show_severe [data-baseweb="checkbox"][aria-checked="true"] p,
+        .st-key-show_extreme [data-baseweb="checkbox"][aria-checked="true"] p {
+            color: #FFFFFF !important;
+            font-weight: 700 !important;
+        }
+        /* Hide the default checkbox square */
+        .st-key-show_clean [data-baseweb="checkbox"] > span:first-child,
+        .st-key-show_alert [data-baseweb="checkbox"] > span:first-child,
+        .st-key-show_critical [data-baseweb="checkbox"] > span:first-child,
+        .st-key-show_severe [data-baseweb="checkbox"] > span:first-child,
+        .st-key-show_extreme [data-baseweb="checkbox"] > span:first-child {
+            display: none;
+        }
+
         /* ── Tabs ── */
         .stTabs [data-baseweb="tab-list"] {
             gap: 0;
@@ -832,7 +907,7 @@ def render_header(latest_date: str) -> None:
         f"""
         <div class="otcx-header">
           <div>
-            <div class="otcx-logo">OTC<span>|X</span></div>
+            <div class="otcx-logo">OTC|<span>X</span></div>
             <div class="otcx-tagline">Market Intelligence Platform</div>
           </div>
           <div style="margin-left:auto;display:flex;align-items:center;gap:2rem;">
@@ -1095,17 +1170,19 @@ def main() -> None:
         with col_risk:
             total  = len(latest)
             clean  = int((latest["anomaly_score"] == 0).sum())
-            watch  = int((latest["anomaly_score"] == 1).sum())
-            alt    = int((latest["anomaly_score"] == 2).sum())
-            crit   = int((latest["anomaly_score"] >= 3).sum())
+            alert  = int(latest["anomaly_score"].isin([1, 2]).sum())
+            crit   = int(latest["anomaly_score"].isin([3, 4]).sum())
+            severe = int(latest["anomaly_score"].isin([5, 6]).sum())
+            extreme = int((latest["anomaly_score"] >= 7).sum())
             st.markdown('<div class="sec-hdr">Risk Summary</div>',
                         unsafe_allow_html=True)
-            rc = st.columns(4)
+            rc = st.columns(5)
             for col, (lbl, val, border, txt) in zip(rc, [
-                ("Clean",    clean, "#28A745", "#28A745"),
-                ("Watch",    watch, "#FFC107", "#856404"),
-                ("Alert",    alt,   "#FD7E14", "#7D3C00"),
-                ("Critical", crit,  "#DC3545", "#721C24"),
+                ("Clean",    clean,   "#28A745", "#28A745"),
+                ("Alert",    alert,   "#FD7E14", "#7D3C00"),
+                ("Critical", crit,    "#DC3545", "#721C24"),
+                ("Severe",   severe,  "#7D1128", "#7D1128"),
+                ("Extreme",  extreme, "#4A0010", "#4A0010"),
             ]):
                 with col:
                     st.markdown(
@@ -1118,15 +1195,49 @@ def main() -> None:
                     )
 
         st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown('<div class="sec-hdr">Active Alerts</div>', unsafe_allow_html=True)
+        st.markdown('<div class="sec-hdr">Alerts</div>', unsafe_allow_html=True)
 
-        alerts = latest[latest["anomaly_score"] >= 1].sort_values(
-            "anomaly_score", ascending=False
-        )
-        if alerts.empty:
-            st.success("✓  No anomalies detected in the latest snapshot.")
+        # ── Severity filter toggle group ──
+        _tiers = [
+            ("clean",    "Show Clean",    0),
+            ("alert",    "Show Alert",    1),
+            ("critical", "Show Critical", 2),
+            ("severe",   "Show Severe",   3),
+            ("extreme",  "Show Extreme",  4),
+        ]
+        # Initialise session state for each tier (all except Clean on by default)
+        for key, _, _ in _tiers:
+            if f"show_{key}" not in st.session_state:
+                st.session_state[f"show_{key}"] = key != "clean"
+
+        filter_cols = st.columns(len(_tiers))
+        for col, (key, label, _) in zip(filter_cols, _tiers):
+            with col:
+                st.checkbox(label, key=f"show_{key}")
+
+        # Build mask from active tiers
+        _score_ranges: dict[str, list[int]] = {
+            "clean":    [0],
+            "alert":    [1, 2],
+            "critical": [3, 4],
+            "severe":   [5, 6],
+            "extreme":  [7, 8, 9, 10],
+        }
+        active_scores: list[int] = []
+        for key, _, _ in _tiers:
+            if st.session_state.get(f"show_{key}", False):
+                active_scores.extend(_score_ranges[key])
+
+        if not active_scores:
+            st.info("Select at least one severity tier above to display alerts.")
         else:
-            render_market_table(alerts, n=min(60, len(alerts)))
+            alerts = latest[latest["anomaly_score"].isin(active_scores)].sort_values(
+                "anomaly_score", ascending=False
+            )
+            if alerts.empty:
+                st.success("✓  No anomalies detected for the selected tiers.")
+            else:
+                render_market_table(alerts, n=min(60, len(alerts)))
 
 
 if __name__ == "__main__":
