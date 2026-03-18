@@ -419,6 +419,33 @@ def inject_css() -> None:
             color: #1A1A2E !important;
         }
 
+        /* ── Dropdown/Selectbox popup background and arrow color fixes ── */
+        /* Dropdown popup/menu background */
+        [data-baseweb="popover"] {
+            background-color: rgb(235, 226, 205) !important;
+        }
+        [data-baseweb="menu"] {
+            background-color: rgb(235, 226, 205) !important;
+        }
+        [role="listbox"] {
+            background-color: rgb(235, 226, 205) !important;
+        }
+        /* Dropdown arrow color (change from white to black) */
+        .stSelectbox [data-baseweb="select"] svg,
+        .stMultiSelect [data-baseweb="select"] svg {
+            color: #1A1A2E !important;
+            fill: #1A1A2E !important;
+        }
+        [data-baseweb="select"] svg {
+            color: #1A1A2E !important;
+            fill: #1A1A2E !important;
+        }
+
+        /* ── Text input field background (search bars) ── */
+        .stTextInput input {
+            background-color: rgb(235, 226, 205) !important;
+        }
+
         /* ── Misc ── */
         #MainMenu, footer, header { visibility: hidden; }
         .block-container { padding-top: 1rem; padding-bottom: 2rem; }
@@ -762,19 +789,21 @@ def chart_scatter_volume_price(latest: pd.DataFrame) -> go.Figure:
                 type="log",
                 gridcolor="#E9ECEF",
                 tickformat=",.0f",
+                title_font=dict(color="#1A1A2E"),
             ),
             yaxis=dict(
                 title="Price Change (%)",
                 ticksuffix="%",
                 gridcolor="#E9ECEF",
                 zeroline=False,
+                title_font=dict(color="#1A1A2E"),
             ),
             legend=dict(
                 orientation="v",
                 x=1.01,
                 y=1,
-                font=dict(size=10),
-                title=dict(text="Sector", font=dict(size=10)),
+                font=dict(size=10, color="#1A1A2E"),
+                title=dict(text="Sector", font=dict(size=10, color="#1A1A2E")),
             ),
         )
     )
@@ -813,8 +842,9 @@ def chart_amihud_by_sector(df_hist: pd.DataFrame) -> go.Figure:
         **_base_layout(
             height=390,
             margin=dict(l=4, r=4, t=16, b=70),
-            yaxis=dict(title="Amihud Illiquidity Ratio", gridcolor="#E9ECEF"),
-            xaxis=dict(tickangle=-30, tickfont=dict(size=10)),
+            yaxis=dict(title="Amihud Illiquidity Ratio", gridcolor="#E9ECEF",
+                       title_font=dict(color="#1A1A2E")),
+            xaxis=dict(tickangle=-30, tickfont=dict(size=10, color="#1A1A2E")),
         )
     )
     return fig
@@ -1080,10 +1110,12 @@ def chart_security_history(df_hist: pd.DataFrame, isin: str) -> go.Figure:
     fig.update_layout(
         **_base_layout(
             height=460,
-            legend=dict(orientation="h", y=1.05, font=dict(size=10)),
+            legend=dict(orientation="h", y=1.05, font=dict(size=10, color="#1A1A2E")),
             xaxis2=dict(title=None, gridcolor="#E9ECEF"),
-            yaxis=dict(title="Price (CHF)", gridcolor="#E9ECEF"),
-            yaxis2=dict(title="Volume (CHF)", gridcolor="#E9ECEF"),
+            yaxis=dict(title="Price (CHF)", gridcolor="#E9ECEF",
+                       title_font=dict(color="#1A1A2E")),
+            yaxis2=dict(title="Volume (CHF)", gridcolor="#E9ECEF",
+                        title_font=dict(color="#1A1A2E")),
             bargap=0.08,
         )
     )
@@ -1834,11 +1866,11 @@ def main() -> None:
                     unsafe_allow_html=True)
 
         risk_tiers = [
-            ("Clean",    clean,    "#28A745", "#155724", [0]),
-            ("Alert",    alert_n,  "#FD7E14", "#6A3200", [1, 2]),
-            ("Critical", critical_n, "#DC3545", "#58151C", [3, 4]),
-            ("Severe",   severe_n, "#7D1128", "#4A0E1E", [5, 6]),
-            ("Extreme",  extreme_n, "#4A0010", "#3A0010", [7]),
+            ("Clean",    clean,    "#28A745", "#28A745", [0]),
+            ("Alert",    alert_n,  "#FD7E14", "#7D3C00", [1, 2]),
+            ("Critical", critical_n, "#DC3545", "#721C24", [3, 4]),
+            ("Severe",   severe_n, "#7D1128", "#7D1128", [5, 6]),
+            ("Extreme",  extreme_n, "#4A0010", "#4A0010", [7]),
         ]
 
         rc = st.columns(len(risk_tiers))
