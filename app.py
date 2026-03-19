@@ -1032,7 +1032,14 @@ def chart_anomaly_severity_treemap(latest: pd.DataFrame) -> go.Figure:
     if df.empty:
         return go.Figure()
 
-    df["severity"] = df["anomaly_score"].map(ANOMALY_LABELS).fillna("Unknown")
+    # Map scores to the same tier names used by the KPI cards
+    _score_to_tier: dict[int, str] = {}
+    for tier, scores in SEVERITY_TIERS.items():
+        if tier == "Clean":
+            continue
+        for s in scores:
+            _score_to_tier[s] = tier
+    df["severity"] = df["anomaly_score"].map(_score_to_tier).fillna("Unknown")
     df["label"] = df["Name"].fillna(df["Isin"]).str[:28]
     df["score_size"] = df["anomaly_score"]  # already >= 1 from filter above
 
@@ -1040,24 +1047,27 @@ def chart_anomaly_severity_treemap(latest: pd.DataFrame) -> go.Figure:
     df["sev_order"] = df["severity"].map({s: i for i, s in enumerate(severity_order)}).fillna(99)
     df = df.sort_values(["sev_order", "anomaly_score"], ascending=[False, False])
 
+    # Discrete colours matching the KPI big-number text colours
+    tier_colors = {
+        "(?)":      "#F5F6F8",
+        "Alert":    "#7D3C00",
+        "Critical": "#721C24",
+        "Severe":   "#7D1128",
+        "Extreme":  "#4A0010",
+    }
+
     fig = px.treemap(
         df,
         path=["severity", "label"],
         values="score_size",
-        color="anomaly_score",
-        color_continuous_scale=[
-            [0.0, "#7D3C00"],
-            [0.3, "#721C24"],
-            [0.6, "#7D1128"],
-            [1.0, "#4A0010"],
-        ],
-        range_color=[1, 7],
+        color="severity",
+        color_discrete_map=tier_colors,
         custom_data=["Isin", "Sektor", "anomaly_score", "volume_today_chf",
                       "price_change_pct", "volatility_daily"],
     )
     fig.update_traces(
         texttemplate="<b>%{label}</b>",
-        textfont=dict(family="Inter", size=10),
+        textfont=dict(family="Inter", size=10, color="white"),
         hovertemplate=(
             "<b>%{customdata[0]}</b><br>"
             "Sector: %{customdata[1]}<br>"
@@ -1070,12 +1080,8 @@ def chart_anomaly_severity_treemap(latest: pd.DataFrame) -> go.Figure:
         marker_line_color="white",
     )
     fig.update_layout(
-        **_base_layout(
-            height=380,
-            coloraxis_colorbar=dict(title="Score", thickness=10,
-                                     tickfont=dict(color="#1A1A2E"),
-                                     title_font=dict(color="#1A1A2E")),
-        )
+        **_base_layout(height=380),
+        showlegend=False,
     )
     return fig
 
