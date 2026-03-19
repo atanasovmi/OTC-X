@@ -360,13 +360,20 @@ def inject_css() -> None:
         [role="option"] {
             color: #1A1A2E !important;
         }
-        /* Dropdown popup / menu background → beige */
+        /* Dropdown popup / menu background → beige (ultra-broad to defeat dark theme) */
         [data-baseweb="popover"],
         [data-baseweb="popover"] > div,
+        [data-baseweb="popover"] div,
+        [data-baseweb="popover"] ul,
+        [data-baseweb="popover"] li,
         [data-baseweb="menu"],
         [data-baseweb="menu"] ul,
+        [data-baseweb="menu"] div,
         [role="listbox"],
         [role="listbox"] ul,
+        [role="listbox"] div,
+        [role="listbox"] li,
+        [role="option"],
         [data-baseweb="select"] [data-baseweb="popover"] div,
         div[data-baseweb="popover"] > div > ul {
             background-color: rgb(235, 226, 205) !important;
@@ -393,7 +400,7 @@ def inject_css() -> None:
             color: #1A1A2E !important;
         }
         /* ── Tier-specific KPI value colours (must appear after .stMarkdown rule) ── */
-        .stMarkdown .kpi-value.kpi-tier-clean  { color: #28A745 !important; }
+        .stMarkdown .kpi-value.kpi-tier-clean  { color: #1B6B2E !important; }
         .stMarkdown .kpi-value.kpi-tier-alert   { color: #7D3C00 !important; }
         .stMarkdown .kpi-value.kpi-tier-critical { color: #721C24 !important; }
         .stMarkdown .kpi-value.kpi-tier-severe  { color: #7D1128 !important; }
@@ -1039,10 +1046,9 @@ def chart_anomaly_severity_treemap(latest: pd.DataFrame) -> go.Figure:
         values="score_size",
         color="anomaly_score",
         color_continuous_scale=[
-            [0.0, "#FFC107"],
-            [0.3, "#FD7E14"],
-            [0.5, "#DC3545"],
-            [0.8, "#7D1128"],
+            [0.0, "#7D3C00"],
+            [0.3, "#721C24"],
+            [0.6, "#7D1128"],
             [1.0, "#4A0010"],
         ],
         range_color=[1, 7],
@@ -1879,7 +1885,7 @@ def main() -> None:
                     unsafe_allow_html=True)
 
         risk_tiers = [
-            ("Clean",    clean,    "#28A745", "clean",    [0]),
+            ("Clean",    clean,    "#1B6B2E", "clean",    [0]),
             ("Alert",    alert_n,  "#FD7E14", "alert",    [1, 2]),
             ("Critical", critical_n, "#DC3545", "critical", [3, 4]),
             ("Severe",   severe_n, "#7D1128", "severe",   [5, 6]),
