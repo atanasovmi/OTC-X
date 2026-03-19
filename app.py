@@ -905,9 +905,10 @@ def chart_volatility_trend(df_hist: pd.DataFrame, n: int = 5,
         if show_raw_sma:
             grp["smoothed"] = grp["volatility_daily"].rolling(30, min_periods=1).mean()
         else:
-            # EWMA smoothing on volatility_daily
-            # RiskMetrics lambda = 0.94 → alpha = 1 - lambda = 0.06
-            grp["smoothed"] = grp["volatility_daily"].ewm(alpha=0.06, adjust=False).mean()
+            # Double-smoothing: 30-day rolling mean removes daily spikes,
+            # then EWM (span=30 ≈ α=0.065) yields a smooth band-like curve.
+            sma = grp["volatility_daily"].rolling(30, min_periods=1).mean()
+            grp["smoothed"] = sma.ewm(span=30, adjust=False).mean()
 
         # Determine visibility: if a sector is selected, dim others
         is_highlighted = selected_sector is None or sector == selected_sector
@@ -929,7 +930,7 @@ def chart_volatility_trend(df_hist: pd.DataFrame, n: int = 5,
             )
         )
 
-    smoothing_label = "30-Day SMA" if show_raw_sma else "EWMA (λ=0.94)"
+    smoothing_label = "30-Day SMA" if show_raw_sma else "EWMA-Smoothed"
     fig.update_layout(
         **_base_layout(
             height=390,
@@ -1728,7 +1729,7 @@ def main() -> None:
                 "Show raw volatility (30d SMA)",
                 value=False,
                 key="vol_show_raw_sma",
-                help="When enabled, display raw 30-day SMA volatility instead of the EWMA-smoothed RiskMetrics series (λ=0.94).",
+                help="When enabled, display raw 30-day SMA volatility instead of the EWMA-smoothed series.",
             )
         with vol_c1:
             if show_raw_sma:
@@ -1741,8 +1742,7 @@ def main() -> None:
             else:
                 st.markdown(
                     '<div class="math-note">'
-                    'σ<sub>t</sub><sup>2</sup> = λ · σ<sub>t-1</sub><sup>2</sup> + (1 − λ) · r<sub>t-1</sub><sup>2</sup>'
-                    '&nbsp;&nbsp;with λ = 0.94 (RiskMetrics)'
+                    'EWMA-Smoothed: 30-day SMA of σ<sub>daily</sub> → EWM(span=30)'
                     '</div>',
                     unsafe_allow_html=True,
                 )
