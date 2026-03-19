@@ -106,7 +106,9 @@ def inject_css() -> None:
             letter-spacing: -0.04em;
             line-height: 1;
         }
-        .otcx-logo span { color: #B22222; }
+        .otcx-logo span {
+            color: #B22222 !important;
+        }
         .otcx-tagline {
             font-size: 0.65rem;
             color: #1A1A2E;
@@ -684,7 +686,9 @@ def chart_sector_treemap(latest: pd.DataFrame) -> go.Figure:
     )
     fig.update_layout(
         **_base_layout(height=280,
-                       coloraxis_colorbar=dict(title="Avg Δ%", thickness=10))
+                       coloraxis_colorbar=dict(title="Avg Δ%", thickness=10,
+                                                tickfont=dict(color="#1A1A2E"),
+                                                title_font=dict(color="#1A1A2E")))
     )
     return fig
 
@@ -716,7 +720,8 @@ def chart_top_movers(latest: pd.DataFrame, n: int = 14) -> go.Figure:
                        margin=dict(l=10, r=70, t=16, b=4),
                        xaxis=dict(title="Price Change (%)", tickformat="+.1f",
                                   ticksuffix="%", gridcolor="#E9ECEF", zeroline=False,
-                                  tickfont=dict(color="#1A1A2E")),
+                                  tickfont=dict(color="#1A1A2E"),
+                                  title_font=dict(color="#1A1A2E")),
                        yaxis=dict(title=None, tickfont=dict(size=11, color="#1A1A2E")),
                        showlegend=False)
     )
@@ -1899,7 +1904,7 @@ def main() -> None:
                 st.markdown(
                     f'<div class="kpi-card" style="border-top-color:{border};{active_style}">'
                     f'<div class="kpi-label">{lbl}</div>'
-                    f'<div class="kpi-value" style="color:{txt_col};font-size:1.6rem">{val}</div>'
+                    f'<div class="kpi-value" style="color:{txt_col} !important;font-size:1.6rem">{val}</div>'
                     f'<div class="kpi-sub">{pct:.1f}% of market</div>'
                     f'</div>',
                     unsafe_allow_html=True,
