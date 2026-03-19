@@ -430,6 +430,21 @@ def inject_css() -> None:
         [role="listbox"] {
             background-color: rgb(235, 226, 205) !important;
         }
+        /* Dropdown menu items background */
+        [data-baseweb="menu"] li,
+        [data-baseweb="menu"] ul,
+        [role="listbox"] li,
+        [role="option"],
+        li[role="option"] {
+            background-color: rgb(235, 226, 205) !important;
+        }
+        /* Dropdown menu items hover state */
+        [data-baseweb="menu"] li:hover,
+        [role="listbox"] li:hover,
+        [role="option"]:hover,
+        li[role="option"]:hover {
+            background-color: rgb(225, 216, 195) !important;
+        }
         /* Dropdown arrow color (change from white to black) */
         .stSelectbox [data-baseweb="select"] svg,
         .stMultiSelect [data-baseweb="select"] svg {
