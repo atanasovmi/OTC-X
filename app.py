@@ -892,10 +892,7 @@ def chart_volatility_trend(df_hist: pd.DataFrame, n: int = 5,
     df = df_hist[df_hist["Sektor"].isin(top_sectors)].copy()
     agg = (
         df.groupby(["Datum", "Sektor"], as_index=False)
-        .agg(
-            volatility_daily=("volatility_daily", "mean"),
-            log_returns=("log_returns", "mean"),
-        )
+        .agg(volatility_daily=("volatility_daily", "mean"))
     )
     agg = agg.sort_values("Datum")
 
@@ -908,28 +905,13 @@ def chart_volatility_trend(df_hist: pd.DataFrame, n: int = 5,
         if show_raw_sma:
             grp["smoothed"] = grp["volatility_daily"].rolling(30, min_periods=1).mean()
         else:
-            # RiskMetrics EWMA by sector returns:
-            # σ_t² = λ·σ_{t-1}² + (1-λ)·r_{t-1}², λ=0.94
-            # Seed with variance of first 30 returns (or fewer when short history).
-            r = pd.to_numeric(grp["log_returns"], errors="coerce").to_numpy()
-            n_obs = len(r)
-            if n_obs > 0:
-                valid_idx = np.flatnonzero(~np.isnan(r))
-                if len(valid_idx) > 0:
-                    valid_r = r[valid_idx]
-                    seed_n = min(30, len(valid_r))
-                    seed_var = float(np.mean(np.square(valid_r[:seed_n])))
-                    ewma_var = np.empty(len(valid_r), dtype=float)
-                    ewma_var[:seed_n] = seed_var
-                    for t in range(seed_n, len(valid_r)):
-                        ewma_var[t] = 0.94 * ewma_var[t - 1] + 0.06 * (valid_r[t - 1] ** 2)
-                    smoothed = np.full(n_obs, np.nan, dtype=float)
-                    smoothed[valid_idx] = np.sqrt(ewma_var)
-                    grp["smoothed"] = smoothed
-                else:
-                    grp["smoothed"] = np.nan
-            else:
-                grp["smoothed"] = np.nan
+            # Triple-smoothing for macro-trend-only curves:
+            # 1) 90-day rolling mean removes daily/weekly noise
+            # 2) EWM(span=120) flattens to broad structural trends
+            # 3) Second EWM(span=60) removes residual wobble
+            sma = grp["volatility_daily"].rolling(90, min_periods=1).mean()
+            ew1 = sma.ewm(span=120, adjust=False).mean()
+            grp["smoothed"] = ew1.ewm(span=60, adjust=False).mean()
 
         # Determine visibility: if a sector is selected, dim others
         is_highlighted = selected_sector is None or sector == selected_sector
@@ -951,7 +933,7 @@ def chart_volatility_trend(df_hist: pd.DataFrame, n: int = 5,
             )
         )
 
-    smoothing_label = "30-Day SMA" if show_raw_sma else "EWMA (λ=0.94)"
+    smoothing_label = "30-Day SMA" if show_raw_sma else "Macro-Smoothed"
     fig.update_layout(
         **_base_layout(
             height=390,
@@ -1750,7 +1732,7 @@ def main() -> None:
                 "Show raw volatility (30d SMA)",
                 value=False,
                 key="vol_show_raw_sma",
-                help="When enabled, display raw 30-day SMA volatility instead of the EWMA-smoothed RiskMetrics series (λ=0.94).",
+                help="When enabled, display raw 30-day SMA volatility instead of the EWMA-smoothed series.",
             )
         with vol_c1:
             if show_raw_sma:
@@ -1763,8 +1745,7 @@ def main() -> None:
             else:
                 st.markdown(
                     '<div class="math-note">'
-                    'σ<sub>t</sub><sup>2</sup> = λ · σ<sub>t-1</sub><sup>2</sup> + (1 − λ) · r<sub>t-1</sub><sup>2</sup>'
-                    '&nbsp;&nbsp;with λ = 0.94 (RiskMetrics)'
+                    'Macro-Smoothed: SMA(90) → EWM(120) → EWM(60)'
                     '</div>',
                     unsafe_allow_html=True,
                 )
