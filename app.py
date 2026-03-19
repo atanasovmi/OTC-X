@@ -106,7 +106,7 @@ def inject_css() -> None:
             letter-spacing: -0.04em;
             line-height: 1;
         }
-        .otcx-logo span { color: #B22222; }
+        .otcx-logo span { color: #B22222 !important; }
         .otcx-tagline {
             font-size: 0.65rem;
             color: #1A1A2E;
@@ -340,6 +340,10 @@ def inject_css() -> None:
             opacity: 1 !important;
             -webkit-text-fill-color: #1A1A2E !important;
         }
+        /* Search / text input background → beige */
+        .stTextInput input {
+            background-color: rgb(235, 226, 205) !important;
+        }
         /* All text inside selectbox/multiselect controls */
         [data-baseweb="select"] div,
         [data-baseweb="select"] span,
@@ -355,6 +359,17 @@ def inject_css() -> None:
         [role="option"] span,
         [role="option"] {
             color: #1A1A2E !important;
+        }
+        /* Dropdown popup / menu background → beige */
+        [data-baseweb="popover"],
+        [data-baseweb="menu"],
+        [role="listbox"] {
+            background-color: rgb(235, 226, 205) !important;
+        }
+        /* Dropdown arrow → black (was invisible white on beige) */
+        [data-baseweb="select"] svg {
+            color: #1A1A2E !important;
+            fill: #1A1A2E !important;
         }
         /* Toggle / checkbox description text */
         .stCheckbox > label > div[data-testid="stMarkdownContainer"] {
@@ -543,6 +558,18 @@ def load_data() -> tuple[pd.DataFrame, pd.DataFrame]:
 # ─────────────────────────────────────────────
 #  Chart Factory
 # ─────────────────────────────────────────────
+def _deep_merge(base: dict, override: dict) -> dict:
+    """Recursively merge *override* into *base* so nested dicts are merged
+    rather than replaced (prevents axis tickfont/title_font colour loss)."""
+    merged = base.copy()
+    for k, v in override.items():
+        if k in merged and isinstance(merged[k], dict) and isinstance(v, dict):
+            merged[k] = _deep_merge(merged[k], v)
+        else:
+            merged[k] = v
+    return merged
+
+
 def _base_layout(**kwargs) -> dict:
     _axis_defaults = dict(
         color="#1A1A2E",
@@ -552,9 +579,7 @@ def _base_layout(**kwargs) -> dict:
     # Preserve axis contrast defaults even when callers pass partial axis dicts
     for axis_key in ("xaxis", "yaxis", "xaxis2", "yaxis2"):
         if axis_key in kwargs and isinstance(kwargs[axis_key], dict):
-            merged_axis = _axis_defaults.copy()
-            merged_axis.update(kwargs[axis_key])
-            kwargs[axis_key] = merged_axis
+            kwargs[axis_key] = _deep_merge(_axis_defaults, kwargs[axis_key])
     base = dict(
         template=PLOTLY_TPL,
         paper_bgcolor="white",
@@ -773,8 +798,8 @@ def chart_scatter_volume_price(latest: pd.DataFrame) -> go.Figure:
                 orientation="v",
                 x=1.01,
                 y=1,
-                font=dict(size=10),
-                title=dict(text="Sector", font=dict(size=10)),
+                font=dict(size=10, color="#1A1A2E"),
+                title=dict(text="Sector", font=dict(size=10, color="#1A1A2E")),
             ),
         )
     )
@@ -1080,7 +1105,7 @@ def chart_security_history(df_hist: pd.DataFrame, isin: str) -> go.Figure:
     fig.update_layout(
         **_base_layout(
             height=460,
-            legend=dict(orientation="h", y=1.05, font=dict(size=10)),
+            legend=dict(orientation="h", y=1.05, font=dict(size=10, color="#1A1A2E")),
             xaxis2=dict(title=None, gridcolor="#E9ECEF"),
             yaxis=dict(title="Price (CHF)", gridcolor="#E9ECEF"),
             yaxis2=dict(title="Volume (CHF)", gridcolor="#E9ECEF"),
@@ -1834,11 +1859,11 @@ def main() -> None:
                     unsafe_allow_html=True)
 
         risk_tiers = [
-            ("Clean",    clean,    "#28A745", "#155724", [0]),
-            ("Alert",    alert_n,  "#FD7E14", "#6A3200", [1, 2]),
-            ("Critical", critical_n, "#DC3545", "#58151C", [3, 4]),
-            ("Severe",   severe_n, "#7D1128", "#4A0E1E", [5, 6]),
-            ("Extreme",  extreme_n, "#4A0010", "#3A0010", [7]),
+            ("Clean",    clean,    "#28A745", "#28A745", [0]),
+            ("Alert",    alert_n,  "#FD7E14", "#7D3C00", [1, 2]),
+            ("Critical", critical_n, "#DC3545", "#721C24", [3, 4]),
+            ("Severe",   severe_n, "#7D1128", "#7D1128", [5, 6]),
+            ("Extreme",  extreme_n, "#4A0010", "#4A0010", [7]),
         ]
 
         rc = st.columns(len(risk_tiers))
@@ -1852,7 +1877,7 @@ def main() -> None:
                 st.markdown(
                     f'<div class="kpi-card" style="border-top-color:{border};{active_style}">'
                     f'<div class="kpi-label">{lbl}</div>'
-                    f'<div class="kpi-value" style="color:{txt_col};font-size:1.6rem">{val}</div>'
+                    f'<div class="kpi-value" style="color:{txt_col} !important;font-size:1.6rem">{val}</div>'
                     f'<div class="kpi-sub">{pct:.1f}% of market</div>'
                     f'</div>',
                     unsafe_allow_html=True,
