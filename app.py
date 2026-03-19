@@ -362,9 +362,21 @@ def inject_css() -> None:
         }
         /* Dropdown popup / menu background → beige */
         [data-baseweb="popover"],
+        [data-baseweb="popover"] > div,
         [data-baseweb="menu"],
-        [role="listbox"] {
+        [data-baseweb="menu"] ul,
+        [role="listbox"],
+        [role="listbox"] ul,
+        [data-baseweb="select"] [data-baseweb="popover"] div,
+        div[data-baseweb="popover"] > div > ul {
             background-color: rgb(235, 226, 205) !important;
+        }
+        /* Dropdown list items hover state → slightly darker beige */
+        [data-baseweb="menu"] li:hover,
+        [role="listbox"] li:hover,
+        [role="option"]:hover,
+        [role="option"][aria-selected="true"] {
+            background-color: rgb(220, 210, 185) !important;
         }
         /* Dropdown arrow → black (was invisible white on beige) */
         [data-baseweb="select"] svg {
@@ -380,6 +392,14 @@ def inject_css() -> None:
         .stMarkdown div, .stText, .stCaption {
             color: #1A1A2E !important;
         }
+        /* ── Tier-specific KPI value colours (must appear after .stMarkdown rule) ── */
+        .stMarkdown .kpi-value.kpi-tier-clean  { color: #28A745 !important; }
+        .stMarkdown .kpi-value.kpi-tier-alert   { color: #7D3C00 !important; }
+        .stMarkdown .kpi-value.kpi-tier-critical { color: #721C24 !important; }
+        .stMarkdown .kpi-value.kpi-tier-severe  { color: #7D1128 !important; }
+        .stMarkdown .kpi-value.kpi-tier-extreme { color: #4A0010 !important; }
+        /* ── Logo span override (must appear after .stMarkdown rule) ── */
+        .stMarkdown .otcx-logo span { color: #B22222 !important; }
         /* Streamlit expander header text */
         .streamlit-expanderHeader p, .streamlit-expanderHeader span {
             color: #1A1A2E !important;
@@ -1398,22 +1418,22 @@ def main() -> None:
         with col_act:
             st.markdown('<div class="sec-hdr">Market Activity — Last 90 Days</div>',
                         unsafe_allow_html=True)
-            st.plotly_chart(chart_market_activity(df_hist), use_container_width=True)
+            st.plotly_chart(chart_market_activity(df_hist), use_container_width=True, theme=None)
         with col_tree:
             st.markdown('<div class="sec-hdr">Sector Allocation by Volume</div>',
                         unsafe_allow_html=True)
-            st.plotly_chart(chart_sector_treemap(latest), use_container_width=True)
+            st.plotly_chart(chart_sector_treemap(latest), use_container_width=True, theme=None)
 
         st.markdown("<br>", unsafe_allow_html=True)
         col_mov, col_vol = st.columns(2)
         with col_mov:
             st.markdown('<div class="sec-hdr">Top Movers — Price Change %</div>',
                         unsafe_allow_html=True)
-            st.plotly_chart(chart_top_movers(latest), use_container_width=True)
+            st.plotly_chart(chart_top_movers(latest), use_container_width=True, theme=None)
         with col_vol:
             st.markdown('<div class="sec-hdr">Volume by Sector (CHF)</div>',
                         unsafe_allow_html=True)
-            st.plotly_chart(chart_volume_by_sector(latest), use_container_width=True)
+            st.plotly_chart(chart_volume_by_sector(latest), use_container_width=True, theme=None)
 
     # ══════════════════════════════════════════
     # TAB 2 — Market Data (Raw Data Explorer)
@@ -1572,7 +1592,7 @@ def main() -> None:
                 label_visibility="collapsed",
             )
             st.plotly_chart(chart_security_history(df_hist, sel_isin),
-                            use_container_width=True)
+                            use_container_width=True, theme=None)
 
             # ── Security summary metrics with math notation ──
             sec_row = latest[latest["Isin"] == sel_isin]
@@ -1672,7 +1692,7 @@ def main() -> None:
         if len(hm_selected) >= 2:
             st.plotly_chart(
                 chart_correlation_heatmap(analytics_df, hm_selected),
-                use_container_width=True,
+                use_container_width=True, theme=None,
             )
         else:
             st.info("Select at least 2 metrics to display the correlation matrix.")
@@ -1687,7 +1707,7 @@ def main() -> None:
                 unsafe_allow_html=True,
             )
             st.plotly_chart(chart_scatter_volume_price(analytics_df),
-                            use_container_width=True)
+                            use_container_width=True, theme=None)
         with col_amh:
             st.markdown(
                 '<div class="sec-hdr">Amihud Illiquidity by Sector</div>',
@@ -1703,7 +1723,7 @@ def main() -> None:
             if hm_sectors:
                 hist_filtered = hist_filtered[hist_filtered["Sektor"].isin(hm_sectors)]
             st.plotly_chart(chart_amihud_by_sector(hist_filtered),
-                            use_container_width=True)
+                            use_container_width=True, theme=None)
 
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown(
@@ -1771,7 +1791,7 @@ def main() -> None:
                 show_raw_sma=show_raw_sma,
                 selected_sector=st.session_state.get("vol_selected_sector", None),
             ),
-            use_container_width=True,
+            use_container_width=True, theme=None,
         )
 
         # ── 3D Explorer Section ──
@@ -1840,7 +1860,7 @@ def main() -> None:
                 analytics_df, x_sel, y_sel, z_sel, color_sel, size_sel,
                 use_log=use_log, remove_outliers=rm_outliers,
             ),
-            use_container_width=True,
+            use_container_width=True, theme=None,
         )
 
     # ══════════════════════════════════════════
@@ -1859,17 +1879,17 @@ def main() -> None:
                     unsafe_allow_html=True)
 
         risk_tiers = [
-            ("Clean",    clean,    "#28A745", "#28A745", [0]),
-            ("Alert",    alert_n,  "#FD7E14", "#7D3C00", [1, 2]),
-            ("Critical", critical_n, "#DC3545", "#721C24", [3, 4]),
-            ("Severe",   severe_n, "#7D1128", "#7D1128", [5, 6]),
-            ("Extreme",  extreme_n, "#4A0010", "#4A0010", [7]),
+            ("Clean",    clean,    "#28A745", "clean",    [0]),
+            ("Alert",    alert_n,  "#FD7E14", "alert",    [1, 2]),
+            ("Critical", critical_n, "#DC3545", "critical", [3, 4]),
+            ("Severe",   severe_n, "#7D1128", "severe",   [5, 6]),
+            ("Extreme",  extreme_n, "#4A0010", "extreme",  [7]),
         ]
 
         rc = st.columns(len(risk_tiers))
         selected_tier = st.session_state.get("anomaly_tier", None)
 
-        for col_idx, (lbl, val, border, txt_col, scores) in enumerate(risk_tiers):
+        for col_idx, (lbl, val, border, tier_cls, scores) in enumerate(risk_tiers):
             with rc[col_idx]:
                 is_active = selected_tier == lbl
                 active_style = f"border: 2px solid {border}; box-shadow: 0 0 8px {border}40;" if is_active else ""
@@ -1877,7 +1897,7 @@ def main() -> None:
                 st.markdown(
                     f'<div class="kpi-card" style="border-top-color:{border};{active_style}">'
                     f'<div class="kpi-label">{lbl}</div>'
-                    f'<div class="kpi-value" style="color:{txt_col} !important;font-size:1.6rem">{val}</div>'
+                    f'<div class="kpi-value kpi-tier-{tier_cls}" style="font-size:1.6rem">{val}</div>'
                     f'<div class="kpi-sub">{pct:.1f}% of market</div>'
                     f'</div>',
                     unsafe_allow_html=True,
@@ -1904,7 +1924,7 @@ def main() -> None:
             '</div>',
             unsafe_allow_html=True,
         )
-        st.plotly_chart(chart_anomaly_severity_treemap(latest), use_container_width=True)
+        st.plotly_chart(chart_anomaly_severity_treemap(latest), use_container_width=True, theme=None)
 
         st.markdown("<br>", unsafe_allow_html=True)
 
