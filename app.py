@@ -1033,13 +1033,13 @@ def chart_anomaly_severity_treemap(latest: pd.DataFrame) -> go.Figure:
         return go.Figure()
 
     # Map scores to the same tier names used by the KPI cards
-    _score_to_tier: dict[int, str] = {}
+    score_to_tier: dict[int, str] = {}
     for tier, scores in SEVERITY_TIERS.items():
         if tier == "Clean":
             continue
         for s in scores:
-            _score_to_tier[s] = tier
-    df["severity"] = df["anomaly_score"].map(_score_to_tier).fillna("Unknown")
+            score_to_tier[s] = tier
+    df["severity"] = df["anomaly_score"].map(score_to_tier).fillna("Unknown")
     df["label"] = df["Name"].fillna(df["Isin"]).str[:28]
     df["score_size"] = df["anomaly_score"]  # already >= 1 from filter above
 
@@ -1048,6 +1048,7 @@ def chart_anomaly_severity_treemap(latest: pd.DataFrame) -> go.Figure:
     df = df.sort_values(["sev_order", "anomaly_score"], ascending=[False, False])
 
     # Discrete colours matching the KPI big-number text colours
+    # "(?)": Plotly's internal key for the root node in hierarchical treemaps
     tier_colors = {
         "(?)":      "#F5F6F8",
         "Alert":    "#7D3C00",
