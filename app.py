@@ -560,7 +560,7 @@ def load_data() -> tuple[pd.DataFrame, pd.DataFrame]:
 # ─────────────────────────────────────────────
 def _deep_merge(base: dict, override: dict) -> dict:
     """Recursively merge *override* into *base* so nested dicts are merged
-    rather than replaced (prevents axis tickfont/title_font colour loss)."""
+    rather than replaced (prevents axis tickfont/title_font color loss)."""
     merged = base.copy()
     for k, v in override.items():
         if k in merged and isinstance(merged[k], dict) and isinstance(v, dict):
