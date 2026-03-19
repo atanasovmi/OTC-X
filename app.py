@@ -905,10 +905,13 @@ def chart_volatility_trend(df_hist: pd.DataFrame, n: int = 5,
         if show_raw_sma:
             grp["smoothed"] = grp["volatility_daily"].rolling(30, min_periods=1).mean()
         else:
-            # Double-smoothing: 30-day rolling mean removes daily spikes,
-            # then EWM (span=30 ≈ α=0.065) yields a smooth band-like curve.
-            sma = grp["volatility_daily"].rolling(30, min_periods=1).mean()
-            grp["smoothed"] = sma.ewm(span=30, adjust=False).mean()
+            # Triple-smoothing for macro-trend-only curves:
+            # 1) 90-day rolling mean removes daily/weekly noise
+            # 2) EWM(span=120) flattens to broad structural trends
+            # 3) Second EWM(span=60) removes residual wobble
+            sma = grp["volatility_daily"].rolling(90, min_periods=1).mean()
+            ew1 = sma.ewm(span=120, adjust=False).mean()
+            grp["smoothed"] = ew1.ewm(span=60, adjust=False).mean()
 
         # Determine visibility: if a sector is selected, dim others
         is_highlighted = selected_sector is None or sector == selected_sector
@@ -930,7 +933,7 @@ def chart_volatility_trend(df_hist: pd.DataFrame, n: int = 5,
             )
         )
 
-    smoothing_label = "30-Day SMA" if show_raw_sma else "EWMA-Smoothed"
+    smoothing_label = "30-Day SMA" if show_raw_sma else "Macro-Smoothed"
     fig.update_layout(
         **_base_layout(
             height=390,
@@ -1742,7 +1745,7 @@ def main() -> None:
             else:
                 st.markdown(
                     '<div class="math-note">'
-                    'EWMA-Smoothed: 30-day SMA of σ<sub>daily</sub> → EWM(span=30)'
+                    'Macro-Smoothed: SMA(90) → EWM(120) → EWM(60)'
                     '</div>',
                     unsafe_allow_html=True,
                 )
