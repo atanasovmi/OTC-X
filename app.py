@@ -106,7 +106,7 @@ def inject_css() -> None:
             letter-spacing: -0.04em;
             line-height: 1;
         }
-        .otcx-logo span { color: #B22222; }
+        .otcx-logo span { color: #B22222 !important; }
         .otcx-tagline {
             font-size: 0.65rem;
             color: #1A1A2E;
@@ -340,6 +340,10 @@ def inject_css() -> None:
             opacity: 1 !important;
             -webkit-text-fill-color: #1A1A2E !important;
         }
+        /* Search / text input background → beige */
+        .stTextInput input {
+            background-color: rgb(235, 226, 205) !important;
+        }
         /* All text inside selectbox/multiselect controls */
         [data-baseweb="select"] div,
         [data-baseweb="select"] span,
@@ -356,6 +360,36 @@ def inject_css() -> None:
         [role="option"] {
             color: #1A1A2E !important;
         }
+        /* Dropdown popup / menu background → beige (ultra-broad to defeat dark theme) */
+        [data-baseweb="popover"],
+        [data-baseweb="popover"] > div,
+        [data-baseweb="popover"] div,
+        [data-baseweb="popover"] ul,
+        [data-baseweb="popover"] li,
+        [data-baseweb="menu"],
+        [data-baseweb="menu"] ul,
+        [data-baseweb="menu"] div,
+        [role="listbox"],
+        [role="listbox"] ul,
+        [role="listbox"] div,
+        [role="listbox"] li,
+        [role="option"],
+        [data-baseweb="select"] [data-baseweb="popover"] div,
+        div[data-baseweb="popover"] > div > ul {
+            background-color: rgb(235, 226, 205) !important;
+        }
+        /* Dropdown list items hover state → slightly darker beige */
+        [data-baseweb="menu"] li:hover,
+        [role="listbox"] li:hover,
+        [role="option"]:hover,
+        [role="option"][aria-selected="true"] {
+            background-color: rgb(220, 210, 185) !important;
+        }
+        /* Dropdown arrow → black (was invisible white on beige) */
+        [data-baseweb="select"] svg {
+            color: #1A1A2E !important;
+            fill: #1A1A2E !important;
+        }
         /* Toggle / checkbox description text */
         .stCheckbox > label > div[data-testid="stMarkdownContainer"] {
             color: #1A1A2E !important;
@@ -365,6 +399,14 @@ def inject_css() -> None:
         .stMarkdown div, .stText, .stCaption {
             color: #1A1A2E !important;
         }
+        /* ── Tier-specific KPI value colours (must appear after .stMarkdown rule) ── */
+        .stMarkdown .kpi-value.kpi-tier-clean  { color: #1B6B2E !important; }
+        .stMarkdown .kpi-value.kpi-tier-alert   { color: #7D3C00 !important; }
+        .stMarkdown .kpi-value.kpi-tier-critical { color: #721C24 !important; }
+        .stMarkdown .kpi-value.kpi-tier-severe  { color: #7D1128 !important; }
+        .stMarkdown .kpi-value.kpi-tier-extreme { color: #4A0010 !important; }
+        /* ── Logo span override (must appear after .stMarkdown rule) ── */
+        .stMarkdown .otcx-logo span { color: #B22222 !important; }
         /* Streamlit expander header text */
         .streamlit-expanderHeader p, .streamlit-expanderHeader span {
             color: #1A1A2E !important;
@@ -543,6 +585,18 @@ def load_data() -> tuple[pd.DataFrame, pd.DataFrame]:
 # ─────────────────────────────────────────────
 #  Chart Factory
 # ─────────────────────────────────────────────
+def _deep_merge(base: dict, override: dict) -> dict:
+    """Recursively merge *override* into *base* so nested dicts are merged
+    rather than replaced (prevents axis tickfont/title_font color loss)."""
+    merged = base.copy()
+    for k, v in override.items():
+        if k in merged and isinstance(merged[k], dict) and isinstance(v, dict):
+            merged[k] = _deep_merge(merged[k], v)
+        else:
+            merged[k] = v
+    return merged
+
+
 def _base_layout(**kwargs) -> dict:
     _axis_defaults = dict(
         color="#1A1A2E",
@@ -552,9 +606,7 @@ def _base_layout(**kwargs) -> dict:
     # Preserve axis contrast defaults even when callers pass partial axis dicts
     for axis_key in ("xaxis", "yaxis", "xaxis2", "yaxis2"):
         if axis_key in kwargs and isinstance(kwargs[axis_key], dict):
-            merged_axis = _axis_defaults.copy()
-            merged_axis.update(kwargs[axis_key])
-            kwargs[axis_key] = merged_axis
+            kwargs[axis_key] = _deep_merge(_axis_defaults, kwargs[axis_key])
     base = dict(
         template=PLOTLY_TPL,
         paper_bgcolor="white",
@@ -773,8 +825,8 @@ def chart_scatter_volume_price(latest: pd.DataFrame) -> go.Figure:
                 orientation="v",
                 x=1.01,
                 y=1,
-                font=dict(size=10),
-                title=dict(text="Sector", font=dict(size=10)),
+                font=dict(size=10, color="#1A1A2E"),
+                title=dict(text="Sector", font=dict(size=10, color="#1A1A2E")),
             ),
         )
     )
@@ -980,7 +1032,14 @@ def chart_anomaly_severity_treemap(latest: pd.DataFrame) -> go.Figure:
     if df.empty:
         return go.Figure()
 
-    df["severity"] = df["anomaly_score"].map(ANOMALY_LABELS).fillna("Unknown")
+    # Map scores to the same tier names used by the KPI cards
+    score_to_tier: dict[int, str] = {}
+    for tier, scores in SEVERITY_TIERS.items():
+        if tier == "Clean":
+            continue
+        for s in scores:
+            score_to_tier[s] = tier
+    df["severity"] = df["anomaly_score"].map(score_to_tier).fillna("Unknown")
     df["label"] = df["Name"].fillna(df["Isin"]).str[:28]
     df["score_size"] = df["anomaly_score"]  # already >= 1 from filter above
 
@@ -988,25 +1047,28 @@ def chart_anomaly_severity_treemap(latest: pd.DataFrame) -> go.Figure:
     df["sev_order"] = df["severity"].map({s: i for i, s in enumerate(severity_order)}).fillna(99)
     df = df.sort_values(["sev_order", "anomaly_score"], ascending=[False, False])
 
+    # Discrete colours matching the KPI big-number text colours
+    # "(?)": Plotly's internal key for the root node in hierarchical treemaps
+    tier_colors = {
+        "(?)":      "#F5F6F8",
+        "Alert":    "#7D3C00",
+        "Critical": "#721C24",
+        "Severe":   "#7D1128",
+        "Extreme":  "#4A0010",
+    }
+
     fig = px.treemap(
         df,
         path=["severity", "label"],
         values="score_size",
-        color="anomaly_score",
-        color_continuous_scale=[
-            [0.0, "#FFC107"],
-            [0.3, "#FD7E14"],
-            [0.5, "#DC3545"],
-            [0.8, "#7D1128"],
-            [1.0, "#4A0010"],
-        ],
-        range_color=[1, 7],
+        color="severity",
+        color_discrete_map=tier_colors,
         custom_data=["Isin", "Sektor", "anomaly_score", "volume_today_chf",
                       "price_change_pct", "volatility_daily"],
     )
     fig.update_traces(
         texttemplate="<b>%{label}</b>",
-        textfont=dict(family="Inter", size=10),
+        textfont=dict(family="Inter", size=10, color="white"),
         hovertemplate=(
             "<b>%{customdata[0]}</b><br>"
             "Sector: %{customdata[1]}<br>"
@@ -1019,12 +1081,8 @@ def chart_anomaly_severity_treemap(latest: pd.DataFrame) -> go.Figure:
         marker_line_color="white",
     )
     fig.update_layout(
-        **_base_layout(
-            height=380,
-            coloraxis_colorbar=dict(title="Score", thickness=10,
-                                     tickfont=dict(color="#1A1A2E"),
-                                     title_font=dict(color="#1A1A2E")),
-        )
+        **_base_layout(height=380),
+        showlegend=False,
     )
     return fig
 
@@ -1080,7 +1138,7 @@ def chart_security_history(df_hist: pd.DataFrame, isin: str) -> go.Figure:
     fig.update_layout(
         **_base_layout(
             height=460,
-            legend=dict(orientation="h", y=1.05, font=dict(size=10)),
+            legend=dict(orientation="h", y=1.05, font=dict(size=10, color="#1A1A2E")),
             xaxis2=dict(title=None, gridcolor="#E9ECEF"),
             yaxis=dict(title="Price (CHF)", gridcolor="#E9ECEF"),
             yaxis2=dict(title="Volume (CHF)", gridcolor="#E9ECEF"),
@@ -1373,22 +1431,22 @@ def main() -> None:
         with col_act:
             st.markdown('<div class="sec-hdr">Market Activity — Last 90 Days</div>',
                         unsafe_allow_html=True)
-            st.plotly_chart(chart_market_activity(df_hist), use_container_width=True)
+            st.plotly_chart(chart_market_activity(df_hist), use_container_width=True, theme=None)
         with col_tree:
             st.markdown('<div class="sec-hdr">Sector Allocation by Volume</div>',
                         unsafe_allow_html=True)
-            st.plotly_chart(chart_sector_treemap(latest), use_container_width=True)
+            st.plotly_chart(chart_sector_treemap(latest), use_container_width=True, theme=None)
 
         st.markdown("<br>", unsafe_allow_html=True)
         col_mov, col_vol = st.columns(2)
         with col_mov:
             st.markdown('<div class="sec-hdr">Top Movers — Price Change %</div>',
                         unsafe_allow_html=True)
-            st.plotly_chart(chart_top_movers(latest), use_container_width=True)
+            st.plotly_chart(chart_top_movers(latest), use_container_width=True, theme=None)
         with col_vol:
             st.markdown('<div class="sec-hdr">Volume by Sector (CHF)</div>',
                         unsafe_allow_html=True)
-            st.plotly_chart(chart_volume_by_sector(latest), use_container_width=True)
+            st.plotly_chart(chart_volume_by_sector(latest), use_container_width=True, theme=None)
 
     # ══════════════════════════════════════════
     # TAB 2 — Market Data (Raw Data Explorer)
@@ -1547,7 +1605,7 @@ def main() -> None:
                 label_visibility="collapsed",
             )
             st.plotly_chart(chart_security_history(df_hist, sel_isin),
-                            use_container_width=True)
+                            use_container_width=True, theme=None)
 
             # ── Security summary metrics with math notation ──
             sec_row = latest[latest["Isin"] == sel_isin]
@@ -1647,7 +1705,7 @@ def main() -> None:
         if len(hm_selected) >= 2:
             st.plotly_chart(
                 chart_correlation_heatmap(analytics_df, hm_selected),
-                use_container_width=True,
+                use_container_width=True, theme=None,
             )
         else:
             st.info("Select at least 2 metrics to display the correlation matrix.")
@@ -1662,7 +1720,7 @@ def main() -> None:
                 unsafe_allow_html=True,
             )
             st.plotly_chart(chart_scatter_volume_price(analytics_df),
-                            use_container_width=True)
+                            use_container_width=True, theme=None)
         with col_amh:
             st.markdown(
                 '<div class="sec-hdr">Amihud Illiquidity by Sector</div>',
@@ -1678,7 +1736,7 @@ def main() -> None:
             if hm_sectors:
                 hist_filtered = hist_filtered[hist_filtered["Sektor"].isin(hm_sectors)]
             st.plotly_chart(chart_amihud_by_sector(hist_filtered),
-                            use_container_width=True)
+                            use_container_width=True, theme=None)
 
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown(
@@ -1746,7 +1804,7 @@ def main() -> None:
                 show_raw_sma=show_raw_sma,
                 selected_sector=st.session_state.get("vol_selected_sector", None),
             ),
-            use_container_width=True,
+            use_container_width=True, theme=None,
         )
 
         # ── 3D Explorer Section ──
@@ -1815,7 +1873,7 @@ def main() -> None:
                 analytics_df, x_sel, y_sel, z_sel, color_sel, size_sel,
                 use_log=use_log, remove_outliers=rm_outliers,
             ),
-            use_container_width=True,
+            use_container_width=True, theme=None,
         )
 
     # ══════════════════════════════════════════
@@ -1834,17 +1892,17 @@ def main() -> None:
                     unsafe_allow_html=True)
 
         risk_tiers = [
-            ("Clean",    clean,    "#28A745", "#155724", [0]),
-            ("Alert",    alert_n,  "#FD7E14", "#6A3200", [1, 2]),
-            ("Critical", critical_n, "#DC3545", "#58151C", [3, 4]),
-            ("Severe",   severe_n, "#7D1128", "#4A0E1E", [5, 6]),
-            ("Extreme",  extreme_n, "#4A0010", "#3A0010", [7]),
+            ("Clean",    clean,    "#1B6B2E", "clean",    [0]),
+            ("Alert",    alert_n,  "#FD7E14", "alert",    [1, 2]),
+            ("Critical", critical_n, "#DC3545", "critical", [3, 4]),
+            ("Severe",   severe_n, "#7D1128", "severe",   [5, 6]),
+            ("Extreme",  extreme_n, "#4A0010", "extreme",  [7]),
         ]
 
         rc = st.columns(len(risk_tiers))
         selected_tier = st.session_state.get("anomaly_tier", None)
 
-        for col_idx, (lbl, val, border, txt_col, scores) in enumerate(risk_tiers):
+        for col_idx, (lbl, val, border, tier_cls, scores) in enumerate(risk_tiers):
             with rc[col_idx]:
                 is_active = selected_tier == lbl
                 active_style = f"border: 2px solid {border}; box-shadow: 0 0 8px {border}40;" if is_active else ""
@@ -1852,7 +1910,7 @@ def main() -> None:
                 st.markdown(
                     f'<div class="kpi-card" style="border-top-color:{border};{active_style}">'
                     f'<div class="kpi-label">{lbl}</div>'
-                    f'<div class="kpi-value" style="color:{txt_col};font-size:1.6rem">{val}</div>'
+                    f'<div class="kpi-value kpi-tier-{tier_cls}" style="font-size:1.6rem">{val}</div>'
                     f'<div class="kpi-sub">{pct:.1f}% of market</div>'
                     f'</div>',
                     unsafe_allow_html=True,
@@ -1879,7 +1937,7 @@ def main() -> None:
             '</div>',
             unsafe_allow_html=True,
         )
-        st.plotly_chart(chart_anomaly_severity_treemap(latest), use_container_width=True)
+        st.plotly_chart(chart_anomaly_severity_treemap(latest), use_container_width=True, theme=None)
 
         st.markdown("<br>", unsafe_allow_html=True)
 
