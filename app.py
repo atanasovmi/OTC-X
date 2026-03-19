@@ -348,6 +348,28 @@ def inject_css() -> None:
         .stMultiSelect div[data-baseweb="select"] > div > div {
             color: #1A1A2E !important;
         }
+        /* Dropdown popover background + arrow visibility */
+        [data-baseweb="popover"],
+        [data-baseweb="menu"],
+        [role="listbox"] {
+            background-color: rgb(235, 226, 205) !important;
+            border: 1px solid #C8BFA5 !important;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08) !important;
+        }
+        [data-baseweb="menu"] ul,
+        [role="listbox"] ul {
+            background-color: rgb(235, 226, 205) !important;
+        }
+        .stSelectbox [data-baseweb="select"] svg,
+        .stMultiSelect [data-baseweb="select"] svg {
+            color: #1A1A2E !important;
+            fill: #1A1A2E !important;
+        }
+        /* Text input background (e.g., Market Data search) */
+        .stTextInput input {
+            background-color: rgb(235, 226, 205) !important;
+            border: 1px solid #C8BFA5 !important;
+        }
         /* Dropdown menu items */
         [data-baseweb="menu"] li,
         [data-baseweb="menu"] li span,
@@ -757,6 +779,8 @@ def chart_scatter_volume_price(latest: pd.DataFrame) -> go.Figure:
     fig.update_layout(
         **_base_layout(
             height=390,
+            title=dict(text="Volume vs. Price Change — Log Scale",
+                       font=dict(color="#1A1A2E", size=14)),
             xaxis=dict(
                 title="Daily Volume (CHF) — log scale",
                 type="log",
@@ -773,8 +797,8 @@ def chart_scatter_volume_price(latest: pd.DataFrame) -> go.Figure:
                 orientation="v",
                 x=1.01,
                 y=1,
-                font=dict(size=10),
-                title=dict(text="Sector", font=dict(size=10)),
+                font=dict(size=10, color="#1A1A2E"),
+                title=dict(text="Sector", font=dict(size=10, color="#1A1A2E")),
             ),
         )
     )
@@ -814,7 +838,9 @@ def chart_amihud_by_sector(df_hist: pd.DataFrame) -> go.Figure:
             height=390,
             margin=dict(l=4, r=4, t=16, b=70),
             yaxis=dict(title="Amihud Illiquidity Ratio", gridcolor="#E9ECEF"),
-            xaxis=dict(tickangle=-30, tickfont=dict(size=10)),
+            xaxis=dict(tickangle=-30, tickfont=dict(size=10, color="#1A1A2E")),
+            title=dict(text="Amihud Illiquidity by Sector",
+                       font=dict(color="#1A1A2E", size=14)),
         )
     )
     return fig
@@ -903,6 +929,8 @@ def chart_volatility_trend(df_hist: pd.DataFrame, n: int = 5,
     fig.update_layout(
         **_base_layout(
             height=390,
+            title=dict(text="Rolling Volatility — Top Sectors",
+                       font=dict(color="#1A1A2E", size=14)),
             xaxis=dict(title=None, gridcolor="#E9ECEF"),
             yaxis=dict(title=f"Avg Daily Volatility σ ({smoothing_label})",
                        gridcolor="#E9ECEF",
@@ -1080,7 +1108,9 @@ def chart_security_history(df_hist: pd.DataFrame, isin: str) -> go.Figure:
     fig.update_layout(
         **_base_layout(
             height=460,
-            legend=dict(orientation="h", y=1.05, font=dict(size=10)),
+            title=dict(text="Security History", font=dict(color="#1A1A2E", size=14)),
+            legend=dict(orientation="h", y=1.05,
+                        font=dict(size=10, color="#1A1A2E")),
             xaxis2=dict(title=None, gridcolor="#E9ECEF"),
             yaxis=dict(title="Price (CHF)", gridcolor="#E9ECEF"),
             yaxis2=dict(title="Volume (CHF)", gridcolor="#E9ECEF"),
@@ -1834,11 +1864,11 @@ def main() -> None:
                     unsafe_allow_html=True)
 
         risk_tiers = [
-            ("Clean",    clean,    "#28A745", "#155724", [0]),
-            ("Alert",    alert_n,  "#FD7E14", "#6A3200", [1, 2]),
-            ("Critical", critical_n, "#DC3545", "#58151C", [3, 4]),
-            ("Severe",   severe_n, "#7D1128", "#4A0E1E", [5, 6]),
-            ("Extreme",  extreme_n, "#4A0010", "#3A0010", [7]),
+            ("Clean",    clean,    "#28A745", "#28A745", [0]),
+            ("Alert",    alert_n,  "#FD7E14", "#7D3C00", [1, 2]),
+            ("Critical", critical_n, "#DC3545", "#721C24", [3, 4]),
+            ("Severe",   severe_n, "#7D1128", "#7D1128", [5, 6]),
+            ("Extreme",  extreme_n, "#4A0010", "#4A0010", [7]),
         ]
 
         rc = st.columns(len(risk_tiers))
