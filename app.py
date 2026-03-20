@@ -495,6 +495,17 @@ def inject_css() -> None:
         .anomaly-detail-table td.left { text-align: left; font-family: 'Inter', sans-serif; }
         .anomaly-detail-table tr:hover { background: #F0F1F3; }
 
+        /* ── Native Dataframe (Market Data tab) ── */
+        [data-testid="stDataFrame"] {
+            border: 1px solid #CED4DA;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        [data-testid="stDataFrame"] [data-testid="glideDataEditor"] {
+            font-family: 'IBM Plex Mono', monospace !important;
+            font-size: 0.82rem !important;
+        }
+
         </style>
         """,
         unsafe_allow_html=True,
@@ -1386,6 +1397,134 @@ def render_market_table(df: pd.DataFrame, n: int = 50) -> None:
     st.markdown(html, unsafe_allow_html=True)
 
 
+def render_native_dataframe(df: pd.DataFrame, n: int = 50) -> None:
+    """Render a full-width interactive Streamlit dataframe for the Market Data tab.
+
+    Uses ``st.dataframe`` with ``column_config`` to format primary business
+    columns (currencies, percentages, dates) while allowing all remaining
+    columns to render dynamically so users can scroll through the complete
+    dataset.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Filtered market-data snapshot.
+    n : int, optional
+        Maximum number of rows to display (default 50).
+    """
+    display = df.head(n).copy()
+
+    # ── Column configuration for known business columns ──
+    col_cfg: dict[str, st.column_config.Column] = {}
+
+    if "Isin" in display.columns:
+        col_cfg["Isin"] = st.column_config.TextColumn("ISIN", width="small")
+    if "Name" in display.columns:
+        col_cfg["Name"] = st.column_config.TextColumn("Security", width="medium")
+    if "Sektor" in display.columns:
+        col_cfg["Sektor"] = st.column_config.TextColumn("Sector", width="medium")
+    if "Datum" in display.columns:
+        col_cfg["Datum"] = st.column_config.DateColumn(
+            "Date", format="DD.MM.YYYY", width="small",
+        )
+    if "price_last" in display.columns:
+        col_cfg["price_last"] = st.column_config.NumberColumn(
+            "Last Price", format="CHF %.2f",
+        )
+    if "price_change_pct" in display.columns:
+        col_cfg["price_change_pct"] = st.column_config.NumberColumn(
+            "Δ Price %", format="%.2f%%",
+        )
+    if "volume_today_chf" in display.columns:
+        col_cfg["volume_today_chf"] = st.column_config.NumberColumn(
+            "Volume (CHF)", format="CHF %d",
+        )
+    if "volume_today_units" in display.columns:
+        col_cfg["volume_today_units"] = st.column_config.NumberColumn(
+            "Volume (Units)", format="%d",
+        )
+    if "trades_today" in display.columns:
+        col_cfg["trades_today"] = st.column_config.NumberColumn(
+            "Trades", format="%d",
+        )
+    if "volatility_daily" in display.columns:
+        col_cfg["volatility_daily"] = st.column_config.NumberColumn(
+            "Volatility σ", format="%.4f",
+        )
+    if "volatility_30d_median" in display.columns:
+        col_cfg["volatility_30d_median"] = st.column_config.NumberColumn(
+            "Volatility 30d Med", format="%.4f",
+        )
+    if "amihud_daily" in display.columns:
+        col_cfg["amihud_daily"] = st.column_config.NumberColumn(
+            "Amihud λ", format="%.6f",
+        )
+    if "amihud_30d_median" in display.columns:
+        col_cfg["amihud_30d_median"] = st.column_config.NumberColumn(
+            "Amihud 30d Med", format="%.6f",
+        )
+    if "anomaly_score" in display.columns:
+        col_cfg["anomaly_score"] = st.column_config.NumberColumn(
+            "Anomaly Score", format="%d",
+        )
+    if "spread_log_hl" in display.columns:
+        col_cfg["spread_log_hl"] = st.column_config.NumberColumn(
+            "Spread (log H/L)", format="%.4f",
+        )
+    if "log_returns" in display.columns:
+        col_cfg["log_returns"] = st.column_config.NumberColumn(
+            "Log Returns", format="%.4f",
+        )
+    if "off_book_pct" in display.columns:
+        col_cfg["off_book_pct"] = st.column_config.NumberColumn(
+            "Off-Book %", format="%.2f%%",
+        )
+    if "trades_30d_median" in display.columns:
+        col_cfg["trades_30d_median"] = st.column_config.NumberColumn(
+            "Trades 30d Med", format="%.1f",
+        )
+    if "price_min" in display.columns:
+        col_cfg["price_min"] = st.column_config.NumberColumn(
+            "Price Min", format="CHF %.2f",
+        )
+    if "price_max" in display.columns:
+        col_cfg["price_max"] = st.column_config.NumberColumn(
+            "Price Max", format="CHF %.2f",
+        )
+    if "volume_spike" in display.columns:
+        col_cfg["volume_spike"] = st.column_config.CheckboxColumn(
+            "Vol Spike",
+        )
+    if "activity_spike" in display.columns:
+        col_cfg["activity_spike"] = st.column_config.CheckboxColumn(
+            "Activity Spike",
+        )
+    if "price_gap" in display.columns:
+        col_cfg["price_gap"] = st.column_config.CheckboxColumn(
+            "Price Gap",
+        )
+    if "price_first" in display.columns:
+        col_cfg["price_first"] = st.column_config.NumberColumn(
+            "First Price", format="CHF %.2f",
+        )
+    if "trade_duration_min" in display.columns:
+        col_cfg["trade_duration_min"] = st.column_config.NumberColumn(
+            "Trade Duration (min)", format="%.1f",
+        )
+    if "volume_30d_median" in display.columns:
+        col_cfg["volume_30d_median"] = st.column_config.NumberColumn(
+            "Volume 30d Med", format="%.0f",
+        )
+
+    st.dataframe(
+        display,
+        column_config=col_cfg,
+        use_container_width=True,
+        hide_index=True,
+        height=min(n, len(display)) * 35 + 38,
+    )
+
+
 # ─────────────────────────────────────────────
 #  Main Application
 # ─────────────────────────────────────────────
@@ -1564,7 +1703,7 @@ def main() -> None:
             )
 
         # ── Data table ──
-        render_market_table(df_filt, n=n_display)
+        render_native_dataframe(df_filt, n=n_display)
 
         st.markdown("<br>", unsafe_allow_html=True)
 
