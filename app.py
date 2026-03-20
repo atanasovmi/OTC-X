@@ -9,6 +9,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
 import numpy as np
+from html import escape as _esc
 from pathlib import Path
 
 # ─────────────────────────────────────────────
@@ -213,6 +214,10 @@ def inject_css() -> None:
         .mkt-table td.sektor {
             font-size: 0.75rem;
             color: #1A1A2E;
+        }
+        .mkt-table td.flag {
+            text-align: center;
+            font-size: 0.9rem;
         }
         .mkt-table tr:hover { background: #F0F1F3; }
         .pos { color: #28A745 !important; }
@@ -495,24 +500,6 @@ def inject_css() -> None:
         .anomaly-detail-table td.left { text-align: left; font-family: 'Inter', sans-serif; }
         .anomaly-detail-table tr:hover { background: #F0F1F3; }
 
-        /* ── Native Dataframe (Market Data tab) ── */
-        [data-testid="stDataFrame"] {
-            border: 1px solid #CED4DA;
-            border-radius: 6px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-        }
-        [data-testid="stDataFrame"] [data-testid="glideDataEditor"] {
-            font-family: 'IBM Plex Mono', monospace !important;
-            font-size: 0.80rem !important;
-        }
-        /* Header row styling */
-        [data-testid="stDataFrame"] [data-testid="glideDataEditor"] .dvn-scroller .header-menu {
-            font-family: 'Inter', sans-serif !important;
-            font-size: 0.68rem !important;
-            text-transform: uppercase !important;
-            letter-spacing: 0.06em !important;
-        }
 
         </style>
         """,
@@ -1408,13 +1395,19 @@ def render_market_table(df: pd.DataFrame, n: int = 50) -> None:
     st.markdown(html, unsafe_allow_html=True)
 
 
-def render_native_dataframe(df: pd.DataFrame, n: int = 50) -> None:
-    """Render a full-width interactive Streamlit dataframe for the Market Data tab.
+def _flag_dot(active: bool) -> str:
+    """Return a coloured dot for boolean flag columns."""
+    if active:
+        return "<span style='color:#B22222;font-size:0.9rem;'>●</span>"
+    return "<span style='color:#CED4DA;font-size:0.9rem;'>·</span>"
 
-    Uses ``st.dataframe`` with ``column_config`` to format primary business
-    columns (currencies, percentages, dates) while allowing all remaining
-    columns to render dynamically so users can scroll through the complete
-    dataset.
+
+def render_native_dataframe(df: pd.DataFrame, n: int = 50) -> None:
+    """Render a full-width custom HTML table for the Market Data tab.
+
+    Produces a styled table matching the existing ``.mkt-table`` aesthetic
+    with all parquet columns, proper formatting, and meaningful colour
+    accents (ISIN links, price-change colouring, score badges, flag dots).
 
     Parameters
     ----------
@@ -1423,128 +1416,115 @@ def render_native_dataframe(df: pd.DataFrame, n: int = 50) -> None:
     n : int, optional
         Maximum number of rows to display (default 50).
     """
-    display = df.head(n).copy()
+    display = df.head(n)
 
-    # ── Reorder columns: primary business columns first, rest follow ──
-    primary = [
-        "Isin", "Name", "Sektor", "Datum",
-        "price_last", "price_change_pct",
-        "volume_today_chf", "trades_today",
-        "volatility_daily", "amihud_daily", "anomaly_score",
+    # ── Column spec: (parquet_col, header_label, align, formatter) ──
+    # Formatter receives the cell value and row; returns HTML string.
+    def _f_isin(v: str, _r: pd.Series) -> str:
+        safe = _esc(str(v))
+        return (f"<a href='https://www.otc-x.ch/security/{safe}' "
+                f"target='_blank'>{safe}</a>")
+
+    def _f_name(v: str, _r: pd.Series) -> str:
+        return _esc(str(v)[:34]) if pd.notna(v) else "—"
+
+    def _f_sektor(v: str, _r: pd.Series) -> str:
+        return _esc(str(v)[:22]) if pd.notna(v) else "—"
+
+    def _f_date(v, _r: pd.Series) -> str:
+        return v.strftime("%d.%m.%Y") if pd.notna(v) else "—"
+
+    def _f_chf(v, _r: pd.Series) -> str:
+        return fmt_chf(v)
+
+    def _f_pct(v, _r: pd.Series) -> str:
+        cls = pct_cls(v)
+        return f"<span class='{cls}'>{fmt_pct(v)}</span>"
+
+    def _f_int(v, _r: pd.Series) -> str:
+        return fmt_num(v, dec=0) if pd.notna(v) else "—"
+
+    def _f_d2(v, _r: pd.Series) -> str:
+        return f"{float(v):.2f}" if pd.notna(v) else "—"
+
+    def _f_d4(v, _r: pd.Series) -> str:
+        return f"{float(v):.4f}" if pd.notna(v) else "—"
+
+    def _f_d6(v, _r: pd.Series) -> str:
+        return f"{float(v):.6f}" if pd.notna(v) else "—"
+
+    def _f_d1(v, _r: pd.Series) -> str:
+        return f"{float(v):.1f}" if pd.notna(v) else "—"
+
+    def _f_pct_plain(v, _r: pd.Series) -> str:
+        return f"{float(v):.2f}%" if pd.notna(v) else "—"
+
+    def _f_badge(v, _r: pd.Series) -> str:
+        return score_badge(int(v)) if pd.notna(v) else "—"
+
+    def _f_flag(v, _r: pd.Series) -> str:
+        return _flag_dot(bool(v))
+
+    def _f_vol_num(v, _r: pd.Series) -> str:
+        return fmt_num(v, dec=0) if pd.notna(v) else "—"
+
+    cols: list[tuple[str, str, str, str, object]] = [
+        # (key, header, th_class, td_class, formatter)
+        ("Isin",                "ISIN",             "left", "isin",  _f_isin),
+        ("Name",                "Security",         "left", "name left", _f_name),
+        ("Sektor",              "Sector",           "left", "sektor left", _f_sektor),
+        ("Datum",               "Date",             "",     "",      _f_date),
+        ("price_last",          "Last",             "",     "",      _f_chf),
+        ("price_change_pct",    "Δ%",               "",     "",      _f_pct),
+        ("volume_today_chf",    "Vol (CHF)",        "",     "",      _f_chf),
+        ("volume_today_units",  "Vol (Units)",      "",     "",      _f_vol_num),
+        ("trades_today",        "Trades",           "",     "",      _f_int),
+        ("price_first",         "First",            "",     "",      _f_chf),
+        ("price_min",           "Min",              "",     "",      _f_chf),
+        ("price_max",           "Max",              "",     "",      _f_chf),
+        ("volatility_daily",    "σ Daily",          "",     "",      _f_d4),
+        ("volatility_30d_median", "σ 30d",          "",     "",      _f_d4),
+        ("amihud_daily",        "λ Daily",          "",     "",      _f_d6),
+        ("amihud_30d_median",   "λ 30d",            "",     "",      _f_d6),
+        ("spread_log_hl",       "Spread",           "",     "",      _f_d4),
+        ("log_returns",         "Log Ret",          "",     "",      _f_d4),
+        ("off_book_pct",        "Off-Book",         "",     "",      _f_pct_plain),
+        ("trades_30d_median",   "Trd 30d",          "",     "",      _f_d1),
+        ("volume_30d_median",   "Vol 30d",          "",     "",      _f_vol_num),
+        ("trade_duration_min",  "Dur (min)",        "",     "",      _f_d1),
+        ("volume_spike",        "Vol↑",             "",     "flag",  _f_flag),
+        ("activity_spike",      "Act↑",             "",     "flag",  _f_flag),
+        ("price_gap",           "Gap",              "",     "flag",  _f_flag),
+        ("anomaly_score",       "Status",           "",     "",      _f_badge),
     ]
-    ordered = [c for c in primary if c in display.columns]
-    rest = [c for c in display.columns if c not in ordered]
-    display = display[ordered + rest]
 
-    # ── Column configuration for known business columns ──
-    col_cfg: dict[str, st.column_config.Column] = {}
+    # Filter to columns actually present
+    cols = [c for c in cols if c[0] in display.columns]
 
-    if "Isin" in display.columns:
-        col_cfg["Isin"] = st.column_config.TextColumn("ISIN", width="medium")
-    if "Name" in display.columns:
-        col_cfg["Name"] = st.column_config.TextColumn("Security", width="medium")
-    if "Sektor" in display.columns:
-        col_cfg["Sektor"] = st.column_config.TextColumn("Sector", width="medium")
-    if "Datum" in display.columns:
-        col_cfg["Datum"] = st.column_config.DateColumn(
-            "Date", format="DD.MM.YYYY", width="small",
-        )
-    if "price_last" in display.columns:
-        col_cfg["price_last"] = st.column_config.NumberColumn(
-            "Last Price", format="CHF %.2f",
-        )
-    if "price_change_pct" in display.columns:
-        col_cfg["price_change_pct"] = st.column_config.NumberColumn(
-            "Δ Price %", format="%.2f%%",
-        )
-    if "volume_today_chf" in display.columns:
-        col_cfg["volume_today_chf"] = st.column_config.NumberColumn(
-            "Volume (CHF)", format="CHF %d",
-        )
-    if "volume_today_units" in display.columns:
-        col_cfg["volume_today_units"] = st.column_config.NumberColumn(
-            "Volume (Units)", format="%d",
-        )
-    if "trades_today" in display.columns:
-        col_cfg["trades_today"] = st.column_config.NumberColumn(
-            "Trades", format="%d",
-        )
-    if "volatility_daily" in display.columns:
-        col_cfg["volatility_daily"] = st.column_config.NumberColumn(
-            "Volatility σ", format="%.4f",
-        )
-    if "volatility_30d_median" in display.columns:
-        col_cfg["volatility_30d_median"] = st.column_config.NumberColumn(
-            "Volatility 30d Med", format="%.4f",
-        )
-    if "amihud_daily" in display.columns:
-        col_cfg["amihud_daily"] = st.column_config.NumberColumn(
-            "Amihud λ", format="%.6f",
-        )
-    if "amihud_30d_median" in display.columns:
-        col_cfg["amihud_30d_median"] = st.column_config.NumberColumn(
-            "Amihud 30d Med", format="%.6f",
-        )
-    if "anomaly_score" in display.columns:
-        col_cfg["anomaly_score"] = st.column_config.NumberColumn(
-            "Anomaly Score", format="%d",
-        )
-    if "spread_log_hl" in display.columns:
-        col_cfg["spread_log_hl"] = st.column_config.NumberColumn(
-            "Spread (log H/L)", format="%.4f",
-        )
-    if "log_returns" in display.columns:
-        col_cfg["log_returns"] = st.column_config.NumberColumn(
-            "Log Returns", format="%.4f",
-        )
-    if "off_book_pct" in display.columns:
-        col_cfg["off_book_pct"] = st.column_config.NumberColumn(
-            "Off-Book %", format="%.2f%%",
-        )
-    if "trades_30d_median" in display.columns:
-        col_cfg["trades_30d_median"] = st.column_config.NumberColumn(
-            "Trades 30d Med", format="%.1f",
-        )
-    if "price_min" in display.columns:
-        col_cfg["price_min"] = st.column_config.NumberColumn(
-            "Price Min", format="CHF %.2f",
-        )
-    if "price_max" in display.columns:
-        col_cfg["price_max"] = st.column_config.NumberColumn(
-            "Price Max", format="CHF %.2f",
-        )
-    if "volume_spike" in display.columns:
-        col_cfg["volume_spike"] = st.column_config.CheckboxColumn(
-            "Vol Spike",
-        )
-    if "activity_spike" in display.columns:
-        col_cfg["activity_spike"] = st.column_config.CheckboxColumn(
-            "Activity Spike",
-        )
-    if "price_gap" in display.columns:
-        col_cfg["price_gap"] = st.column_config.CheckboxColumn(
-            "Price Gap",
-        )
-    if "price_first" in display.columns:
-        col_cfg["price_first"] = st.column_config.NumberColumn(
-            "First Price", format="CHF %.2f",
-        )
-    if "trade_duration_min" in display.columns:
-        col_cfg["trade_duration_min"] = st.column_config.NumberColumn(
-            "Trade Duration (min)", format="%.1f",
-        )
-    if "volume_30d_median" in display.columns:
-        col_cfg["volume_30d_median"] = st.column_config.NumberColumn(
-            "Volume 30d Med", format="%.0f",
-        )
-
-    st.dataframe(
-        display,
-        column_config=col_cfg,
-        use_container_width=True,
-        hide_index=True,
-        height=min(n, len(display)) * 35 + 38,
+    # ── Header ──
+    ths = "".join(
+        f"<th class='{c[2]}'>{c[1]}</th>" if c[2] else f"<th>{c[1]}</th>"
+        for c in cols
     )
+
+    # ── Rows ──
+    rows_html = ""
+    for _, r in display.iterrows():
+        tds = ""
+        for key, _hdr, _thcls, tdcls, formatter in cols:
+            val = r.get(key)
+            cell = formatter(val, r)
+            tds += f"<td class='{tdcls}'>{cell}</td>" if tdcls else f"<td>{cell}</td>"
+        rows_html += f"<tr>{tds}</tr>"
+
+    html = (
+        "<div style='overflow-x:auto;'>"
+        "<table class='mkt-table'>"
+        f"<thead><tr>{ths}</tr></thead>"
+        f"<tbody>{rows_html}</tbody>"
+        "</table></div>"
+    )
+    st.markdown(html, unsafe_allow_html=True)
 
 
 # ─────────────────────────────────────────────
