@@ -579,6 +579,14 @@ def load_data() -> tuple[pd.DataFrame, pd.DataFrame]:
     df["Datum"] = pd.to_datetime(df["Datum"])
 
     latest = df.sort_values("Datum").groupby("Isin", as_index=False).last()
+
+    # Off-book trades are rare: on >99% of trading days all ISINs have
+    # off_book_pct == 0, so the single-day snapshot has zero variance and
+    # produces NaN correlations.  Replace with the historical mean per ISIN
+    # to surface the cross-sectional signal.
+    hist_off_book = df.groupby("Isin")["off_book_pct"].mean()
+    latest["off_book_pct"] = latest["Isin"].map(hist_off_book)
+
     return df, latest
 
 
@@ -1004,6 +1012,7 @@ def chart_correlation_heatmap(df: pd.DataFrame, selected_cols: list[str] | None 
             yaxis=dict(tickfont=dict(size=11, color="#1A1A2E"), autorange="reversed"),
         )
     )
+
     return fig
 
 
@@ -1440,7 +1449,7 @@ def main() -> None:
         )
         st.markdown(
             '<div style="font-size:0.78rem;color:#1A1A2E;margin-bottom:0.8rem;">'
-            'Browse, filter, and download raw market data for offline analysis. '
+            'Browse, filter and download raw data straight from the metrics engine for offline analysis. '
             'Click any <strong style="color:#B22222;">ISIN</strong> to view the security on '
             '<a href="https://www.otc-x.ch" target="_blank" style="color:#B22222;">otc-x.ch</a>.'
             '</div>',
@@ -1664,6 +1673,7 @@ def main() -> None:
                 default=list(hm_metric_options.keys())[:7],
                 format_func=lambda x: hm_metric_options[x],
                 key="heatmap_metrics",
+                help="Off-Book % uses historical averages per ISIN because off-book trades are extremely rare — fewer than 1% of trading days show any variation.",
             )
 
         # Filter data
@@ -1671,6 +1681,7 @@ def main() -> None:
         if hm_sectors:
             analytics_df = analytics_df[analytics_df["Sektor"].isin(hm_sectors)]
 
+        # ── Correlation Heatmap (full width) ──
         st.markdown(
             f'<div class="math-note">'
             f'ρ(X,Y) = cov(X,Y) / (σ<sub>X</sub> · σ<sub>Y</sub>) '
@@ -1678,8 +1689,6 @@ def main() -> None:
             f'</div>',
             unsafe_allow_html=True,
         )
-
-        # ── Correlation Heatmap (full width) ──
         st.markdown(
             '<div class="sec-hdr">Metric Correlation Matrix</div>',
             unsafe_allow_html=True,
@@ -1788,8 +1797,9 @@ def main() -> None:
             use_container_width=True, theme=None,
         )
 
-        # ── 3D Explorer Section ──
         st.markdown("<br>", unsafe_allow_html=True)
+
+        # ── 3D Explorer Section ──
         st.markdown(
             '<div class="sec-hdr">3D Market Explorer — Interactive Visualization</div>',
             unsafe_allow_html=True,
