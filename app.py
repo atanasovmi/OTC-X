@@ -500,10 +500,18 @@ def inject_css() -> None:
             border: 1px solid #CED4DA;
             border-radius: 6px;
             overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
         }
         [data-testid="stDataFrame"] [data-testid="glideDataEditor"] {
             font-family: 'IBM Plex Mono', monospace !important;
-            font-size: 0.82rem !important;
+            font-size: 0.80rem !important;
+        }
+        /* Header row styling */
+        [data-testid="stDataFrame"] [data-testid="glideDataEditor"] .dvn-scroller .header-menu {
+            font-family: 'Inter', sans-serif !important;
+            font-size: 0.68rem !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.06em !important;
         }
 
         </style>
@@ -1101,15 +1109,18 @@ def chart_security_history(df_hist: pd.DataFrame, isin: str) -> go.Figure:
         vertical_spacing=0.04,
     )
 
-    # Price + volatility band
-    upper = sec["price_last"] + sec["volatility_30d_median"]
-    lower = sec["price_last"] - sec["volatility_30d_median"]
+    # Price + rolling 30-day σ band (std of closing prices, not intraday vol)
+    rolling_std = sec["price_last"].rolling(
+        30, min_periods=5,  # require ≥5 observations for a meaningful std
+    ).std().fillna(0)
+    upper = sec["price_last"] + rolling_std
+    lower = sec["price_last"] - rolling_std
     fig.add_trace(
         go.Scatter(
             x=pd.concat([sec["Datum"], sec["Datum"][::-1]]),
             y=pd.concat([upper, lower[::-1]]),
             fill="toself",
-            fillcolor="rgba(178,34,34,0.07)",
+            fillcolor="rgba(178,34,34,0.10)",
             line=dict(color="rgba(0,0,0,0)"),
             name="±30d σ band",
         ),
@@ -1414,11 +1425,22 @@ def render_native_dataframe(df: pd.DataFrame, n: int = 50) -> None:
     """
     display = df.head(n).copy()
 
+    # ── Reorder columns: primary business columns first, rest follow ──
+    primary = [
+        "Isin", "Name", "Sektor", "Datum",
+        "price_last", "price_change_pct",
+        "volume_today_chf", "trades_today",
+        "volatility_daily", "amihud_daily", "anomaly_score",
+    ]
+    ordered = [c for c in primary if c in display.columns]
+    rest = [c for c in display.columns if c not in ordered]
+    display = display[ordered + rest]
+
     # ── Column configuration for known business columns ──
     col_cfg: dict[str, st.column_config.Column] = {}
 
     if "Isin" in display.columns:
-        col_cfg["Isin"] = st.column_config.TextColumn("ISIN", width="small")
+        col_cfg["Isin"] = st.column_config.TextColumn("ISIN", width="medium")
     if "Name" in display.columns:
         col_cfg["Name"] = st.column_config.TextColumn("Security", width="medium")
     if "Sektor" in display.columns:
