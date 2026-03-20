@@ -1681,73 +1681,25 @@ def main() -> None:
         if hm_sectors:
             analytics_df = analytics_df[analytics_df["Sektor"].isin(hm_sectors)]
 
-        # ── 3D Explorer Section ──
+        # ── Correlation Heatmap (full width) ──
         st.markdown(
-            '<div class="sec-hdr">3D Market Explorer — Interactive Visualization</div>',
+            f'<div class="math-note">'
+            f'ρ(X,Y) = cov(X,Y) / (σ<sub>X</sub> · σ<sub>Y</sub>) '
+            f'&nbsp;|&nbsp; Showing {len(analytics_df)} securities'
+            f'</div>',
             unsafe_allow_html=True,
         )
         st.markdown(
-            '<div class="math-note">'
-            'Map 5 dimensions: X, Y, Z axes + colour + size. '
-            'Rotate, zoom, and pan to explore multi-dimensional market structure.'
-            '</div>',
+            '<div class="sec-hdr">Metric Correlation Matrix</div>',
             unsafe_allow_html=True,
         )
-
-        dim_options = {
-            "volume_today_chf": "Volume (CHF)",
-            "price_change_pct": "Δ Price %",
-            "volatility_daily": "Volatility σ",
-            "amihud_daily": "Amihud λ",
-            "trades_today": "Trades",
-            "anomaly_score": "Anomaly Score",
-            "spread_log_hl": "Spread ln(H/L)",
-            "log_returns": "Log Returns ln(r)",
-            "off_book_pct": "Off-Book %",
-            "price_last": "Last Price",
-            "volume_today_units": "Volume (Units)",
-            "trade_duration_min": "Trade Duration (min)",
-        }
-        dim_keys = list(dim_options.keys())
-
-        d3c1, d3c2, d3c3, d3c4, d3c5 = st.columns(5)
-        with d3c1:
-            x_sel = st.selectbox("X-Axis", dim_keys, index=0,
-                                  format_func=lambda k: dim_options[k], key="3d_x")
-        with d3c2:
-            y_sel = st.selectbox("Y-Axis", dim_keys, index=1,
-                                  format_func=lambda k: dim_options[k], key="3d_y")
-        with d3c3:
-            z_sel = st.selectbox("Z-Axis", dim_keys, index=2,
-                                  format_func=lambda k: dim_options[k], key="3d_z")
-        with d3c4:
-            color_sel = st.selectbox("Colour", dim_keys, index=5,
-                                      format_func=lambda k: dim_options[k], key="3d_c")
-        with d3c5:
-            size_sel = st.selectbox("Size", dim_keys, index=4,
-                                     format_func=lambda k: dim_options[k], key="3d_s")
-
-        opt1, opt2 = st.columns(2)
-        with opt1:
-            use_log = st.checkbox(
-                "Apply log₁₀ transform (recommended for skewed distributions)",
-                value=False,
-                key="3d_log",
+        if len(hm_selected) >= 2:
+            st.plotly_chart(
+                chart_correlation_heatmap(analytics_df, hm_selected),
+                use_container_width=True, theme=None,
             )
-        with opt2:
-            rm_outliers = st.checkbox(
-                "Remove outliers (clip to 1st–99th percentile)",
-                value=True,
-                key="3d_outliers",
-            )
-
-        st.plotly_chart(
-            chart_3d_explorer(
-                analytics_df, x_sel, y_sel, z_sel, color_sel, size_sel,
-                use_log=use_log, remove_outliers=rm_outliers,
-            ),
-            use_container_width=True, theme=None,
-        )
+        else:
+            st.info("Select at least 2 metrics to display the correlation matrix.")
 
         st.markdown("<br>", unsafe_allow_html=True)
 
@@ -1847,25 +1799,73 @@ def main() -> None:
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-        # ── Correlation Heatmap (full width) ──
+        # ── 3D Explorer Section ──
         st.markdown(
-            f'<div class="math-note">'
-            f'ρ(X,Y) = cov(X,Y) / (σ<sub>X</sub> · σ<sub>Y</sub>) '
-            f'&nbsp;|&nbsp; Showing {len(analytics_df)} securities'
-            f'</div>',
+            '<div class="sec-hdr">3D Market Explorer — Interactive Visualization</div>',
             unsafe_allow_html=True,
         )
         st.markdown(
-            '<div class="sec-hdr">Metric Correlation Matrix</div>',
+            '<div class="math-note">'
+            'Map 5 dimensions: X, Y, Z axes + colour + size. '
+            'Rotate, zoom, and pan to explore multi-dimensional market structure.'
+            '</div>',
             unsafe_allow_html=True,
         )
-        if len(hm_selected) >= 2:
-            st.plotly_chart(
-                chart_correlation_heatmap(analytics_df, hm_selected),
-                use_container_width=True, theme=None,
+
+        dim_options = {
+            "volume_today_chf": "Volume (CHF)",
+            "price_change_pct": "Δ Price %",
+            "volatility_daily": "Volatility σ",
+            "amihud_daily": "Amihud λ",
+            "trades_today": "Trades",
+            "anomaly_score": "Anomaly Score",
+            "spread_log_hl": "Spread ln(H/L)",
+            "log_returns": "Log Returns ln(r)",
+            "off_book_pct": "Off-Book %",
+            "price_last": "Last Price",
+            "volume_today_units": "Volume (Units)",
+            "trade_duration_min": "Trade Duration (min)",
+        }
+        dim_keys = list(dim_options.keys())
+
+        d3c1, d3c2, d3c3, d3c4, d3c5 = st.columns(5)
+        with d3c1:
+            x_sel = st.selectbox("X-Axis", dim_keys, index=0,
+                                  format_func=lambda k: dim_options[k], key="3d_x")
+        with d3c2:
+            y_sel = st.selectbox("Y-Axis", dim_keys, index=1,
+                                  format_func=lambda k: dim_options[k], key="3d_y")
+        with d3c3:
+            z_sel = st.selectbox("Z-Axis", dim_keys, index=2,
+                                  format_func=lambda k: dim_options[k], key="3d_z")
+        with d3c4:
+            color_sel = st.selectbox("Colour", dim_keys, index=5,
+                                      format_func=lambda k: dim_options[k], key="3d_c")
+        with d3c5:
+            size_sel = st.selectbox("Size", dim_keys, index=4,
+                                     format_func=lambda k: dim_options[k], key="3d_s")
+
+        opt1, opt2 = st.columns(2)
+        with opt1:
+            use_log = st.checkbox(
+                "Apply log₁₀ transform (recommended for skewed distributions)",
+                value=False,
+                key="3d_log",
             )
-        else:
-            st.info("Select at least 2 metrics to display the correlation matrix.")
+        with opt2:
+            rm_outliers = st.checkbox(
+                "Remove outliers (clip to 1st–99th percentile)",
+                value=True,
+                key="3d_outliers",
+            )
+
+        st.plotly_chart(
+            chart_3d_explorer(
+                analytics_df, x_sel, y_sel, z_sel, color_sel, size_sel,
+                use_log=use_log, remove_outliers=rm_outliers,
+            ),
+            use_container_width=True, theme=None,
+        )
 
     # ══════════════════════════════════════════
     # TAB 4 — Anomaly Monitor
