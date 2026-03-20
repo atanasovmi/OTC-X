@@ -1013,19 +1013,6 @@ def chart_correlation_heatmap(df: pd.DataFrame, selected_cols: list[str] | None 
         )
     )
 
-    # Annotate Off-Book % with context: off-book trades are extremely rare,
-    # so the value shown is a historical average per ISIN, not a single-day snapshot.
-    if "Off-Book %" in labels:
-        ob_idx = labels.index("Off-Book %")
-        fig.add_annotation(
-            text="<i>historical avg · off-book trades are<br>extremely rare (<1% of trading days)</i>",
-            x=-0.01, xref="paper", xanchor="right",
-            y=ob_idx, yref="y",
-            showarrow=False,
-            font=dict(size=8.5, color="#6B7280", family="IBM Plex Mono"),
-            align="right",
-        )
-
     return fig
 
 
@@ -1686,6 +1673,7 @@ def main() -> None:
                 default=list(hm_metric_options.keys())[:7],
                 format_func=lambda x: hm_metric_options[x],
                 key="heatmap_metrics",
+                help="Off-Book % uses historical averages per ISIN because off-book trades are extremely rare — fewer than 1% of trading days show any variation.",
             )
 
         # Filter data
