@@ -580,9 +580,10 @@ def load_data() -> tuple[pd.DataFrame, pd.DataFrame]:
 
     latest = df.sort_values("Datum").groupby("Isin", as_index=False).last()
 
-    # Off-book trades are rare: on most days every ISIN has off_book_pct == 0,
-    # so the single-day snapshot has zero variance and produces NaN correlations.
-    # Replace with the historical mean per ISIN to surface the cross-sectional signal.
+    # Off-book trades are rare: on >99% of trading days all ISINs have
+    # off_book_pct == 0, so the single-day snapshot has zero variance and
+    # produces NaN correlations.  Replace with the historical mean per ISIN
+    # to surface the cross-sectional signal.
     hist_off_book = df.groupby("Isin")["off_book_pct"].mean()
     latest["off_book_pct"] = latest["Isin"].map(hist_off_book)
 
