@@ -9,6 +9,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
 import numpy as np
+from html import escape as _esc
 from pathlib import Path
 
 # ─────────────────────────────────────────────
@@ -213,6 +214,10 @@ def inject_css() -> None:
         .mkt-table td.sektor {
             font-size: 0.75rem;
             color: #1A1A2E;
+        }
+        .mkt-table td.flag {
+            text-align: center;
+            font-size: 0.9rem;
         }
         .mkt-table tr:hover { background: #F0F1F3; }
         .pos { color: #28A745 !important; }
@@ -494,6 +499,7 @@ def inject_css() -> None:
         }
         .anomaly-detail-table td.left { text-align: left; font-family: 'Inter', sans-serif; }
         .anomaly-detail-table tr:hover { background: #F0F1F3; }
+
 
         </style>
         """,
@@ -1090,15 +1096,18 @@ def chart_security_history(df_hist: pd.DataFrame, isin: str) -> go.Figure:
         vertical_spacing=0.04,
     )
 
-    # Price + volatility band
-    upper = sec["price_last"] + sec["volatility_30d_median"]
-    lower = sec["price_last"] - sec["volatility_30d_median"]
+    # Price + rolling 30-day σ band (std of closing prices, not intraday vol)
+    rolling_std = sec["price_last"].rolling(
+        30, min_periods=5,  # require ≥5 observations for a meaningful std
+    ).std().fillna(0)
+    upper = sec["price_last"] + rolling_std
+    lower = sec["price_last"] - rolling_std
     fig.add_trace(
         go.Scatter(
             x=pd.concat([sec["Datum"], sec["Datum"][::-1]]),
             y=pd.concat([upper, lower[::-1]]),
             fill="toself",
-            fillcolor="rgba(178,34,34,0.07)",
+            fillcolor="rgba(178,34,34,0.10)",
             line=dict(color="rgba(0,0,0,0)"),
             name="±30d σ band",
         ),
@@ -1386,6 +1395,138 @@ def render_market_table(df: pd.DataFrame, n: int = 50) -> None:
     st.markdown(html, unsafe_allow_html=True)
 
 
+def _flag_dot(active: bool) -> str:
+    """Return a coloured dot for boolean flag columns."""
+    if active:
+        return "<span style='color:#B22222;font-size:0.9rem;'>●</span>"
+    return "<span style='color:#CED4DA;font-size:0.9rem;'>·</span>"
+
+
+def render_native_dataframe(df: pd.DataFrame, n: int = 50) -> None:
+    """Render a full-width custom HTML table for the Market Data tab.
+
+    Produces a styled table matching the existing ``.mkt-table`` aesthetic
+    with all parquet columns, proper formatting, and meaningful colour
+    accents (ISIN links, price-change colouring, score badges, flag dots).
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Filtered market-data snapshot.
+    n : int, optional
+        Maximum number of rows to display (default 50).
+    """
+    display = df.head(n)
+
+    # ── Column spec: (parquet_col, header_label, align, formatter) ──
+    # Formatter receives the cell value and row; returns HTML string.
+    def _f_isin(v: str, _r: pd.Series) -> str:
+        safe = _esc(str(v))
+        return (f"<a href='https://www.otc-x.ch/security/{safe}' "
+                f"target='_blank'>{safe}</a>")
+
+    def _f_name(v: str, _r: pd.Series) -> str:
+        return _esc(str(v)[:34]) if pd.notna(v) else "—"
+
+    def _f_sektor(v: str, _r: pd.Series) -> str:
+        return _esc(str(v)[:22]) if pd.notna(v) else "—"
+
+    def _f_date(v, _r: pd.Series) -> str:
+        return v.strftime("%d.%m.%Y") if pd.notna(v) else "—"
+
+    def _f_chf(v, _r: pd.Series) -> str:
+        return fmt_chf(v)
+
+    def _f_pct(v, _r: pd.Series) -> str:
+        cls = pct_cls(v)
+        return f"<span class='{cls}'>{fmt_pct(v)}</span>"
+
+    def _f_int(v, _r: pd.Series) -> str:
+        return fmt_num(v, dec=0) if pd.notna(v) else "—"
+
+    def _f_d2(v, _r: pd.Series) -> str:
+        return f"{float(v):.2f}" if pd.notna(v) else "—"
+
+    def _f_d4(v, _r: pd.Series) -> str:
+        return f"{float(v):.4f}" if pd.notna(v) else "—"
+
+    def _f_d6(v, _r: pd.Series) -> str:
+        return f"{float(v):.6f}" if pd.notna(v) else "—"
+
+    def _f_d1(v, _r: pd.Series) -> str:
+        return f"{float(v):.1f}" if pd.notna(v) else "—"
+
+    def _f_pct_plain(v, _r: pd.Series) -> str:
+        return f"{float(v):.2f}%" if pd.notna(v) else "—"
+
+    def _f_badge(v, _r: pd.Series) -> str:
+        return score_badge(int(v)) if pd.notna(v) else "—"
+
+    def _f_flag(v, _r: pd.Series) -> str:
+        return _flag_dot(bool(v))
+
+    def _f_vol_num(v, _r: pd.Series) -> str:
+        return fmt_num(v, dec=0) if pd.notna(v) else "—"
+
+    cols: list[tuple[str, str, str, str, object]] = [
+        # (key, header, th_class, td_class, formatter)
+        ("Isin",                "ISIN",             "left", "isin",  _f_isin),
+        ("Name",                "Security",         "left", "name left", _f_name),
+        ("Sektor",              "Sector",           "left", "sektor left", _f_sektor),
+        ("Datum",               "Date",             "",     "",      _f_date),
+        ("price_last",          "Last",             "",     "",      _f_chf),
+        ("price_change_pct",    "Δ%",               "",     "",      _f_pct),
+        ("volume_today_chf",    "Vol (CHF)",        "",     "",      _f_chf),
+        ("volume_today_units",  "Vol (Units)",      "",     "",      _f_vol_num),
+        ("trades_today",        "Trades",           "",     "",      _f_int),
+        ("price_first",         "First",            "",     "",      _f_chf),
+        ("price_min",           "Min",              "",     "",      _f_chf),
+        ("price_max",           "Max",              "",     "",      _f_chf),
+        ("volatility_daily",    "σ Daily",          "",     "",      _f_d4),
+        ("volatility_30d_median", "σ 30d",          "",     "",      _f_d4),
+        ("amihud_daily",        "λ Daily",          "",     "",      _f_d6),
+        ("amihud_30d_median",   "λ 30d",            "",     "",      _f_d6),
+        ("spread_log_hl",       "Spread",           "",     "",      _f_d4),
+        ("log_returns",         "Log Ret",          "",     "",      _f_d4),
+        ("off_book_pct",        "Off-Book",         "",     "",      _f_pct_plain),
+        ("trades_30d_median",   "Trd 30d",          "",     "",      _f_d1),
+        ("volume_30d_median",   "Vol 30d",          "",     "",      _f_vol_num),
+        ("trade_duration_min",  "Dur (min)",        "",     "",      _f_d1),
+        ("volume_spike",        "Vol↑",             "",     "flag",  _f_flag),
+        ("activity_spike",      "Act↑",             "",     "flag",  _f_flag),
+        ("price_gap",           "Gap",              "",     "flag",  _f_flag),
+        ("anomaly_score",       "Status",           "",     "",      _f_badge),
+    ]
+
+    # Filter to columns actually present
+    cols = [c for c in cols if c[0] in display.columns]
+
+    # ── Header ──
+    ths = "".join(
+        f"<th class='{c[2]}'>{c[1]}</th>" if c[2] else f"<th>{c[1]}</th>"
+        for c in cols
+    )
+
+    # ── Rows ──
+    rows_html = ""
+    for _, r in display.iterrows():
+        tds = ""
+        for key, _hdr, _thcls, tdcls, formatter in cols:
+            val = r.get(key)
+            cell = formatter(val, r)
+            tds += f"<td class='{tdcls}'>{cell}</td>" if tdcls else f"<td>{cell}</td>"
+        rows_html += f"<tr>{tds}</tr>"
+
+    html = (
+        "<div style='overflow-x:auto;'>"
+        "<table class='mkt-table'>"
+        f"<thead><tr>{ths}</tr></thead>"
+        f"<tbody>{rows_html}</tbody>"
+        "</table></div>"
+    )
+    st.markdown(html, unsafe_allow_html=True)
+
+
 # ─────────────────────────────────────────────
 #  Main Application
 # ─────────────────────────────────────────────
@@ -1564,7 +1705,7 @@ def main() -> None:
             )
 
         # ── Data table ──
-        render_market_table(df_filt, n=n_display)
+        render_native_dataframe(df_filt, n=n_display)
 
         st.markdown("<br>", unsafe_allow_html=True)
 
