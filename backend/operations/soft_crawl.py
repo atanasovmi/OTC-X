@@ -1,6 +1,14 @@
+import sys
+from pathlib import Path
+
 import pandas as pd
 import requests
-from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parents[2]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from otcx_paths import DATA_DIR
 
 def run_crawl():
     print("Fetching securities dynamically from OTC-X API...")
@@ -28,7 +36,7 @@ def run_crawl():
     df = pd.DataFrame(data)
     
     # Define output paths
-    data_dir = Path(__file__).parent.parent / "data"
+    data_dir = DATA_DIR
     data_dir.mkdir(parents=True, exist_ok=True)
     
     path_sec = data_dir / "securities.csv"

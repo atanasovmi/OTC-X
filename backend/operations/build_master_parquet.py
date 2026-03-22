@@ -2,15 +2,21 @@
 OTC-X Data Ingestion Pipeline
 Consolidates and cleans 244+ Swiss trade CSVs into master datasets.
 """
-import polars as pl
+import sys
 from pathlib import Path
 
+import polars as pl
+
+ROOT_DIR = Path(__file__).resolve().parents[2]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from otcx_paths import DATA_DIR
+
 def build_master_parquet():
-    # Define paths (relative to operations/)
-    script_dir = Path(__file__).parent
-    raw_data_dir = script_dir / "../data/trades"
-    output_parquet = script_dir / "../data/master_trades.parquet"
-    output_csv = script_dir / "../data/master_trades_cleaned.csv"
+    raw_data_dir = DATA_DIR / "trades"
+    output_parquet = DATA_DIR / "master_trades.parquet"
+    output_csv = DATA_DIR / "master_trades_cleaned.csv"
 
     print("=" * 60)
     print("OTC-X Data Ingestion Pipeline")

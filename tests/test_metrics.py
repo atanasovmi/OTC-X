@@ -2,7 +2,7 @@ import datetime as dt
 
 import polars as pl
 
-from operations import metrics
+from backend.operations import metrics
 
 
 def _sample_trades() -> pl.DataFrame:
@@ -68,4 +68,3 @@ def test_compute_anomaly_flags_scores_price_gap_only():
 
     a_day2 = anomaly.filter((pl.col("Isin") == "A") & (pl.col("Datum") == dt.date(2024, 1, 3)))
     assert a_day2.select("anomaly_score").item() == 0
-

@@ -21,9 +21,17 @@ Metrics computed:
 Plus: 30-day rolling baselines (trading days) and anomaly flags.
 """
 
-import polars as pl
-from pathlib import Path
+import sys
 from datetime import datetime
+from pathlib import Path
+
+import polars as pl
+
+ROOT_DIR = Path(__file__).resolve().parents[2]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from otcx_paths import DATA_DIR
 
 
 def parse_time_to_minutes(zeit_col: pl.Expr) -> pl.Expr:
@@ -279,11 +287,9 @@ def main() -> None:
     print(f"Timestamp: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 70)
     
-    # Setup paths relative to script location
-    script_dir = Path(__file__).parent
-    trades_path = script_dir / "../data/master_trades.parquet"
-    securities_path = script_dir / "../data/securities_enriched.csv"
-    output_path = script_dir / "../data/daily_metrics.parquet"
+    trades_path = DATA_DIR / "master_trades.parquet"
+    securities_path = DATA_DIR / "securities_enriched.csv"
+    output_path = DATA_DIR / "daily_metrics.parquet"
     
     try:
         # 1. Load Data

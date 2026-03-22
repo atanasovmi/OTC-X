@@ -1,6 +1,6 @@
 import pytest
 
-import app
+from frontend import formatting as fmt
 
 
 @pytest.mark.parametrize(
@@ -13,7 +13,7 @@ import app
     ],
 )
 def test_fmt_chf_formats_currency(value, expected):
-    assert app.fmt_chf(value) == expected
+    assert fmt.fmt_chf(value) == expected
 
 
 @pytest.mark.parametrize(
@@ -26,12 +26,11 @@ def test_fmt_chf_formats_currency(value, expected):
     ],
 )
 def test_fmt_num_formats_general_numbers(value, expected):
-    assert app.fmt_num(value, dec=1) == expected
+    assert fmt.fmt_num(value, dec=1) == expected
 
 
 def test_score_badge_renders_expected_css_class():
-    assert 'bdg-clean' in app.score_badge(0)
-    assert 'bdg-alert' in app.score_badge(2)
-    assert 'bdg-severe' in app.score_badge(5)
-    assert 'bdg-extreme' in app.score_badge(7)
-
+    assert "bdg-clean" in fmt.score_badge(0)
+    assert "bdg-alert" in fmt.score_badge(2)
+    assert "bdg-severe" in fmt.score_badge(5)
+    assert "bdg-extreme" in fmt.score_badge(7)

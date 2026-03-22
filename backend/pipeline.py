@@ -4,21 +4,18 @@ One-click data pipeline: Scrape -> Fetch -> Consolidate -> Analyze
 """
 
 import sys
-import os
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
-# Add operations directory to path for imports
-sys.path.append(str(Path(__file__).parent / "operations"))
+# Ensure repository root is on sys.path for absolute imports
+ROOT_DIR = Path(__file__).resolve().parents[1]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
-try:
-    from soft_crawl import run_crawl
-    from fetcher import main as run_fetcher
-    from build_master_parquet import build_master_parquet
-    from metrics import main as run_metrics
-except ImportError as e:
-    print(f"Error importing operations: {e}")
-    sys.exit(1)
+from backend.operations.build_master_parquet import build_master_parquet
+from backend.operations.fetcher import main as run_fetcher
+from backend.operations.metrics import main as run_metrics
+from backend.operations.soft_crawl import run_crawl
 
 def print_header(text):
     print("\n" + "=" * 80)

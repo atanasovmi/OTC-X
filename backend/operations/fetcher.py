@@ -1,16 +1,24 @@
+import logging
+import os
+import sys
+import time
+from datetime import datetime
+from pathlib import Path
+
 import pandas as pd
 import requests
-import os
-from pathlib import Path
-import time
-import logging
-from datetime import datetime
+
+ROOT_DIR = Path(__file__).resolve().parents[2]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from otcx_paths import DATA_DIR, LOGS_DIR
 
 # --- Configuration ---
 SCRIPT_DIR = Path(__file__).parent
-INPUT_FILE = SCRIPT_DIR.parent / "data" / "securities.csv"
-OUTPUT_DIR = SCRIPT_DIR.parent / "data" / "trades"
-LOG_DIR = SCRIPT_DIR.parent / "logs"
+INPUT_FILE = DATA_DIR / "securities.csv"
+OUTPUT_DIR = DATA_DIR / "trades"
+LOG_DIR = LOGS_DIR
 BASE_URL = "https://www.otc-x.ch/api/market/trades/{}/export"
 TIMEOUT = 10
 RATE_LIMIT_DELAY = 1.0  # Seconds between requests
