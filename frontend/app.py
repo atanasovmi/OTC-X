@@ -46,7 +46,7 @@ def main() -> None:
     df_hist, latest = load_data()
 
     if df_hist.empty:
-        st.error("No data available. Run `python main.py` to populate the data pipeline.")
+        st.error("No data available. Run `python run_backend.py` to populate the data pipeline.")
         st.stop()
 
     latest_date = df_hist["Datum"].max().strftime("%d.%m.%Y")
