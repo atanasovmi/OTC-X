@@ -29,7 +29,7 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       - name: Run main orchestrator
-        run: python main.py
+        run: python run_backend.py
 
       # CRITICAL: Antigravity missed this. Without it, your new data is destroyed when the VM shuts down.
       - name: Commit and push new data
