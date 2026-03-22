@@ -6,6 +6,11 @@ __pycache__/
 # C extensions
 *.so
 
+# OTC-X specific
+backend/logs/*.log
+backend/data/trades/*.csv
+.DS_Store
+
 # Distribution / packaging
 .Python
 build/
