@@ -6,16 +6,18 @@ Produces a detailed receipt log in backend/logs/ after each run.
 
 import sys
 import io
-import traceback
+import traceback as _tb
 from pathlib import Path
 from datetime import datetime
-from contextlib import redirect_stdout
 
 # Ensure project root is on sys.path so package imports work
 # regardless of whether this module is invoked directly or via -m.
 _PROJECT_ROOT = str(Path(__file__).resolve().parent.parent)
 if _PROJECT_ROOT not in sys.path:
     sys.path.insert(0, _PROJECT_ROOT)
+
+import pandas as pd
+import polars as pl
 
 from backend.operations.soft_crawl import run_crawl
 from backend.operations.fetcher import main as run_fetcher
@@ -26,6 +28,25 @@ from backend.operations.metrics import main as run_metrics
 _BACKEND_DIR = Path(__file__).resolve().parent
 _DATA_DIR = _BACKEND_DIR / "data"
 _LOG_DIR = _BACKEND_DIR / "logs"
+
+
+class _TeeStream(io.TextIOBase):
+    """Write to both the real stdout and an internal buffer simultaneously."""
+
+    def __init__(self, real_stdout: io.TextIOBase):
+        self._real = real_stdout
+        self._buf = io.StringIO()
+
+    def write(self, s: str) -> int:
+        self._real.write(s)
+        self._buf.write(s)
+        return len(s)
+
+    def flush(self) -> None:
+        self._real.flush()
+
+    def getvalue(self) -> str:
+        return self._buf.getvalue()
 
 
 def _file_stats(path: Path) -> str:
@@ -50,10 +71,10 @@ def _count_files(directory: Path, pattern: str = "*.csv") -> int:
 def _run_stage(name: str, func, receipt_lines: list, stage_results: list):
     """
     Execute a pipeline stage, capture its stdout, track timing and status.
+    Output streams live to the console and is also buffered for the receipt.
     Returns True on success, False on failure.
     """
     start = datetime.now()
-    captured = io.StringIO()
     success = False
     error_msg = ""
 
@@ -61,21 +82,21 @@ def _run_stage(name: str, func, receipt_lines: list, stage_results: list):
     print(f"--- {name.upper()} ---")
     print(f"{'=' * 80}")
 
+    tee = _TeeStream(sys.stdout)
+    old_stdout = sys.stdout
     try:
-        # Capture stdout from the stage while also printing live
-        with redirect_stdout(captured):
-            func()
+        sys.stdout = tee
+        func()
         success = True
     except Exception as exc:
-        error_msg = f"{type(exc).__name__}: {exc}"
+        error_msg = f"{type(exc).__name__}: {exc}\n{_tb.format_exc()}"
+        sys.stdout = old_stdout
         print(f"CRITICAL ERROR in {name}: {error_msg}")
+    finally:
+        sys.stdout = old_stdout
 
     elapsed = (datetime.now() - start).total_seconds()
-    output = captured.getvalue()
-
-    # Print captured output to real stdout
-    if output.strip():
-        print(output)
+    output = tee.getvalue()
 
     stage_results.append({
         "name": name,
@@ -135,7 +156,6 @@ def _build_receipt(start_time: datetime, end_time: datetime,
     sec_rows = "—"
     if securities_path.exists():
         try:
-            import pandas as pd
             sec_rows = f"{len(pd.read_csv(securities_path)):,} securities"
         except Exception:
             sec_rows = _file_stats(securities_path)
@@ -145,23 +165,27 @@ def _build_receipt(start_time: datetime, end_time: datetime,
     master_info = "—"
     if master_path.exists():
         try:
-            import polars as pl
             df = pl.read_parquet(master_path)
-            master_info = f"{len(df):,} rows, {df['Isin'].n_unique()} ISINs ({_file_stats(master_path)})"
+            isin_col = "Isin" if "Isin" in df.columns else df.columns[0]
+            master_info = f"{len(df):,} rows, {df[isin_col].n_unique()} ISINs ({_file_stats(master_path)})"
         except Exception:
             master_info = _file_stats(master_path)
 
     metrics_info = "—"
     if metrics_path.exists():
         try:
-            import polars as pl
             df = pl.read_parquet(metrics_path)
-            date_range = f"{df['Datum'].min()} → {df['Datum'].max()}"
-            metrics_info = (
-                f"{len(df):,} rows, {df['Isin'].n_unique()} ISINs, "
-                f"{df['Sektor'].drop_nulls().n_unique()} sectors"
-            )
-            lines.append(f"  Date Range:        {date_range}")
+            if "Datum" in df.columns and "Isin" in df.columns:
+                date_range = f"{df['Datum'].min()} → {df['Datum'].max()}"
+                sektor_info = ""
+                if "Sektor" in df.columns:
+                    sektor_info = f", {df['Sektor'].drop_nulls().n_unique()} sectors"
+                metrics_info = (
+                    f"{len(df):,} rows, {df['Isin'].n_unique()} ISINs{sektor_info}"
+                )
+                lines.append(f"  Date Range:        {date_range}")
+            else:
+                metrics_info = f"{len(df):,} rows ({_file_stats(metrics_path)})"
         except Exception:
             metrics_info = _file_stats(metrics_path)
 
@@ -174,8 +198,9 @@ def _build_receipt(start_time: datetime, end_time: datetime,
     # Anomaly snapshot
     if metrics_path.exists():
         try:
-            import polars as pl
             df = pl.read_parquet(metrics_path)
+            if "Isin" not in df.columns or "anomaly_score" not in df.columns:
+                raise KeyError("missing required columns")
             latest = df.sort("Datum").group_by("Isin").last()
             anomaly_counts = latest.group_by("anomaly_score").len().sort("anomaly_score")
 
