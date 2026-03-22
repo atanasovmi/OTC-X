@@ -28,7 +28,7 @@ def run_crawl():
     df = pd.DataFrame(data)
     
     # Define output paths
-    data_dir = Path(__file__).resolve().parent.parent.parent / "data"
+    data_dir = Path(__file__).resolve().parent.parent / "data"
     data_dir.mkdir(parents=True, exist_ok=True)
     
     path_sec = data_dir / "securities.csv"

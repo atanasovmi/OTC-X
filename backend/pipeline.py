@@ -7,6 +7,12 @@ import sys
 from pathlib import Path
 from datetime import datetime
 
+# Ensure project root is on sys.path so package imports work
+# regardless of whether this module is invoked directly or via -m.
+_PROJECT_ROOT = str(Path(__file__).resolve().parent.parent)
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
+
 from backend.operations.soft_crawl import run_crawl
 from backend.operations.fetcher import main as run_fetcher
 from backend.operations.build_master_parquet import build_master_parquet
@@ -62,7 +68,7 @@ def main():
     
     print_header("Pipeline Execution Complete")
     print(f"Total Duration: {duration}")
-    print(f"Success! All data products delivered to the 'data' directory.")
+    print(f"Success! All data products delivered to 'backend/data/'.")
     print("=" * 80 + "\n")
 
 

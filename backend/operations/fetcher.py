@@ -8,9 +8,9 @@ from datetime import datetime
 
 # --- Configuration ---
 SCRIPT_DIR = Path(__file__).resolve().parent
-INPUT_FILE = SCRIPT_DIR.parent.parent / "data" / "securities.csv"
-OUTPUT_DIR = SCRIPT_DIR.parent.parent / "data" / "trades"
-LOG_DIR = SCRIPT_DIR.parent.parent / "logs"
+INPUT_FILE = SCRIPT_DIR.parent / "data" / "securities.csv"
+OUTPUT_DIR = SCRIPT_DIR.parent / "data" / "trades"
+LOG_DIR = SCRIPT_DIR.parent / "logs"
 BASE_URL = "https://www.otc-x.ch/api/market/trades/{}/export"
 TIMEOUT = 10
 RATE_LIMIT_DELAY = 1.0  # Seconds between requests

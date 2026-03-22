@@ -5,7 +5,7 @@ from pathlib import Path
 
 @st.cache_data(ttl=3600)
 def load_data() -> tuple[pd.DataFrame, pd.DataFrame]:
-    path = Path(__file__).resolve().parent.parent / "data" / "daily_metrics.parquet"
+    path = Path(__file__).resolve().parent.parent.parent / "backend" / "data" / "daily_metrics.parquet"
     if not path.exists():
         return pd.DataFrame(), pd.DataFrame()
 

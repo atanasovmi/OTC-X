@@ -3,15 +3,24 @@ OTC-X Market Intelligence Dashboard
 Professional Swiss OTC market analytics platform
 """
 
+import sys
+from pathlib import Path
+
+# Ensure project root is on sys.path so package imports work
+# regardless of whether Streamlit runs this file directly.
+_PROJECT_ROOT = str(Path(__file__).resolve().parent.parent)
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
+
 import streamlit as st
 import pandas as pd
 import numpy as np
 
-from frontend.config import SEVERITY_TIERS
-from frontend.styles import inject_css
-from frontend.utils import fmt_chf, fmt_num, fmt_pct, pct_cls, score_badge
-from frontend.data_loader import load_data
-from frontend.charts import (
+from frontend.operations.config import SEVERITY_TIERS
+from frontend.operations.styles import inject_css
+from frontend.operations.utils import fmt_chf, fmt_num, fmt_pct, pct_cls, score_badge
+from frontend.operations.data_loader import load_data
+from frontend.operations.charts import (
     chart_market_activity,
     chart_sector_treemap,
     chart_top_movers,
@@ -24,7 +33,7 @@ from frontend.charts import (
     chart_security_history,
     chart_3d_explorer,
 )
-from frontend.components import (
+from frontend.operations.components import (
     render_header,
     render_kpis,
     render_market_table,
@@ -46,7 +55,7 @@ def main() -> None:
     df_hist, latest = load_data()
 
     if df_hist.empty:
-        st.error("No data available. Run `python run_backend.py` to populate the data pipeline.")
+        st.error("No data available. Run `python -m backend.pipeline` to populate the data pipeline.")
         st.stop()
 
     latest_date = df_hist["Datum"].max().strftime("%d.%m.%Y")

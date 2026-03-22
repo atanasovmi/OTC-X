@@ -2,8 +2,8 @@ import streamlit as st
 import pandas as pd
 from html import escape as _esc
 
-from frontend.config import ANOMALY_LABELS, ANOMALY_COLORS
-from frontend.utils import fmt_chf, fmt_num, fmt_pct, pct_cls, score_badge
+from frontend.operations.config import ANOMALY_LABELS, ANOMALY_COLORS
+from frontend.operations.utils import fmt_chf, fmt_num, fmt_pct, pct_cls, score_badge
 
 
 def render_header(latest_date: str) -> None:

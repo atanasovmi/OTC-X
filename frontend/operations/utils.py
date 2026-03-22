@@ -1,6 +1,6 @@
 import pandas as pd
 
-from frontend.config import ANOMALY_LABELS
+from frontend.operations.config import ANOMALY_LABELS
 
 
 def _hex_to_rgba(hex_color: str, alpha: float = 1.0) -> str:

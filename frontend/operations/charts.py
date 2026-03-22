@@ -4,11 +4,11 @@ import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
 
-from frontend.config import (
+from frontend.operations.config import (
     BRAND_RED, BRAND_DARK, GREEN_POS, RED_NEG, BORDER_COL,
     MUTED, PLOTLY_TPL, SECTOR_PALETTE, SEVERITY_TIERS,
 )
-from frontend.utils import _hex_to_rgba, fmt_chf, fmt_pct
+from frontend.operations.utils import _hex_to_rgba, fmt_chf, fmt_pct
 
 
 def _deep_merge(base: dict, override: dict) -> dict:
