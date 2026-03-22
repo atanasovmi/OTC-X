@@ -5,3 +5,5 @@ polars
 pyarrow
 streamlit
 plotly
+pytest
+pytest-cov
