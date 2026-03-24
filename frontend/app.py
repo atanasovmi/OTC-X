@@ -82,22 +82,22 @@ def main() -> None:
         with col_act:
             st.markdown('<div class="sec-hdr">Market Activity — Last 90 Days</div>',
                         unsafe_allow_html=True)
-            st.plotly_chart(chart_market_activity(df_hist), use_container_width=True, theme=None)
+            st.plotly_chart(chart_market_activity(df_hist), width="stretch", theme=None)
         with col_tree:
             st.markdown('<div class="sec-hdr">Sector Allocation by Volume</div>',
                         unsafe_allow_html=True)
-            st.plotly_chart(chart_sector_treemap(latest), use_container_width=True, theme=None)
+            st.plotly_chart(chart_sector_treemap(latest), width="stretch", theme=None)
 
         st.markdown("<br>", unsafe_allow_html=True)
         col_mov, col_vol = st.columns(2)
         with col_mov:
             st.markdown('<div class="sec-hdr">Top Movers — Price Change %</div>',
                         unsafe_allow_html=True)
-            st.plotly_chart(chart_top_movers(latest), use_container_width=True, theme=None)
+            st.plotly_chart(chart_top_movers(latest), width="stretch", theme=None)
         with col_vol:
             st.markdown('<div class="sec-hdr">Volume by Sector (CHF)</div>',
                         unsafe_allow_html=True)
-            st.plotly_chart(chart_volume_by_sector(latest), use_container_width=True, theme=None)
+            st.plotly_chart(chart_volume_by_sector(latest), width="stretch", theme=None)
 
     # ══════════════════════════════════════════
     # TAB 2 — Market Data (Raw Data Explorer)
@@ -212,7 +212,7 @@ def main() -> None:
                 data=csv_data.to_csv(index=False).encode("utf-8"),
                 file_name="otcx_market_data.csv",
                 mime="text/csv",
-                use_container_width=True,
+                width="stretch",
             )
         with dl2:
             st.markdown(
@@ -256,7 +256,7 @@ def main() -> None:
                 label_visibility="collapsed",
             )
             st.plotly_chart(chart_security_history(df_hist, sel_isin),
-                            use_container_width=True, theme=None)
+                            width="stretch", theme=None)
 
             # ── Security summary metrics with math notation ──
             sec_row = latest[latest["Isin"] == sel_isin]
@@ -356,7 +356,7 @@ def main() -> None:
         if len(hm_selected) >= 2:
             st.plotly_chart(
                 chart_correlation_heatmap(analytics_df, hm_selected),
-                use_container_width=True, theme=None,
+                width="stretch", theme=None,
             )
         else:
             st.info("Select at least 2 metrics to display the correlation matrix.")
@@ -371,7 +371,7 @@ def main() -> None:
                 unsafe_allow_html=True,
             )
             st.plotly_chart(chart_scatter_volume_price(analytics_df),
-                            use_container_width=True, theme=None)
+                            width="stretch", theme=None)
         with col_amh:
             st.markdown(
                 '<div class="sec-hdr">Amihud Illiquidity by Sector</div>',
@@ -387,7 +387,7 @@ def main() -> None:
             if hm_sectors:
                 hist_filtered = hist_filtered[hist_filtered["Sektor"].isin(hm_sectors)]
             st.plotly_chart(chart_amihud_by_sector(hist_filtered),
-                            use_container_width=True, theme=None)
+                            width="stretch", theme=None)
 
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown(
@@ -441,7 +441,7 @@ def main() -> None:
                 is_active = selected_vol_sector == sec_name
                 btn_label = f"● {sec_name}" if is_active else sec_name
                 if st.button(btn_label, key=f"vol_sec_{sec_name}",
-                             use_container_width=True):
+                             width="stretch"):
                     if selected_vol_sector == sec_name:
                         st.session_state["vol_selected_sector"] = None
                     else:
@@ -454,7 +454,7 @@ def main() -> None:
                 show_raw_sma=show_raw_sma,
                 selected_sector=st.session_state.get("vol_selected_sector", None),
             ),
-            use_container_width=True, theme=None,
+            width="stretch", theme=None,
         )
 
         st.markdown("<br>", unsafe_allow_html=True)
@@ -524,7 +524,7 @@ def main() -> None:
                 analytics_df, x_sel, y_sel, z_sel, color_sel, size_sel,
                 use_log=use_log, remove_outliers=rm_outliers,
             ),
-            use_container_width=True, theme=None,
+            width="stretch", theme=None,
         )
 
     # ══════════════════════════════════════════
@@ -566,7 +566,7 @@ def main() -> None:
                     f'</div>',
                     unsafe_allow_html=True,
                 )
-                if st.button(f"Show {lbl}", key=f"risk_{lbl}", use_container_width=True):
+                if st.button(f"Show {lbl}", key=f"risk_{lbl}", width="stretch"):
                     if selected_tier == lbl:
                         st.session_state["anomaly_tier"] = None
                     else:
@@ -588,7 +588,7 @@ def main() -> None:
             '</div>',
             unsafe_allow_html=True,
         )
-        st.plotly_chart(chart_anomaly_severity_treemap(latest), use_container_width=True, theme=None)
+        st.plotly_chart(chart_anomaly_severity_treemap(latest), width="stretch", theme=None)
 
         st.markdown("<br>", unsafe_allow_html=True)
 
