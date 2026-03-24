@@ -280,10 +280,10 @@ def main() -> None:
     print("=" * 70)
     
     # Setup paths relative to script location
-    script_dir = Path(__file__).parent
-    trades_path = script_dir / "../data/master_trades.parquet"
-    securities_path = script_dir / "../data/securities_enriched.csv"
-    output_path = script_dir / "../data/daily_metrics.parquet"
+    script_dir = Path(__file__).resolve().parent
+    trades_path = script_dir.parent / "data" / "master_trades.parquet"
+    securities_path = script_dir.parent / "data" / "securities_enriched.csv"
+    output_path = script_dir.parent / "data" / "daily_metrics.parquet"
     
     try:
         # 1. Load Data

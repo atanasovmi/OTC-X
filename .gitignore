@@ -57,6 +57,7 @@ cover/
 
 # Django stuff:
 *.log
+!backend/logs/*.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
@@ -205,3 +206,4 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+.pytest_cache/

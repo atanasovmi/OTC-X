@@ -7,10 +7,10 @@ from pathlib import Path
 
 def build_master_parquet():
     # Define paths (relative to operations/)
-    script_dir = Path(__file__).parent
-    raw_data_dir = script_dir / "../data/trades"
-    output_parquet = script_dir / "../data/master_trades.parquet"
-    output_csv = script_dir / "../data/master_trades_cleaned.csv"
+    script_dir = Path(__file__).resolve().parent
+    raw_data_dir = script_dir.parent / "data" / "trades"
+    output_parquet = script_dir.parent / "data" / "master_trades.parquet"
+    output_csv = script_dir.parent / "data" / "master_trades_cleaned.csv"
 
     print("=" * 60)
     print("OTC-X Data Ingestion Pipeline")

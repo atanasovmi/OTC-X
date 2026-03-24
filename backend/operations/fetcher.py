@@ -7,7 +7,7 @@ import logging
 from datetime import datetime
 
 # --- Configuration ---
-SCRIPT_DIR = Path(__file__).parent
+SCRIPT_DIR = Path(__file__).resolve().parent
 INPUT_FILE = SCRIPT_DIR.parent / "data" / "securities.csv"
 OUTPUT_DIR = SCRIPT_DIR.parent / "data" / "trades"
 LOG_DIR = SCRIPT_DIR.parent / "logs"
