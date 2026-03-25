@@ -16,61 +16,34 @@
 
 <br/><br/>
 
-<!-- Status Badges -->
-[![Pipeline](https://img.shields.io/github/actions/workflow/status/atanasovmi/OTC-X/automation_pipeline.yml?style=for-the-badge&logo=github-actions&logoColor=white&label=Daily%20Pipeline&color=28A745)](https://github.com/atanasovmi/OTC-X/actions/workflows/automation_pipeline.yml)
-&nbsp;
-[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-&nbsp;
-[![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io/)
-&nbsp;
-[![License](https://img.shields.io/badge/License-Private-1A1A2E?style=for-the-badge&logo=lock&logoColor=white)](#license)
-
-<br/>
-
-<!-- Data Stats -->
-<table>
-<tr>
-<td align="center"><b>📈 Securities</b><br/><code>243</code></td>
-<td align="center"><b>📊 Daily Metrics</b><br/><code>75,319 rows</code></td>
-<td align="center"><b>🏦 Sectors</b><br/><code>10</code></td>
-<td align="center"><b>📅 History</b><br/><code>2004 – 2026</code></td>
-<td align="center"><b>🔍 Anomaly Tiers</b><br/><code>6 levels</code></td>
-</tr>
-</table>
-
-</div>
-
----
-
-<!-- ═══════════════════════════════════════════════════════════════
-     🚀 LIVE DASHBOARD — THE HERO CTA
-     ═══════════════════════════════════════════════════════════════ -->
-
-<div align="center">
-
-<br/>
-
-<a href="https://otc-x-radar.streamlit.app">
-<img src="https://img.shields.io/badge/%F0%9F%9A%80%20LAUNCH%20LIVE%20DASHBOARD-B22222?style=for-the-badge&logoColor=white&labelColor=1A1A2E&color=B22222" alt="Launch Live Dashboard" height="56"/>
+<!-- Tech Stack Icons -->
+<a href="https://skillicons.dev">
+  <img src="https://skillicons.dev/icons?i=py,css,html,git,github,githubactions,md,latex&theme=light&perline=8" alt="Tech Stack"/>
 </a>
 
 <br/><br/>
 
-```
-  ╔══════════════════════════════════════════════════════════════════╗
-  ║                                                                  ║
-  ║   🟢  OTC-X Liquidity Radar — Live on Streamlit Cloud           ║
-  ║                                                                  ║
-  ║   Real-time anomaly detection  •  11 interactive Plotly charts   ║
-  ║   243 Swiss OTC securities     •  20+ years of trade history     ║
-  ║   Automated daily pipeline     •  Zero manual intervention       ║
-  ║                                                                  ║
-  ║   ➜  https://otc-x-radar.streamlit.app                          ║
-  ║                                                                  ║
-  ╚══════════════════════════════════════════════════════════════════╝
-```
+<!-- ═══════════════════════════════════════════════════════════════
+     LIVE DASHBOARD — ELEGANT CTA
+     ═══════════════════════════════════════════════════════════════ -->
 
-<sub>The dashboard runs on Streamlit Community Cloud and auto-updates daily at 05:00 UTC via GitHub Actions.</sub>
+<a href="https://otc-x-radar.streamlit.app">
+  <img src="https://img.shields.io/badge/Visit_Live_Dashboard-%E2%86%92-1A1A2E?style=for-the-badge&labelColor=1A1A2E&color=3D3D5C" alt="Visit Live Dashboard" height="44"/>
+</a>
+
+<br/><br/>
+
+<table>
+<tr>
+<td align="center" width="160"><b>Anomaly Detection</b></td>
+<td align="center" width="160"><b>11 Plotly Charts</b></td>
+<td align="center" width="160"><b>243 Securities</b></td>
+<td align="center" width="160"><b>20+ Year History</b></td>
+<td align="center" width="160"><b>Automated Daily</b></td>
+</tr>
+</table>
+
+<sub>Auto-updates daily at 05:00 UTC via GitHub Actions · Zero manual intervention</sub>
 
 </div>
 
@@ -84,17 +57,16 @@
 <summary><b>Navigate</b></summary>
 
 - [What is OTC-X?](#-what-is-otc-x)
+- [Tech Stack](#-tech-stack)
 - [Key Features](#-key-features)
 - [Dashboard Preview](#-dashboard-preview)
 - [Architecture](#-architecture)
 - [Data Pipeline](#-data-pipeline)
-- [Tech Stack](#-tech-stack)
 - [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
-- [How It Works](#-how-it-works)
-- [Anomaly Detection](#-anomaly-detection)
+- [Metrics Engine](#-metrics-engine)
 - [Contributing](#-contributing)
-- [License](#license)
+- [Proprietary Notice & Terms of Use](#-proprietary-notice--terms-of-use)
 
 </details>
 
@@ -102,23 +74,81 @@
 
 ## 🔭 What is OTC-X?
 
-**OTC-X Liquidity Radar** is an end-to-end market intelligence platform for the **Swiss OTC-X exchange** — a marketplace for unlisted Swiss equities covering sectors from banking and real estate to mountain railways and energy.
+<div align="center">
 
-> **The Problem:** The Swiss OTC market is opaque. Trade data is fragmented, illiquidity metrics are unavailable, and unusual activity goes unnoticed.
->
-> **The Solution:** OTC-X Radar automates the entire pipeline — from data collection through anomaly scoring — and surfaces insights through a professional, interactive dashboard.
+```mermaid
+flowchart LR
+    P["<b>Problem</b><br/>The Swiss OTC market is opaque:<br/>fragmented data, no liquidity<br/>metrics, invisible signals"]
+    T["<b>Target</b><br/>BEKB Trading Desk and<br/>institutional stakeholders<br/>of the OTC-X platform"]
+    S["<b>Solution</b><br/>End-to-end pipeline from<br/>data collection through<br/>anomaly scoring to dashboard"]
+
+    P -->|who has it?| T -->|how we solve it| S
+
+    style P fill:#7B2D8E,stroke:#5A1A6E,color:#FFFFFF
+    style T fill:#7B2D8E,stroke:#5A1A6E,color:#FFFFFF
+    style S fill:#7B2D8E,stroke:#5A1A6E,color:#FFFFFF
+    linkStyle 0 stroke:#999,stroke-width:2px
+    linkStyle 1 stroke:#999,stroke-width:2px
+```
+
+```mermaid
+flowchart TB
+    V["<b>Value & Uniqueness</b><br/>Turns 243 unlisted Swiss equities into a live liquidity radar: detects anomalies, scores risk,<br/>and surfaces insights through 11 interactive charts — fully automated, zero manual intervention."]
+
+    style V fill:#A0B800,stroke:#7A8E00,color:#1A1A2E
+```
+
+</div>
+
+---
+
+## 🛠️ Tech Stack
 
 <div align="center">
-<br/>
 
-| From | To |
-|:---:|:---:|
-| Scattered CSV exports | Unified Parquet data lake |
-| Manual spreadsheet analysis | Automated 26-metric engine |
-| Invisible market signals | Real-time anomaly alerts |
-| Static reports | Interactive 4-tab dashboard |
+<table>
+<tr>
+<th>Layer</th>
+<th>Technology</th>
+<th>Role</th>
+</tr>
+<tr>
+<td><b>Core</b></td>
+<td><img src="https://skillicons.dev/icons?i=py&theme=light" width="28" align="center"/> Python 3.10+</td>
+<td>Runtime</td>
+</tr>
+<tr>
+<td><b>ETL</b></td>
+<td><img src="https://img.shields.io/badge/-Polars-CD792C?style=flat-square&logo=polars&logoColor=white" height="20" align="center"/> Polars</td>
+<td>High-performance DataFrame engine</td>
+</tr>
+<tr>
+<td><b>Analytics</b></td>
+<td><img src="https://img.shields.io/badge/-Pandas-150458?style=flat-square&logo=pandas&logoColor=white" height="20" align="center"/> Pandas · <img src="https://img.shields.io/badge/-NumPy-013243?style=flat-square&logo=numpy&logoColor=white" height="20" align="center"/> NumPy</td>
+<td>Data manipulation & numerics</td>
+</tr>
+<tr>
+<td><b>Dashboard</b></td>
+<td><img src="https://img.shields.io/badge/-Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white" height="20" align="center"/> Streamlit · <img src="https://img.shields.io/badge/-Plotly-3F4F75?style=flat-square&logo=plotly&logoColor=white" height="20" align="center"/> Plotly</td>
+<td>Interactive web UI with 11 chart types</td>
+</tr>
+<tr>
+<td><b>Storage</b></td>
+<td><img src="https://img.shields.io/badge/-Apache_Parquet-50ABF1?style=flat-square&logo=apache&logoColor=white" height="20" align="center"/> Parquet</td>
+<td>Columnar data (zstd / snappy compression)</td>
+</tr>
+<tr>
+<td><b>CI/CD</b></td>
+<td><img src="https://skillicons.dev/icons?i=githubactions&theme=light" width="28" align="center"/> GitHub Actions</td>
+<td>Automated daily pipeline (cron @ 05:00 UTC)</td>
+</tr>
+<tr>
+<td><b>Testing</b></td>
+<td><img src="https://img.shields.io/badge/-pytest-0A9EDC?style=flat-square&logo=pytest&logoColor=white" height="20" align="center"/> pytest</td>
+<td>58 unit & integration tests</td>
+</tr>
+</table>
 
-<br/>
 </div>
 
 ---
@@ -172,17 +202,35 @@
 
 ## 🖥️ Dashboard Preview
 
-<div align="center">
-
 > **4 purpose-built tabs** deliver market intelligence at every level of detail.
 
-| Tab | Description |
-|:---|:---|
-| **📈 Overview** | KPI cards, 90-day market activity, sector treemap, top movers |
-| **🗂️ Market Data** | Full 26-column data explorer with search, sort, and CSV download |
-| **📊 Analytics** | Correlation matrix, Amihud boxplots, rolling volatility, 3D scatter |
-| **🚨 Anomaly Monitor** | Risk severity cards, anomaly treemap, active alerts table |
+### 📈 Overview
+KPI cards · 90-day market activity · Sector treemap · Top movers
 
+<!-- Replace the URL below with your own screenshot -->
+<div align="center">
+<img src="https://github.com/user-attachments/assets/placeholder-overview" alt="Overview Tab" width="100%"/>
+</div>
+
+### 🗂️ Market Data
+Full 26-column data explorer · Search & sort · CSV download · Security deep-dive
+
+<div align="center">
+<img src="https://github.com/user-attachments/assets/placeholder-market-data" alt="Market Data Tab" width="100%"/>
+</div>
+
+### 📊 Analytics
+Correlation matrix · Amihud boxplots · Rolling volatility · 3D market explorer
+
+<div align="center">
+<img src="https://github.com/user-attachments/assets/placeholder-analytics" alt="Analytics Tab" width="100%"/>
+</div>
+
+### 🚨 Anomaly Monitor
+Risk severity cards · Anomaly treemap · Active alerts table
+
+<div align="center">
+<img src="https://github.com/user-attachments/assets/placeholder-anomaly" alt="Anomaly Monitor Tab" width="100%"/>
 </div>
 
 <details>
@@ -209,77 +257,72 @@
 ## 🏗️ Architecture
 
 ```mermaid
-flowchart TB
-    subgraph EXTERNAL["🌐 External"]
-        API["OTC-X API<br/><sub>otc-x.ch/api/market</sub>"]
+flowchart TD
+    API["🌐 OTC-X API"]
+
+    subgraph Pipeline ["⚙️ Backend Pipeline"]
+        direction LR
+        S1["soft_crawl.py\n① Valor Extraction"]
+        S2["fetcher.py\n② Trade Download"]
+        S3["build_master_parquet.py\n③ Consolidation"]
+        S4["metrics.py\n④ Metrics Engine"]
+        S1 --> S2 --> S3 --> S4
     end
 
-    subgraph BACKEND["⚙️ Backend Pipeline"]
-        direction TB
-        S1["① Valor Extraction<br/><sub>soft_crawl.py</sub>"]
-        S2["② Trade Download<br/><sub>fetcher.py</sub>"]
-        S3["③ Data Consolidation<br/><sub>build_master_parquet.py</sub>"]
-        S4["④ Metrics Engine<br/><sub>metrics.py</sub>"]
+    subgraph Storage ["💾 Data Layer"]
+        direction LR
+        CSV["securities.csv"]
+        TRADES["trades/*.csv"]
+        MASTER["master_trades\n.parquet"]
+        METRICS["daily_metrics\n.parquet"]
     end
 
-    subgraph DATA["💾 Data Layer"]
-        CSV["securities.csv<br/><sub>243 securities</sub>"]
-        TRADES["trades/*.csv<br/><sub>243 CSV files</sub>"]
-        MASTER["master_trades.parquet<br/><sub>Deduplicated trades</sub>"]
-        METRICS["daily_metrics.parquet<br/><sub>75K rows × 26 cols</sub>"]
+    subgraph Dashboard ["🖥️ Streamlit Dashboard"]
+        direction LR
+        LOADER["Data Loader"]
+        TABS["4-Tab UI"]
+        CHARTS["11 Chart Types"]
+        LOADER --> TABS --> CHARTS
     end
 
-    subgraph FRONTEND["🖥️ Streamlit Dashboard"]
-        direction TB
-        DL["Data Loader<br/><sub>Cached Parquet → Pandas</sub>"]
-        TABS["4-Tab UI<br/><sub>Overview · Data · Analytics · Anomaly</sub>"]
-        CHARTS["11 Chart Types<br/><sub>Plotly Interactive</sub>"]
-    end
-
-    subgraph CI["🔄 CI/CD"]
-        GHA["GitHub Actions<br/><sub>Daily @ 05:00 UTC</sub>"]
-    end
+    GHA["🔄 GitHub Actions\nDaily @ 05:00 UTC"]
 
     API --> S1
-    S1 --> CSV
     API --> S2
-    CSV --> S2
-    S2 --> TRADES
-    TRADES --> S3
-    S3 --> MASTER
-    MASTER --> S4
-    CSV --> S4
-    S4 --> METRICS
-    METRICS --> DL
-    DL --> TABS
-    TABS --> CHARTS
-    GHA -.->|triggers| S1
-
-    style EXTERNAL fill:#F5F6F8,stroke:#CED4DA,color:#1A1A2E
-    style BACKEND fill:#FFF5F5,stroke:#B22222,color:#1A1A2E
-    style DATA fill:#F5F6F8,stroke:#CED4DA,color:#1A1A2E
-    style FRONTEND fill:#FFF5F5,stroke:#B22222,color:#1A1A2E
-    style CI fill:#F0FFF0,stroke:#28A745,color:#1A1A2E
+    S1 -.-> CSV
+    S2 -.-> TRADES
+    S3 -.-> MASTER
+    S4 -.-> METRICS
+    METRICS --> LOADER
+    GHA -->|triggers| Pipeline
 ```
 
 ---
 
 ## 🔄 Data Pipeline
 
-The pipeline runs as a single Python module (`python -m backend.pipeline`) and produces a detailed receipt log at each execution.
-
 ```mermaid
-graph LR
-    A["🔍 Stage 1<br/>Valor Extraction"] -->|securities.csv| B["📥 Stage 2<br/>Trade Download"]
-    B -->|trades/*.csv| C["🔨 Stage 3<br/>Parquet Build"]
-    C -->|master_trades.parquet| D["📐 Stage 4<br/>Metrics Engine"]
-    D -->|daily_metrics.parquet| E["✅ Receipt Log"]
+flowchart LR
+    subgraph Stage1 [" "]
+        S1["🔍 <b>Stage 1</b>\nValor Extraction"]
+    end
+    subgraph Stage2 [" "]
+        S2["📥 <b>Stage 2</b>\nTrade Download"]
+    end
+    subgraph Stage3 [" "]
+        S3["🔨 <b>Stage 3</b>\nParquet Build"]
+    end
+    subgraph Stage4 [" "]
+        S4["📐 <b>Stage 4</b>\nMetrics Engine"]
+    end
+    subgraph Done [" "]
+        S5["✅ <b>Receipt Log</b>"]
+    end
 
-    style A fill:#B22222,stroke:#8B0000,color:#FFFFFF
-    style B fill:#B22222,stroke:#8B0000,color:#FFFFFF
-    style C fill:#B22222,stroke:#8B0000,color:#FFFFFF
-    style D fill:#B22222,stroke:#8B0000,color:#FFFFFF
-    style E fill:#28A745,stroke:#1E7E34,color:#FFFFFF
+    Stage1 -->|"securities.csv"| Stage2
+    Stage2 -->|"trades/*.csv"| Stage3
+    Stage3 -->|"master_trades.parquet"| Stage4
+    Stage4 -->|"daily_metrics.parquet"| Done
 ```
 
 <details>
@@ -292,33 +335,7 @@ graph LR
 | **③** | `build_master_parquet.py` | `trades/*.csv` | `master_trades.parquet` | Consolidate, clean, cast types, deduplicate, compress (zstd) |
 | **④** | `metrics.py` | `master_trades.parquet` | `daily_metrics.parquet` | Compute 26 daily metrics, rolling baselines, anomaly flags |
 
-**Receipt Log:** Every run produces `backend/logs/pipeline_receipt_YYYY-MM-DD_HHMMSS.log` with:
-- Execution timing per stage
-- Data product file sizes
-- Anomaly snapshot (latest day per ISIN)
-- Full stage stdout capture
-
 </details>
-
----
-
-## 🛠️ Tech Stack
-
-<div align="center">
-
-| Layer | Technology | Purpose |
-|:---:|:---:|:---|
-| ![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white) | **Python 3.10+** | Core runtime |
-| ![Polars](https://img.shields.io/badge/Polars-CD792C?style=flat-square&logo=polars&logoColor=white) | **Polars** | High-performance DataFrame engine (backend) |
-| ![Pandas](https://img.shields.io/badge/Pandas-150458?style=flat-square&logo=pandas&logoColor=white) | **Pandas** | DataFrame manipulation (frontend) |
-| ![NumPy](https://img.shields.io/badge/NumPy-013243?style=flat-square&logo=numpy&logoColor=white) | **NumPy** | Numerical computation |
-| ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white) | **Streamlit** | Interactive web dashboard |
-| ![Plotly](https://img.shields.io/badge/Plotly-3F4F75?style=flat-square&logo=plotly&logoColor=white) | **Plotly** | 11 interactive chart types |
-| ![Parquet](https://img.shields.io/badge/Apache_Parquet-50ABF1?style=flat-square&logo=apache&logoColor=white) | **Apache Parquet** | Columnar data storage (zstd/snappy) |
-| ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=flat-square&logo=github-actions&logoColor=white) | **GitHub Actions** | Automated daily pipeline (cron) |
-| ![pytest](https://img.shields.io/badge/pytest-0A9EDC?style=flat-square&logo=pytest&logoColor=white) | **pytest** | 58 unit & integration tests |
-
-</div>
 
 ---
 
@@ -377,139 +394,310 @@ OTC-X/
 
 - **Python 3.10+**
 - **pip** package manager
-- Internet access (for OTC-X API calls during pipeline execution)
 
 ### Installation
 
 ```bash
-# Clone the repository
 git clone https://github.com/atanasovmi/OTC-X.git
 cd OTC-X
-
-# Install dependencies
 pip install -r requirements.txt
 ```
 
 ### Run the Data Pipeline
 
 ```bash
-# Execute the full 4-stage pipeline
 python -m backend.pipeline
 ```
-
-This will:
-1. Fetch securities from the OTC-X API
-2. Download trade history for all 243 ISINs
-3. Consolidate into a master Parquet file
-4. Compute 26 daily metrics with anomaly flags
-
-A receipt log is saved to `backend/logs/pipeline_receipt_*.log`.
 
 ### Launch the Dashboard
 
 ```bash
-# Start the Streamlit dashboard
 streamlit run frontend/app.py
 ```
-
-The dashboard opens at `http://localhost:8501` with 4 interactive tabs.
 
 ### Run Tests
 
 ```bash
-# Run the full test suite (58 tests)
 python -m pytest tests/ -v
 ```
 
 ---
 
-## 🧠 How It Works
+## 📐 Metrics Engine
 
-### Metrics Engine
+The engine transforms raw trade records into a **26-column** analytical dataset. Each row = one security × one trading day.
 
-The engine transforms raw trade records into a 26-column analytical dataset. Each row represents one security on one trading day.
+### Price Dynamics
 
-<details>
-<summary><b>📐 Core Metrics (click to expand)</b></summary>
+$$\text{price\_change\_pct} = \frac{P_{\text{last}} - P_{\text{first}}}{P_{\text{first}}} \times 100$$
 
-| Category | Metric | Formula / Logic |
-|:---|:---|:---|
-| **Trade Data** | `trades_today` | Count of trades |
-| | `volume_today_units` | Σ(volume) |
-| | `volume_today_chf` | Σ(price × volume) |
-| **Price** | `price_first`, `price_last` | Open / close |
-| | `price_min`, `price_max` | Intraday range |
-| | `price_change_pct` | (last − first) / first × 100 |
-| | `log_returns` | ln(last / first) |
-| **Liquidity** | `volatility_daily` | σ(intraday prices) |
-| | `amihud_daily` | \|ln(r)\| / V_CHF × 10⁶ |
-| | `spread_log_hl` | ln(high / low) |
-| | `trade_duration_min` | Max gap between trades (min) |
-| | `off_book_pct` | % off-book trades |
-| **Baselines** | `*_30d_median` | 30-trading-day rolling medians |
+$$r_{\log} = \ln\!\left(\frac{P_{\text{last}}}{P_{\text{first}}}\right)$$
 
-</details>
+### Intraday Volatility
 
----
+$$\sigma_{\text{daily}} = \sqrt{\frac{1}{n-1}\sum_{i=1}^{n}\left(P_i - \bar{P}\right)^2}$$
 
-## 🚨 Anomaly Detection
+### Amihud Illiquidity Ratio
 
-The scoring system flags unusual market activity using a weighted formula against 30-day rolling baselines.
+$$\lambda_{\text{Amihud}} = \frac{|r_{\log}|}{V_{\text{CHF}}} \times 10^{6}$$
 
-```
-Anomaly Score = 3 × volume_spike + 2 × activity_spike + 2 × price_gap
-```
+> A higher λ indicates greater price impact per unit of volume — the hallmark of an illiquid security.
 
-| Flag | Trigger | Weight | Logic |
-|:---|:---|:---:|:---|
-| **Volume Spike** | Volume > 1.5× median | **3** | Captures unusual CHF flow |
-| **Activity Spike** | Trades > 1.5× median | **2** | Detects unusual trade frequency |
-| **Price Gap** | \|ΔP\| > 5% | **2** | Flags abnormal price movement |
+### Spread Proxy (Corwin–Schultz)
 
-### Severity Tiers
+$$S_{\text{HL}} = \ln\!\left(\frac{P_{\text{high}}}{P_{\text{low}}}\right)$$
 
-<div align="center">
+### Rolling Baselines
 
-| Score | Tier | Color |
-|:---:|:---|:---:|
-| **0** | 🟢 Clean | `#28A745` |
-| **1** | 🟡 Watch | `#FFC107` |
-| **2** | 🟠 Alert | `#FD7E14` |
-| **3–4** | 🔴 Critical | `#DC3545` |
-| **5–6** | 🟥 Severe | `#7D1128` |
-| **7** | ⬛ Extreme | `#4A0010` |
+$$\tilde{x}_{30} = \text{median}\!\left(x_{t-29},\; x_{t-28},\; \ldots,\; x_{t}\right)$$
 
-</div>
+Computed over **30 trading days** (not calendar days) per ISIN for: trades, volume, volatility, and Amihud.
+
+### Anomaly Scoring
+
+$$\boxed{\;\text{Score} = 3 \cdot \mathbb{1}_{[\text{vol\_spike}]} + 2 \cdot \mathbb{1}_{[\text{act\_spike}]} + 2 \cdot \mathbb{1}_{[\text{price\_gap}]}\;}$$
+
+| Flag | Trigger | Weight |
+|:---|:---|:---:|
+| Volume Spike | $V > 1.5 \times \tilde{V}_{30}$ | **3** |
+| Activity Spike | $N_{\text{trades}} > 1.5 \times \tilde{N}_{30}$ | **2** |
+| Price Gap | $\lvert\Delta P\%\rvert > 5$ | **2** |
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Here's how to get started:
-
 1. **Fork** the repository
 2. **Create** a feature branch (`git checkout -b feature/my-feature`)
-3. **Run** the test suite to ensure nothing breaks:
+3. **Run** the test suite:
    ```bash
    python -m pytest tests/ -v
    ```
-4. **Commit** your changes (`git commit -m 'Add my feature'`)
-5. **Push** to the branch (`git push origin feature/my-feature`)
-6. **Open** a Pull Request
+4. **Commit** & **Push**
+5. **Open** a Pull Request
 
 ### Development Guidelines
 
-- Follow existing code conventions (type hints, docstrings, PEP 8)
-- Backend uses **Polars** for high-performance data processing
-- Frontend uses **Pandas** for Streamlit/Plotly compatibility
+- Follow existing code conventions (type hints, NumPy-style docstrings, PEP 8)
+- Backend uses **Polars** · Frontend uses **Pandas**
 - All paths use `Path(__file__).resolve().parent` chains — no hardcoded paths
 - Swiss number formatting: thousands separator is `'` (apostrophe), currency is CHF
 
 ---
 
-## License
+## ⚖️ Proprietary Notice & Terms of Use
 
-This project is private and proprietary. All rights reserved.
+<details>
+<summary><b>🇬🇧 English</b></summary>
+
+### Data Sovereignty and Project Restraints
+
+**Art. 1 — Subject Matter and Ownership**
+
+All content contained within this repository—including but not limited to source code, algorithms, data structures, and user interface logic—is the exclusive intellectual property of the author.
+
+This project is developed specifically and exclusively for the **BEKB (Berner Kantonalbank AG) Trading Desk**, the entity responsible for the OTC-X platform, and its authorized internal stakeholders.
+
+The transfer of any rights or deliverables is intended solely for the Berner Kantonalbank AG upon project completion.
+
+**Art. 2 — Data Sovereignty and Processing Authorization**
+
+The author maintains the singular right to process and retrieve data from the Berner Börse (OTC-X).
+
+This explicit authorization was granted per request by:
+
+> **Berner Kantonalbank AG**
+> Schwarzenburgstrasse 160
+> Postfach
+> 3001 Bern
+
+This authorization is strictly limited as follows:
+
+*lit. a:* it applies only to this specific use case and project;
+*lit. b:* it is granted solely for the duration of this development phase;
+*lit. c:* it is contingent upon the final delivery of the project to the BEKB.
+
+Data sovereignty remains with the author until the formal handover to the BEKB. No third party is authorized to claim, replicate, or intercept the data streams processed herein.
+
+**Art. 3 — Usage Restraints and Prohibitions**
+
+Unauthorized use by any third party is strictly prohibited. This includes, but is not limited to:
+
+**Prohibition of Local Execution:** Users are not permitted to clone, compile, or execute this code in any local or external cloud environment.
+
+**Data Extraction Restraints (Anti-Scraping):**
+
+*lit. a:* The automated or manual retrieval of data from this project for storage outside the BEKB infrastructure is prohibited.
+*lit. b:* Utilizing the logic within this repository to bypass security or access protocols of the OTC-X website is not permitted.
+
+**Prohibition of Impersonation:** The use of this code to mimic, mirror, or falsely represent the services of BEKB or OTC-X (impersonation) is strictly forbidden.
+
+**Art. 4 — Final Provisions**
+
+This software is provided "as is," intended for the internal business purposes of the BEKB Trading Desk.
+
+Any access to this repository does not constitute a grant of license for public or commercial distribution.
+
+</details>
+
+<details>
+<summary><b>🇩🇪 Deutsch</b></summary>
+
+### Datensouveränität und Projektbeschränkungen
+
+**Art. 1 — Gegenstand und Eigentum**
+
+Sämtliche Inhalte dieses Repositorys — einschliesslich, aber nicht beschränkt auf Quellcode, Algorithmen, Datenstrukturen und Benutzeroberflächenlogik — sind ausschliessliches geistiges Eigentum des Autors.
+
+Dieses Projekt wurde spezifisch und ausschliesslich für den **BEKB (Berner Kantonalbank AG) Trading Desk** entwickelt, die für die OTC-X-Plattform verantwortliche Stelle, sowie deren autorisierte interne Stakeholder.
+
+Die Übertragung jeglicher Rechte oder Ergebnisse ist ausschliesslich für die Berner Kantonalbank AG nach Projektabschluss vorgesehen.
+
+**Art. 2 — Datensouveränität und Verarbeitungsermächtigung**
+
+Der Autor behält das alleinige Recht zur Verarbeitung und zum Abruf von Daten der Berner Börse (OTC-X).
+
+Diese ausdrückliche Genehmigung wurde auf Anfrage erteilt durch:
+
+> **Berner Kantonalbank AG**
+> Schwarzenburgstrasse 160
+> Postfach
+> 3001 Bern
+
+Diese Genehmigung ist streng wie folgt beschränkt:
+
+*lit. a:* Sie gilt ausschliesslich für diesen spezifischen Anwendungsfall und dieses Projekt;
+*lit. b:* Sie ist ausschliesslich für die Dauer dieser Entwicklungsphase erteilt;
+*lit. c:* Sie ist an die endgültige Übergabe des Projekts an die BEKB geknüpft.
+
+Die Datensouveränität verbleibt beim Autor bis zur formellen Übergabe an die BEKB. Kein Dritter ist berechtigt, die hierin verarbeiteten Datenströme zu beanspruchen, zu replizieren oder abzufangen.
+
+**Art. 3 — Nutzungsbeschränkungen und Verbote**
+
+Die unbefugte Nutzung durch Dritte ist streng untersagt. Dies umfasst insbesondere:
+
+**Verbot der lokalen Ausführung:** Benutzer sind nicht berechtigt, diesen Code in einer lokalen oder externen Cloud-Umgebung zu klonen, zu kompilieren oder auszuführen.
+
+**Datenextraktionsbeschränkungen (Anti-Scraping):**
+
+*lit. a:* Das automatisierte oder manuelle Abrufen von Daten aus diesem Projekt zur Speicherung ausserhalb der BEKB-Infrastruktur ist untersagt.
+*lit. b:* Die Nutzung der Logik dieses Repositorys zur Umgehung von Sicherheits- oder Zugangsprotokollen der OTC-X-Website ist nicht gestattet.
+
+**Verbot der Identitätstäuschung:** Die Verwendung dieses Codes zur Nachahmung, Spiegelung oder falschen Darstellung der Dienstleistungen der BEKB oder OTC-X (Impersonation) ist streng untersagt.
+
+**Art. 4 — Schlussbestimmungen**
+
+Diese Software wird «wie besehen» bereitgestellt und ist für die internen Geschäftszwecke des BEKB Trading Desk bestimmt.
+
+Jeder Zugang zu diesem Repository stellt keine Lizenzerteilung für öffentliche oder kommerzielle Verbreitung dar.
+
+</details>
+
+<details>
+<summary><b>🇫🇷 Français</b></summary>
+
+### Souveraineté des données et restrictions du projet
+
+**Art. 1 — Objet et propriété**
+
+Tout le contenu de ce dépôt — y compris, mais sans s'y limiter, le code source, les algorithmes, les structures de données et la logique d'interface utilisateur — est la propriété intellectuelle exclusive de l'auteur.
+
+Ce projet est développé spécifiquement et exclusivement pour le **BEKB (Berner Kantonalbank AG) Trading Desk**, l'entité responsable de la plateforme OTC-X, et ses parties prenantes internes autorisées.
+
+Le transfert de tout droit ou livrable est destiné uniquement à la Berner Kantonalbank AG à l'achèvement du projet.
+
+**Art. 2 — Souveraineté des données et autorisation de traitement**
+
+L'auteur conserve le droit exclusif de traiter et de récupérer les données de la Berner Börse (OTC-X).
+
+Cette autorisation explicite a été accordée sur demande par :
+
+> **Berner Kantonalbank AG**
+> Schwarzenburgstrasse 160
+> Case postale
+> 3001 Berne
+
+Cette autorisation est strictement limitée comme suit :
+
+*lit. a :* elle s'applique uniquement à ce cas d'utilisation et à ce projet spécifiques ;
+*lit. b :* elle est accordée uniquement pour la durée de cette phase de développement ;
+*lit. c :* elle est subordonnée à la livraison finale du projet à la BEKB.
+
+La souveraineté des données reste auprès de l'auteur jusqu'à la remise formelle à la BEKB. Aucun tiers n'est autorisé à revendiquer, reproduire ou intercepter les flux de données traités ici.
+
+**Art. 3 — Restrictions d'utilisation et interdictions**
+
+L'utilisation non autorisée par un tiers est strictement interdite. Cela inclut, mais sans s'y limiter :
+
+**Interdiction d'exécution locale :** Les utilisateurs ne sont pas autorisés à cloner, compiler ou exécuter ce code dans un environnement local ou cloud externe.
+
+**Restrictions d'extraction de données (anti-scraping) :**
+
+*lit. a :* La récupération automatisée ou manuelle de données de ce projet pour un stockage en dehors de l'infrastructure de la BEKB est interdite.
+*lit. b :* L'utilisation de la logique de ce dépôt pour contourner les protocoles de sécurité ou d'accès du site OTC-X n'est pas autorisée.
+
+**Interdiction d'usurpation d'identité :** L'utilisation de ce code pour imiter, refléter ou représenter faussement les services de la BEKB ou d'OTC-X (usurpation d'identité) est strictement interdite.
+
+**Art. 4 — Dispositions finales**
+
+Ce logiciel est fourni « tel quel », destiné aux fins commerciales internes du BEKB Trading Desk.
+
+Tout accès à ce dépôt ne constitue pas une concession de licence pour une distribution publique ou commerciale.
+
+</details>
+
+<details>
+<summary><b>🇮🇹 Italiano</b></summary>
+
+### Sovranità dei dati e restrizioni del progetto
+
+**Art. 1 — Oggetto e proprietà**
+
+Tutti i contenuti di questo repository — inclusi, a titolo esemplificativo, codice sorgente, algoritmi, strutture dati e logica dell'interfaccia utente — sono proprietà intellettuale esclusiva dell'autore.
+
+Questo progetto è sviluppato specificamente ed esclusivamente per il **BEKB (Berner Kantonalbank AG) Trading Desk**, l'ente responsabile della piattaforma OTC-X, e i suoi stakeholder interni autorizzati.
+
+Il trasferimento di qualsiasi diritto o deliverable è destinato esclusivamente alla Berner Kantonalbank AG al completamento del progetto.
+
+**Art. 2 — Sovranità dei dati e autorizzazione al trattamento**
+
+L'autore mantiene il diritto esclusivo di elaborare e recuperare i dati dalla Berner Börse (OTC-X).
+
+Questa autorizzazione esplicita è stata concessa su richiesta da:
+
+> **Berner Kantonalbank AG**
+> Schwarzenburgstrasse 160
+> Casella postale
+> 3001 Berna
+
+Questa autorizzazione è strettamente limitata come segue:
+
+*lit. a:* si applica esclusivamente a questo specifico caso d'uso e progetto;
+*lit. b:* è concessa esclusivamente per la durata di questa fase di sviluppo;
+*lit. c:* è subordinata alla consegna finale del progetto alla BEKB.
+
+La sovranità dei dati rimane all'autore fino alla consegna formale alla BEKB. Nessun terzo è autorizzato a rivendicare, replicare o intercettare i flussi di dati elaborati nel presente.
+
+**Art. 3 — Restrizioni d'uso e divieti**
+
+L'uso non autorizzato da parte di terzi è severamente vietato. Ciò include, a titolo esemplificativo:
+
+**Divieto di esecuzione locale:** Gli utenti non sono autorizzati a clonare, compilare o eseguire questo codice in qualsiasi ambiente locale o cloud esterno.
+
+**Restrizioni sull'estrazione dei dati (anti-scraping):**
+
+*lit. a:* Il recupero automatizzato o manuale dei dati da questo progetto per l'archiviazione al di fuori dell'infrastruttura BEKB è vietato.
+*lit. b:* L'utilizzo della logica di questo repository per aggirare i protocolli di sicurezza o accesso del sito OTC-X non è consentito.
+
+**Divieto di impersonificazione:** L'uso di questo codice per imitare, rispecchiare o rappresentare falsamente i servizi di BEKB o OTC-X (impersonificazione) è severamente vietato.
+
+**Art. 4 — Disposizioni finali**
+
+Questo software è fornito «così com'è», destinato agli scopi commerciali interni del BEKB Trading Desk.
+
+Qualsiasi accesso a questo repository non costituisce una concessione di licenza per la distribuzione pubblica o commerciale.
+
+</details>
 
 ---
 
@@ -522,7 +710,7 @@ This project is private and proprietary. All rights reserved.
 <br/>
 
 <a href="https://otc-x-radar.streamlit.app">
-<img src="https://img.shields.io/badge/%E2%86%92%20Open%20Dashboard-B22222?style=for-the-badge" alt="Open Dashboard" height="36"/>
+<img src="https://img.shields.io/badge/Visit_Live_Dashboard-%E2%86%92-1A1A2E?style=for-the-badge&labelColor=1A1A2E&color=3D3D5C" alt="Visit Live Dashboard" height="36"/>
 </a>
 
 <br/><br/>
