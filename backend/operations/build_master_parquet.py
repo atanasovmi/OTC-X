@@ -1,11 +1,49 @@
+"""OTC-X Data Ingestion Pipeline.
+
+Consolidates and cleans 244+ per-security Swiss trade CSVs (downloaded
+by ``fetcher.py``) into two master datasets:
+
+* ``master_trades.parquet`` — Zstandard-compressed columnar file for
+  high-performance analytics in Polars.
+* ``master_trades_cleaned.csv`` — Human-readable CSV with the original
+  OTC-X formatting conventions (comma-space separator, ``DD.MM.YYYY``
+  dates, ``X`` for off-book flag).
+
+Processing stages
+-----------------
+1. **Discovery & Filtering** — locate CSVs, skip empty / header-only files.
+2. **Ingestion** — read all files as strings (schema-safe) and concatenate.
+3. **Scrubbing & Casting** — normalise headers, parse dates, cast numerics,
+   convert the off-book flag to boolean.
+4. **Deduplication** — remove exact-duplicate rows.
+5. **Dual Output** — write Parquet and formatted CSV.
+6. **Audit Summary** — print schema, quality stats, and sample rows.
 """
-OTC-X Data Ingestion Pipeline
-Consolidates and cleans 244+ Swiss trade CSVs into master datasets.
-"""
+
 import polars as pl
 from pathlib import Path
 
-def build_master_parquet():
+
+def build_master_parquet() -> None:
+    """Consolidate per-security trade CSVs into master Parquet and CSV.
+
+    Reads every ``*.csv`` file in ``backend/data/trades/``, applies
+    type-safe cleaning transformations, deduplicates, and writes the
+    results to ``backend/data/master_trades.parquet`` and
+    ``backend/data/master_trades_cleaned.csv``.
+
+    Returns
+    -------
+    None
+        Outputs are written to disk; nothing is returned.
+
+    Notes
+    -----
+    Files smaller than 100 bytes are treated as empty / header-only and
+    are silently skipped.  All CSVs are initially read with
+    ``infer_schema_length=0`` (every column as ``Utf8``) to avoid
+    schema-mismatch errors across heterogeneous source files.
+    """
     # Define paths (relative to operations/)
     script_dir = Path(__file__).resolve().parent
     raw_data_dir = script_dir.parent / "data" / "trades"
@@ -19,8 +57,8 @@ def build_master_parquet():
 
     # 1. Discovery & Filtering
     all_files = list(raw_data_dir.glob("*.csv"))
-    valid_files = []
-    skipped_count = 0
+    valid_files: list[Path] = []
+    skipped_count: int = 0
 
     for file_path in all_files:
         if file_path.stat().st_size < 100:
@@ -38,7 +76,7 @@ def build_master_parquet():
         return
 
     # 2. Ingestion
-    dfs = []
+    dfs: list[pl.DataFrame] = []
     for f in valid_files:
         try:
             # Read CSV with all columns as String (safest for dirty data)
@@ -185,6 +223,7 @@ def build_master_parquet():
     
     print("=" * 60)
     print("Pipeline complete! [SUCCESS]")
+
 
 if __name__ == "__main__":
     build_master_parquet()

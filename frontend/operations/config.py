@@ -1,3 +1,10 @@
+"""Shared brand constants, colour palettes, and anomaly classification maps.
+
+This module centralises every visual and domain constant used across the
+OTC-X dashboard so that the colour language, anomaly taxonomy, and brand
+identity remain consistent in charts, components, and CSS.
+"""
+
 # ─────────────────────────────────────────────
 #  Brand Constants
 # ─────────────────────────────────────────────

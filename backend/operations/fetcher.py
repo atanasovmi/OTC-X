@@ -1,3 +1,22 @@
+"""OTC-X Trade Data Fetcher.
+
+Downloads per-security trade CSV exports from the OTC-X API for every
+security listed in ``backend/data/securities.csv``.  This is **Stage 2**
+of the OTC-X data pipeline, executed after the securities crawl
+(``soft_crawl.py``) and before data consolidation
+(``build_master_parquet.py``).
+
+Key behaviours
+--------------
+* Converts Swiss Valor numbers to ISINs via the Luhn check-digit
+  algorithm before requesting the trade export endpoint.
+* Respects a configurable rate-limit delay (default 1 req/s) and
+  performs a single automatic retry on HTTP 403 / 429 responses.
+* Existing CSV files are never overwritten — a timestamped filename is
+  used when the canonical path already exists.
+* Duplicate Valor entries in the input CSV are silently deduplicated.
+"""
+
 import pandas as pd
 import requests
 import os
@@ -7,16 +26,28 @@ import logging
 from datetime import datetime
 
 # --- Configuration ---
-SCRIPT_DIR = Path(__file__).resolve().parent
-INPUT_FILE = SCRIPT_DIR.parent / "data" / "securities.csv"
-OUTPUT_DIR = SCRIPT_DIR.parent / "data" / "trades"
-LOG_DIR = SCRIPT_DIR.parent / "logs"
-BASE_URL = "https://www.otc-x.ch/api/market/trades/{}/export"
-TIMEOUT = 10
-RATE_LIMIT_DELAY = 1.0  # Seconds between requests
+SCRIPT_DIR: Path = Path(__file__).resolve().parent
+INPUT_FILE: Path = SCRIPT_DIR.parent / "data" / "securities.csv"
+OUTPUT_DIR: Path = SCRIPT_DIR.parent / "data" / "trades"
+LOG_DIR: Path = SCRIPT_DIR.parent / "logs"
+BASE_URL: str = "https://www.otc-x.ch/api/market/trades/{}/export"
+TIMEOUT: int = 10
+RATE_LIMIT_DELAY: float = 1.0  # Seconds between requests
+
 
 # --- Setup Logging ---
-def setup_logging():
+def setup_logging() -> logging.Logger:
+    """Configure dual-output logging (file + console).
+
+    Creates a timestamped log file under ``backend/logs/`` and
+    attaches both a file handler and a stream handler to the root
+    logger.
+
+    Returns
+    -------
+    logging.Logger
+        Configured root logger instance.
+    """
     LOG_DIR.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
     log_file = LOG_DIR / f"downloader_{timestamp}.log"
@@ -32,14 +63,34 @@ def setup_logging():
     )
     return logging.getLogger()
 
+
 logger = setup_logging()
+
 
 # --- Helper Functions ---
 
 def calculate_isin_check_digit(isin_without_check: str) -> str:
-    """Calculates the ISIN check digit using the Luhn algorithm."""
+    """Calculate the ISIN check digit using the Luhn algorithm.
+
+    Each letter in the ISIN prefix is expanded into two decimal digits
+    (A = 10 … Z = 35). The resulting digit sequence is then processed
+    right-to-left with alternating ×2 / ×1 weights, and the check
+    digit is ``(10 − (sum mod 10)) mod 10``.
+
+    Parameters
+    ----------
+    isin_without_check : str
+        The 11-character ISIN prefix **without** the final check digit
+        (e.g. ``"CH001629001"``).
+
+    Returns
+    -------
+    str
+        Single-character string containing the computed check digit
+        (``'0'`` – ``'9'``).
+    """
     # Convert letters to numbers
-    digits = []
+    digits: list[int] = []
     for char in isin_without_check:
         if char.isdigit():
             digits.append(int(char))
@@ -49,7 +100,7 @@ def calculate_isin_check_digit(isin_without_check: str) -> str:
             digits.extend([int(d) for d in str(val)])
     
     # Process right to left, double every second digit starting from rightmost
-    total_sum = 0
+    total_sum: int = 0
     # We iterate reversed digits
     # The rightmost of the payload is multiplied by 2
     # Then 1, then 2...
@@ -72,8 +123,25 @@ def calculate_isin_check_digit(isin_without_check: str) -> str:
     check_digit = (10 - (total_sum % 10)) % 10
     return str(check_digit)
 
-def val_to_isin(valor) -> str:
-    """Converts a Swiss Valor number to an ISIN."""
+
+def val_to_isin(valor: str | int | float) -> str | None:
+    """Convert a Swiss Valor number to a fully-qualified ISIN.
+
+    Pads the numeric Valor to 9 digits, prepends the ``CH`` country
+    code, and appends a Luhn check digit.
+
+    Parameters
+    ----------
+    valor : str | int | float
+        Valor number.  Accepts floats (e.g. ``123.0`` as read by
+        pandas) and stringified floats (``"123.0"``).
+
+    Returns
+    -------
+    str | None
+        12-character ISIN string (e.g. ``"CH0016290012"``), or
+        ``None`` if the input cannot be parsed as a numeric Valor.
+    """
     try:
         # Handle cases where pandas reads as float (e.g., 123.0) or string '123.0'
         clean_valor = str(int(float(valor)))
@@ -88,9 +156,24 @@ def val_to_isin(valor) -> str:
 
 
 def download_trades(isin: str, session: requests.Session) -> str:
-    """
-    Downloads trades for a given ISIN.
-    Returns status: 'success', 'not_found', 'error', 'skipped'
+    """Download the trade-history CSV for a single ISIN.
+
+    Fetches the CSV export from the OTC-X API.  On HTTP 403/429 the
+    request is retried once after a 5-second back-off.  Existing files
+    are preserved by appending a timestamp to the filename.
+
+    Parameters
+    ----------
+    isin : str
+        12-character ISIN identifying the security.
+    session : requests.Session
+        Pre-configured ``requests`` session with default headers.
+
+    Returns
+    -------
+    str
+        Download outcome — one of ``'success'``, ``'not_found'``, or
+        ``'error'``.
     """
     output_file = OUTPUT_DIR / f"{isin}.csv"
     if output_file.exists():
@@ -174,8 +257,22 @@ def download_trades(isin: str, session: requests.Session) -> str:
         logger.error(f"✗ {isin}: Network error: {e}")
         return 'error'
 
+
 # --- Main Logic ---
-def main():
+def main() -> None:
+    """Run the full trade-download pipeline.
+
+    Reads the securities CSV produced by ``soft_crawl.py``, converts
+    each Valor to an ISIN, downloads the trade CSV export from the
+    OTC-X API, and writes per-ISIN CSV files to ``backend/data/trades/``.
+
+    The function logs a summary of successful / failed downloads and
+    total elapsed time upon completion.
+
+    Returns
+    -------
+    None
+    """
     logger.info("OTC-X Trade Downloader started")
     start_time = time.time()
     
@@ -202,7 +299,7 @@ def main():
         return
         
     # 3. Process
-    stats = {
+    stats: dict[str, int] = {
         'total': 0,
         'success': 0,
         'failed': 0,
@@ -216,7 +313,7 @@ def main():
         'Accept': 'text/csv,application/json' 
     })
     
-    unique_processed = set()
+    unique_processed: set[str] = set()
     
     for index, row in df.iterrows():
         name = row.get('NAME', 'Unknown')
@@ -265,6 +362,7 @@ def main():
     logger.info(f"CSV files created: {stats['created_files']}")
     logger.info(f"Time elapsed: {int(m)}m {int(s)}s")
     logger.info(f"Log saved: {logger.handlers[0].baseFilename}")
+
 
 if __name__ == "__main__":
     main()

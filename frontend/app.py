@@ -1,6 +1,9 @@
-"""
-OTC-X Market Intelligence Dashboard
-Professional Swiss OTC market analytics platform
+"""OTC-X Market Intelligence Dashboard — main Streamlit application.
+
+Assembles the four-tab interface (Overview, Market Data, Analytics,
+Anomaly Monitor) by composing chart factories, UI components, and the
+cached data-loading layer.  This module is the Streamlit entry-point
+and must be executed via ``streamlit run frontend/app.py``.
 """
 
 import sys
@@ -50,6 +53,21 @@ st.set_page_config(
 
 
 def main() -> None:
+    """Compose and render the full OTC-X dashboard.
+
+    Loads cached data, injects CSS, and builds all four tabs:
+
+    1. **Overview** — KPI cards, market activity, sector treemap, top
+       movers, and volume-by-sector bar.
+    2. **Market Data** — searchable / sortable data explorer with CSV
+       export and per-security detail view.
+    3. **Analytics** — correlation heatmap, volume-vs-price scatter,
+       Amihud box-plots, rolling volatility, and 3-D explorer.
+    4. **Anomaly Monitor** — risk-summary cards, severity treemap, and
+       filtered alerts table.
+
+    This function is the single entry-point called at module level.
+    """
     inject_css()
 
     df_hist, latest = load_data()
