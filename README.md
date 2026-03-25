@@ -75,7 +75,7 @@ The Swiss OTC market is **opaque**: fragmented data sources, no standardized liq
 </td>
 <td width="50%">
 
-### 👥 Zielgruppe
+### 👥 Zielgruppe (Target Audience)
 **BEKB Trading Desk** and institutional stakeholders of the OTC-X platform — the teams who need real-time market intelligence across **243 Swiss unlisted equities**.
 
 </td>
@@ -83,13 +83,13 @@ The Swiss OTC market is **opaque**: fragmented data sources, no standardized liq
 <tr>
 <td width="50%">
 
-### 💡 Lösung
+### 💡 Lösung (Solution)
 A fully automated **end-to-end data pipeline**: from raw OTC-X API data through 4-stage ETL processing, 26-metric computation, and anomaly detection — to an interactive Streamlit dashboard with **11 chart types**.
 
 </td>
 <td width="50%">
 
-### ⭐ Wert & Einzigartigkeit
+### ⭐ Wert & Einzigartigkeit (Value & Uniqueness)
 The **only live liquidity radar** for Swiss OTC equities: automated anomaly scoring, rolling 30-day risk baselines, and institutional-grade analytics — **zero manual intervention**, refreshed daily via GitHub Actions.
 
 </td>
