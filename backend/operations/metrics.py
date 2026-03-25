@@ -1,24 +1,30 @@
-"""
-OTC-X Liquidity Metrics Engine
-Computes daily liquidity metrics from raw trade data for 243 Swiss OTC securities.
+"""OTC-X Liquidity Metrics Engine.
 
-Input:
-    - data/master_trades.parquet (133k trades, 20 years)
-    - data/securities_enriched.csv (ISIN -> Name, Sektor mapping)
+Computes daily liquidity metrics from raw trade data for 243 Swiss OTC
+securities.  This module is the **quantitative core** of the pipeline,
+transforming consolidated trade records into risk-relevant signals
+suitable for institutional dashboards and anomaly detection.
 
-Output:
-    - data/daily_metrics.parquet (1 row per ISIN per trading day)
+Input
+-----
+- ``data/master_trades.parquet`` — ≈133 k trades spanning 20+ years.
+- ``data/securities_enriched.csv`` — ISIN → Name / Sektor mapping.
 
-Metrics computed:
-    1. Price Change (%) - Daily price movement
-    2. Log Returns - Natural log of price ratio
-    3. Daily Volatility - Standard deviation of intraday prices
-    4. Amihud Illiquidity - Price impact per CHF million traded
-    5. Spread Proxy - Log high-low spread estimate
-    6. Trade Intensity - Number of trades per day
-    7. Trade Duration - Maximum gap between trades (minutes)
+Output
+------
+- ``data/daily_metrics.parquet`` — one row per ISIN per trading day.
 
-Plus: 30-day rolling baselines (trading days) and anomaly flags.
+Metrics computed
+----------------
+1. **Price Change (%)** — daily price movement (first → last).
+2. **Log Returns** — natural log of the intraday price ratio.
+3. **Daily Volatility** — standard deviation of intraday prices.
+4. **Amihud Illiquidity** — price impact per CHF million traded.
+5. **Spread Proxy** — log high-low spread estimate.
+6. **Trade Intensity** — number of trades per day.
+7. **Trade Duration** — maximum gap between consecutive trades (min).
+
+Plus: 30-trading-day rolling medians and composite anomaly flags.
 """
 
 import polars as pl
@@ -27,14 +33,22 @@ from datetime import datetime
 
 
 def parse_time_to_minutes(zeit_col: pl.Expr) -> pl.Expr:
-    """
-    Convert Zeit string (HH:MM:SS or HH:MM) to minutes since midnight.
-    
-    Args:
-        zeit_col: Polars expression for the Zeit column
-        
-    Returns:
-        Polars expression with time in minutes (Float64)
+    """Convert a ``Zeit`` string column to minutes since midnight.
+
+    Splits on ``':'`` and combines the hour and minute components into
+    a single floating-point value representing minutes past 00:00.
+    Seconds (if present in ``HH:MM:SS`` format) are silently ignored.
+
+    Parameters
+    ----------
+    zeit_col : pl.Expr
+        Polars expression referencing a ``Utf8`` column whose values
+        are formatted as ``"HH:MM"`` or ``"HH:MM:SS"``.
+
+    Returns
+    -------
+    pl.Expr
+        Float64 expression — minutes since midnight.
     """
     return (
         zeit_col
@@ -45,17 +59,26 @@ def parse_time_to_minutes(zeit_col: pl.Expr) -> pl.Expr:
 
 
 def compute_daily_aggregates(df_trades: pl.DataFrame) -> pl.DataFrame:
-    """
-    Aggregate trade-level data to daily level per ISIN.
-    
-    Computes first/last/min/max prices, total volume, trade counts,
-    and off-book percentage for each ISIN on each trading day.
-    
-    Args:
-        df_trades: Raw trade DataFrame with Isin, Datum, Zeit, Kurs, Volumen, Off Book
-        
-    Returns:
-        DataFrame with daily aggregates (1 row per Isin per Datum)
+    """Aggregate raw trades into daily metrics per security.
+
+    Groups trades by ISIN and date, computing trade counts, volume
+    totals, price bounds, intraday volatility, off-book percentages,
+    and the maximum gap between consecutive trades.
+
+    Parameters
+    ----------
+    df_trades : pl.DataFrame
+        Raw trade-level DataFrame with columns: ``Isin``, ``Datum``,
+        ``Zeit``, ``Kurs``, ``Volumen``, ``Off Book``.
+
+    Returns
+    -------
+    pl.DataFrame
+        One row per ISIN per trading day with aggregated metrics
+        including ``trades_today``, ``volume_today_units``,
+        ``volume_today_chf``, ``price_min/max/first/last``,
+        ``volatility_daily``, ``trade_duration_min``, and
+        ``off_book_pct``.
     """
     # Add minutes column for trade duration calculation
     df_with_minutes = df_trades.with_columns(
@@ -95,20 +118,28 @@ def compute_daily_aggregates(df_trades: pl.DataFrame) -> pl.DataFrame:
 
 
 def compute_liquidity_metrics(df_daily: pl.DataFrame) -> pl.DataFrame:
-    """
-    Calculate derived liquidity metrics from daily aggregates.
-    
-    Metrics:
-        - price_change_pct: Percentage change from first to last price
-        - log_returns: Natural log of (last/first) price ratio
-        - amihud_daily: Price impact measure (|log_returns| / volume_chf * 10^6)
-        - spread_log_hl: Spread proxy using log(high/low)
-    
-    Args:
-        df_daily: Daily aggregated DataFrame
-        
-    Returns:
-        DataFrame with computed liquidity metrics
+    """Derive liquidity metrics from daily price and volume aggregates.
+
+    Adds the following columns:
+
+    * ``price_change_pct`` — percentage change from first to last price.
+    * ``log_returns`` — ``ln(price_last / price_first)``.
+    * ``spread_log_hl`` — ``ln(price_max / price_min)``, a proxy for
+      the bid-ask spread.
+    * ``amihud_daily`` — Amihud illiquidity ratio:
+      ``|log_returns| / volume_chf × 10⁶``.  Guarded against
+      division by zero (returns ``None`` when volume is zero).
+
+    Parameters
+    ----------
+    df_daily : pl.DataFrame
+        Daily aggregated DataFrame produced by
+        :func:`compute_daily_aggregates`.
+
+    Returns
+    -------
+    pl.DataFrame
+        Input DataFrame augmented with the four liquidity columns.
     """
     df_metrics = df_daily.with_columns([
         # Price change (%)
@@ -148,17 +179,34 @@ def compute_liquidity_metrics(df_daily: pl.DataFrame) -> pl.DataFrame:
 
 
 def compute_rolling_baselines(df_metrics: pl.DataFrame) -> pl.DataFrame:
-    """
-    Compute 30-trading-day rolling medians for key metrics.
-    
-    Uses trading days (not calendar days) - each row represents a trading day,
-    so a window of 30 means the last 30 days that the stock actually traded.
-    
-    Args:
-        df_metrics: DataFrame with daily metrics
-        
-    Returns:
-        DataFrame with rolling baseline columns added
+    """Compute 30-trading-day rolling medians for key metrics.
+
+    Uses **trading days** (not calendar days): each row represents a
+    day on which the security actually traded, so a window of 30 means
+    the last 30 sessions with activity for that ISIN.
+
+    Rolling medians are computed for:
+
+    * ``trades_today`` → ``trades_30d_median``
+    * ``volume_today_chf`` → ``volume_30d_median``
+    * ``volatility_daily`` → ``volatility_30d_median``
+    * ``amihud_daily`` → ``amihud_30d_median``
+
+    Parameters
+    ----------
+    df_metrics : pl.DataFrame
+        DataFrame with daily metrics produced by
+        :func:`compute_liquidity_metrics`.
+
+    Returns
+    -------
+    pl.DataFrame
+        Input DataFrame augmented with four ``*_30d_median`` columns.
+
+    Notes
+    -----
+    ``min_samples=1`` ensures that newly listed securities with fewer
+    than 30 trading days still receive a baseline estimate.
     """
     # Sort by date within each ISIN before computing rolling stats
     df_sorted = df_metrics.sort(["Isin", "Datum"])
@@ -191,19 +239,33 @@ def compute_rolling_baselines(df_metrics: pl.DataFrame) -> pl.DataFrame:
 
 
 def compute_anomaly_flags(df_rolling: pl.DataFrame) -> pl.DataFrame:
-    """
-    Flag anomalous trading activity based on deviation from baselines.
-    
-    Flags:
-        - volume_spike: Volume > 1.5x the 30-day median (weight: 3)
-        - activity_spike: Trades > 1.5x the 30-day median (weight: 2)
-        - price_gap: |price_change_pct| > 5% (weight: 2)
-    
-    Args:
-        df_rolling: DataFrame with rolling baselines
-        
-    Returns:
-        DataFrame with anomaly flags and composite score
+    """Flag anomalous trading activity by deviation from baselines.
+
+    Three binary flags are created and combined into a weighted
+    composite anomaly score (range 0–7):
+
+    +-----------------+------------------------------+--------+
+    | Flag            | Condition                    | Weight |
+    +=================+==============================+========+
+    | volume_spike    | volume > 1.5 × 30d median   | 3      |
+    +-----------------+------------------------------+--------+
+    | activity_spike  | trades > 1.5 × 30d median   | 2      |
+    +-----------------+------------------------------+--------+
+    | price_gap       | |price_change_pct| > 5 %    | 2      |
+    +-----------------+------------------------------+--------+
+
+    Parameters
+    ----------
+    df_rolling : pl.DataFrame
+        DataFrame with rolling baselines produced by
+        :func:`compute_rolling_baselines`.
+
+    Returns
+    -------
+    pl.DataFrame
+        Input DataFrame augmented with ``volume_spike``,
+        ``activity_spike``, ``price_gap`` (all ``Boolean``), and
+        ``anomaly_score`` (``UInt8``, 0–7).
     """
     df_anomaly = df_rolling.with_columns([
         # Volume spike: > 1.5x median
@@ -235,20 +297,28 @@ def compute_anomaly_flags(df_rolling: pl.DataFrame) -> pl.DataFrame:
 
 
 def compute_daily_metrics(df_trades: pl.DataFrame) -> pl.DataFrame:
-    """
-    Main pipeline: aggregate trades to daily metrics with anomaly scoring.
-    
-    Pipeline:
-        1. Daily aggregation (group by Isin, Datum)
-        2. Liquidity metrics calculation
-        3. 30-day rolling baselines
-        4. Anomaly detection
-    
-    Args:
-        df_trades: Raw trade-level DataFrame
-        
-    Returns:
-        DataFrame with complete daily metrics per ISIN
+    """Run the full metrics pipeline on raw trade data.
+
+    Orchestrates the four-step transformation:
+
+    1. **Daily aggregation** — group trades by ISIN × date.
+    2. **Liquidity metrics** — derive price change, log returns,
+       Amihud illiquidity, and spread proxy.
+    3. **Rolling baselines** — 30-trading-day medians per ISIN.
+    4. **Anomaly detection** — flag volume spikes, activity surges,
+       and price gaps; compute composite score.
+
+    Parameters
+    ----------
+    df_trades : pl.DataFrame
+        Raw trade-level DataFrame (output of
+        ``build_master_parquet``).
+
+    Returns
+    -------
+    pl.DataFrame
+        Complete daily metrics with anomaly scores — one row per
+        ISIN per trading day.
     """
     print("    Step 1/4: Daily aggregation...")
     df_daily = compute_daily_aggregates(df_trades)
@@ -267,10 +337,18 @@ def compute_daily_metrics(df_trades: pl.DataFrame) -> pl.DataFrame:
 
 
 def main() -> None:
-    """
-    Entry point for the metrics engine.
-    
-    Loads data, computes metrics, enriches with metadata, and saves output.
+    """Entry point for the metrics engine.
+
+    Loads the master trades Parquet and the securities metadata CSV,
+    runs the full metrics pipeline (:func:`compute_daily_metrics`),
+    enriches the output with security name and sector, and writes the
+    final ``daily_metrics.parquet`` to disk.
+
+    Raises
+    ------
+    FileNotFoundError
+        If ``master_trades.parquet`` or ``securities_enriched.csv`` is
+        missing from ``backend/data/``.
     """
     start_time = datetime.now()
     

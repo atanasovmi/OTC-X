@@ -1,7 +1,17 @@
-"""
-OTC-X Master Orchestrator
-One-click data pipeline: Scrape -> Fetch -> Consolidate -> Analyze
-Produces a detailed receipt log in backend/logs/ after each run.
+"""OTC-X Master Orchestrator.
+
+One-click data pipeline that executes the full ETL sequence::
+
+    Scrape → Fetch → Consolidate → Analyse
+
+Each stage is run in order; if any stage fails the pipeline halts
+immediately.  Console output is tee'd so it appears live **and** is
+captured for the receipt log.
+
+After execution a detailed receipt file is written to
+``backend/logs/pipeline_receipt_<timestamp>.log`` containing timing,
+data-product statistics, an anomaly snapshot, and the verbatim output
+of every stage.
 """
 
 import sys
@@ -31,26 +41,69 @@ _LOG_DIR = _BACKEND_DIR / "logs"
 
 
 class _TeeStream(io.TextIOBase):
-    """Write to both the real stdout and an internal buffer simultaneously."""
+    """Dual-write stream that mirrors output to stdout and a buffer.
 
-    def __init__(self, real_stdout: io.TextIOBase):
+    Used to capture stage output for the receipt log while still
+    displaying it live on the console.
+    """
+
+    def __init__(self, real_stdout: io.TextIOBase) -> None:
+        """Initialise the tee stream.
+
+        Parameters
+        ----------
+        real_stdout : io.TextIOBase
+            The original ``sys.stdout`` to forward writes to.
+        """
         self._real = real_stdout
         self._buf = io.StringIO()
 
     def write(self, s: str) -> int:
+        """Write *s* to both the real stdout and the internal buffer.
+
+        Parameters
+        ----------
+        s : str
+            Text to write.
+
+        Returns
+        -------
+        int
+            Number of characters written (always ``len(s)``).
+        """
         self._real.write(s)
         self._buf.write(s)
         return len(s)
 
     def flush(self) -> None:
+        """Flush the underlying real stdout stream."""
         self._real.flush()
 
     def getvalue(self) -> str:
+        """Return everything captured in the internal buffer.
+
+        Returns
+        -------
+        str
+            Accumulated output since construction.
+        """
         return self._buf.getvalue()
 
 
 def _file_stats(path: Path) -> str:
-    """Return human-readable file size or 'N/A'."""
+    """Return a human-readable file size string for *path*.
+
+    Parameters
+    ----------
+    path : Path
+        Filesystem path to inspect.
+
+    Returns
+    -------
+    str
+        Size formatted as ``"X.XX MB"``, ``"X.X KB"``, or ``"X B"``.
+        Returns ``"N/A"`` if the file does not exist.
+    """
     if path.exists():
         size = path.stat().st_size
         if size >= 1_048_576:
@@ -62,17 +115,55 @@ def _file_stats(path: Path) -> str:
 
 
 def _count_files(directory: Path, pattern: str = "*.csv") -> int:
-    """Count files matching a glob pattern."""
+    """Count files matching a glob pattern inside *directory*.
+
+    Parameters
+    ----------
+    directory : Path
+        Directory to search.
+    pattern : str, optional
+        Glob pattern to match, by default ``"*.csv"``.
+
+    Returns
+    -------
+    int
+        Number of matching files, or ``0`` if the directory does not
+        exist.
+    """
     if directory.exists():
         return len(list(directory.glob(pattern)))
     return 0
 
 
-def _run_stage(name: str, func, receipt_lines: list, stage_results: list):
-    """
-    Execute a pipeline stage, capture its stdout, track timing and status.
-    Output streams live to the console and is also buffered for the receipt.
-    Returns True on success, False on failure.
+def _run_stage(
+    name: str,
+    func: callable,
+    receipt_lines: list[str],
+    stage_results: list[dict],
+) -> bool:
+    """Execute a single pipeline stage with output capture and timing.
+
+    Temporarily replaces ``sys.stdout`` with a :class:`_TeeStream` so
+    that stage output streams live to the console **and** is buffered
+    for the receipt log.
+
+    Parameters
+    ----------
+    name : str
+        Human-readable stage name (e.g. ``"Stage 1: Valor Extraction"``).
+    func : callable
+        Zero-argument callable that performs the stage work.
+    receipt_lines : list[str]
+        Mutable list to which receipt summary lines are appended.
+    stage_results : list[dict]
+        Mutable list to which a result dict (``name``, ``success``,
+        ``elapsed``, ``error``, ``output``) is appended.
+
+    Returns
+    -------
+    bool
+        ``True`` if the stage completed without raising an exception,
+        ``False`` otherwise.
     """
     start = datetime.now()
     success = False
@@ -118,9 +209,35 @@ def _run_stage(name: str, func, receipt_lines: list, stage_results: list):
     return success
 
 
-def _build_receipt(start_time: datetime, end_time: datetime,
-                   stage_results: list, receipt_stages: list) -> str:
-    """Build the full pipeline receipt as a formatted string."""
+def _build_receipt(
+    start_time: datetime,
+    end_time: datetime,
+    stage_results: list[dict],
+    receipt_stages: list[str],
+) -> str:
+    """Build the full pipeline receipt as a formatted string.
+
+    Assembles a human-readable report containing execution timing,
+    per-stage status, data-product statistics (row counts, file sizes),
+    an anomaly snapshot of the latest trading day per ISIN, and the
+    verbatim log output of each stage.
+
+    Parameters
+    ----------
+    start_time : datetime
+        Pipeline start timestamp.
+    end_time : datetime
+        Pipeline end timestamp.
+    stage_results : list[dict]
+        Per-stage result dicts produced by :func:`_run_stage`.
+    receipt_stages : list[str]
+        Per-stage summary lines produced by :func:`_run_stage`.
+
+    Returns
+    -------
+    str
+        Multi-line receipt string ready to be written to a log file.
+    """
     duration = end_time - start_time
     all_ok = all(s["success"] for s in stage_results)
 
@@ -245,7 +362,21 @@ def _build_receipt(start_time: datetime, end_time: datetime,
     return "\n".join(lines)
 
 
-def main():
+def main() -> None:
+    """Run the full OTC-X data pipeline end-to-end.
+
+    Executes four stages in sequence:
+
+    1. **Valor Extraction** — crawl the OTC-X API for the securities
+       universe.
+    2. **Trade Data Retrieval** — download per-security trade CSVs.
+    3. **Data Consolidation** — merge CSVs into a master Parquet.
+    4. **Liquidity Metrics Engine** — compute daily metrics and anomaly
+       scores.
+
+    If any stage fails, subsequent stages are skipped and the receipt
+    is finalised immediately.
+    """
     start_total = datetime.now()
 
     print("\n" + "=" * 80)
@@ -284,8 +415,23 @@ def main():
     _finalise_receipt(start_total, receipt_stages, stage_results)
 
 
-def _finalise_receipt(start_total, receipt_stages, stage_results):
-    """Write the receipt log and print final status."""
+def _finalise_receipt(
+    start_total: datetime,
+    receipt_stages: list[str],
+    stage_results: list[dict],
+) -> None:
+    """Write the receipt log to disk and print a final status summary.
+
+    Parameters
+    ----------
+    start_total : datetime
+        Pipeline start timestamp (used for duration calculation and
+        filename generation).
+    receipt_stages : list[str]
+        Per-stage summary lines produced by :func:`_run_stage`.
+    stage_results : list[dict]
+        Per-stage result dicts produced by :func:`_run_stage`.
+    """
     end_total = datetime.now()
     duration = end_total - start_total
     all_ok = all(s["success"] for s in stage_results)

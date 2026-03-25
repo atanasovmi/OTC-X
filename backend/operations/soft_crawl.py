@@ -1,8 +1,37 @@
+"""OTC-X Securities Crawler (Soft Crawl).
+
+Fetches the current universe of Swiss OTC-X securities from the public
+OTC-X market API and persists two identical CSV snapshots:
+``securities.csv`` (canonical reference) and ``securities_enriched.csv``
+(downstream enrichment seed).
+
+This module is the **first stage** of the OTC-X data pipeline and must
+run before any trade-level fetching or metric computation.
+"""
+
 import pandas as pd
 import requests
 from pathlib import Path
 
-def run_crawl():
+
+def run_crawl() -> pd.DataFrame:
+    """Crawl the OTC-X API and persist the securities universe to CSV.
+
+    Sends a single GET request to the ``/api/market/securities`` endpoint,
+    parses the JSON response, and writes the resulting DataFrame to two
+    CSV files under ``backend/data/``.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with columns ``NAME``, ``SEKTOR``, ``VALOR``, ``ISIN``
+        — one row per listed security.
+
+    Raises
+    ------
+    requests.HTTPError
+        If the API returns a non-2xx status code.
+    """
     print("Fetching securities dynamically from OTC-X API...")
     url = "https://www.otc-x.ch/api/market/securities"
     headers = {
@@ -42,6 +71,7 @@ def run_crawl():
     print(f"Gespeichert in: {path_sec.resolve()}")
     print(f"Gespeichert in: {path_enr.resolve()}")
     return df
+
 
 if __name__ == "__main__":
     df = run_crawl()
