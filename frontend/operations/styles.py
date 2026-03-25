@@ -1,7 +1,25 @@
+"""Global CSS injection for the OTC-X Streamlit dashboard.
+
+Provides the ``inject_css`` function which embeds the full custom
+stylesheet — typography (Inter, IBM Plex Mono), brand colours, metric
+cards, table styles, badges, and Streamlit widget overrides — into
+the running Streamlit page via ``st.markdown``.
+"""
+
 import streamlit as st
 
 
 def inject_css() -> None:
+    """Inject the full OTC-X stylesheet into the active Streamlit page.
+
+    Embeds a ``<style>`` block containing all custom CSS rules required by
+    the dashboard, including brand typography, KPI cards, market tables,
+    anomaly badges, tab overrides, sidebar styling, and comprehensive
+    Streamlit widget contrast fixes.
+
+    The function is idempotent — Streamlit deduplicates identical
+    ``st.markdown`` calls within the same script run.
+    """
     st.markdown(
         """
         <style>

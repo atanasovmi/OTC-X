@@ -1,3 +1,12 @@
+"""Reusable Streamlit UI components for the OTC-X dashboard.
+
+Provides HTML-rendering functions for the branded page header, KPI
+metric cards, and two flavours of market-data tables (compact overview
+table and the full-width native data-explorer table).  All output is
+injected via ``st.markdown(…, unsafe_allow_html=True)`` and relies on
+the CSS classes defined in ``styles.py``.
+"""
+
 import streamlit as st
 import pandas as pd
 from html import escape as _esc
@@ -7,6 +16,17 @@ from frontend.operations.utils import fmt_chf, fmt_num, fmt_pct, pct_cls, score_
 
 
 def render_header(latest_date: str) -> None:
+    """Render the branded OTC|X page header with live-status indicator.
+
+    Outputs a full-width header bar containing the logo, tagline, a
+    pulsing "Live" dot, and the date of the most recent data refresh.
+
+    Parameters
+    ----------
+    latest_date : str
+        Human-readable date string (e.g. ``"31.12.2024"``) shown next
+        to the live indicator.
+    """
     st.markdown(
         f"""
         <div class="otcx-header">
@@ -27,6 +47,20 @@ def render_header(latest_date: str) -> None:
 
 
 def render_kpis(latest: pd.DataFrame) -> None:
+    """Render the five top-level KPI cards for the Overview tab.
+
+    Computes aggregate statistics (market volume, active securities,
+    average price change, volume spikes, and anomaly counts) from the
+    latest snapshot and displays them in a single row of branded KPI
+    cards.
+
+    Parameters
+    ----------
+    latest : pd.DataFrame
+        Latest per-ISIN snapshot with columns ``volume_today_chf``,
+        ``trades_today``, ``price_change_pct``, ``volume_spike``,
+        ``activity_spike``, and ``anomaly_score``.
+    """
     total_vol   = latest["volume_today_chf"].sum()
     total_trades = int(latest["trades_today"].sum())
     active       = int((latest["trades_today"] > 0).sum())
@@ -69,6 +103,19 @@ def render_kpis(latest: pd.DataFrame) -> None:
 
 
 def render_market_table(df: pd.DataFrame, n: int = 50) -> None:
+    """Render a compact HTML market-data table (Overview tab).
+
+    Produces a ``<table class='mkt-table'>`` with a fixed column set:
+    ISIN (linked), security name, sector, date, volume (CHF & units),
+    trades, price change, volatility, and anomaly badge.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Filtered / sorted market-data snapshot.
+    n : int, optional
+        Maximum number of rows to display (default ``50``).
+    """
     display = df.head(n)
     rows = ""
     for _, r in display.iterrows():
@@ -118,7 +165,19 @@ def render_market_table(df: pd.DataFrame, n: int = 50) -> None:
 
 
 def _flag_dot(active: bool) -> str:
-    """Return a coloured dot for boolean flag columns."""
+    """Return a coloured HTML dot for boolean flag columns.
+
+    Parameters
+    ----------
+    active : bool
+        ``True`` renders a solid red dot (●); ``False`` renders a muted
+        grey middle-dot (·).
+
+    Returns
+    -------
+    str
+        HTML ``<span>`` element containing the dot character.
+    """
     if active:
         return "<span style='color:#B22222;font-size:0.9rem;'>●</span>"
     return "<span style='color:#CED4DA;font-size:0.9rem;'>·</span>"
@@ -153,41 +212,41 @@ def render_native_dataframe(df: pd.DataFrame, n: int = 50) -> None:
     def _f_sektor(v: str, _r: pd.Series) -> str:
         return _esc(str(v)[:22]) if pd.notna(v) else "—"
 
-    def _f_date(v, _r: pd.Series) -> str:
+    def _f_date(v: object, _r: pd.Series) -> str:
         return v.strftime("%d.%m.%Y") if pd.notna(v) else "—"
 
-    def _f_chf(v, _r: pd.Series) -> str:
+    def _f_chf(v: object, _r: pd.Series) -> str:
         return fmt_chf(v)
 
-    def _f_pct(v, _r: pd.Series) -> str:
+    def _f_pct(v: object, _r: pd.Series) -> str:
         cls = pct_cls(v)
         return f"<span class='{cls}'>{fmt_pct(v)}</span>"
 
-    def _f_int(v, _r: pd.Series) -> str:
+    def _f_int(v: object, _r: pd.Series) -> str:
         return fmt_num(v, dec=0) if pd.notna(v) else "—"
 
-    def _f_d2(v, _r: pd.Series) -> str:
+    def _f_d2(v: object, _r: pd.Series) -> str:
         return f"{float(v):.2f}" if pd.notna(v) else "—"
 
-    def _f_d4(v, _r: pd.Series) -> str:
+    def _f_d4(v: object, _r: pd.Series) -> str:
         return f"{float(v):.4f}" if pd.notna(v) else "—"
 
-    def _f_d6(v, _r: pd.Series) -> str:
+    def _f_d6(v: object, _r: pd.Series) -> str:
         return f"{float(v):.6f}" if pd.notna(v) else "—"
 
-    def _f_d1(v, _r: pd.Series) -> str:
+    def _f_d1(v: object, _r: pd.Series) -> str:
         return f"{float(v):.1f}" if pd.notna(v) else "—"
 
-    def _f_pct_plain(v, _r: pd.Series) -> str:
+    def _f_pct_plain(v: object, _r: pd.Series) -> str:
         return f"{float(v):.2f}%" if pd.notna(v) else "—"
 
-    def _f_badge(v, _r: pd.Series) -> str:
+    def _f_badge(v: object, _r: pd.Series) -> str:
         return score_badge(int(v)) if pd.notna(v) else "—"
 
-    def _f_flag(v, _r: pd.Series) -> str:
+    def _f_flag(v: object, _r: pd.Series) -> str:
         return _flag_dot(bool(v))
 
-    def _f_vol_num(v, _r: pd.Series) -> str:
+    def _f_vol_num(v: object, _r: pd.Series) -> str:
         return fmt_num(v, dec=0) if pd.notna(v) else "—"
 
     cols: list[tuple[str, str, str, str, object]] = [

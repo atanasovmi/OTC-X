@@ -1,3 +1,25 @@
+"""Plotly chart factories for the OTC-X dashboard.
+
+Each public function accepts pre-processed pandas DataFrames and returns
+a fully configured ``plotly.graph_objects.Figure`` ready for display via
+``st.plotly_chart``.  All figures share a common layout baseline
+(``_base_layout``) that enforces the brand colour scheme, Inter
+typography, and high-contrast axis labels.
+
+Charts
+------
+- Market activity (dual-axis bar + line)
+- Sector treemap, volume-by-sector bar
+- Top movers horizontal bar
+- Volume-vs-price scatter (log-scaled, per-sector colour)
+- Amihud illiquidity box-plots
+- Rolling volatility trends (SMA / EWMA)
+- Correlation heatmap (lower-triangle)
+- Anomaly severity treemap
+- Single-security price + volume history
+- Interactive 3-D scatter explorer (5-variable mapping)
+"""
+
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
@@ -12,8 +34,23 @@ from frontend.operations.utils import _hex_to_rgba, fmt_chf, fmt_pct
 
 
 def _deep_merge(base: dict, override: dict) -> dict:
-    """Recursively merge *override* into *base* so nested dicts are merged
-    rather than replaced (prevents axis tickfont/title_font color loss)."""
+    """Recursively merge *override* into *base* (nested-dict aware).
+
+    Prevents axis ``tickfont`` / ``title_font`` colour loss that occurs
+    when a shallow ``dict.update`` replaces an entire nested mapping.
+
+    Parameters
+    ----------
+    base : dict
+        Base configuration dictionary.
+    override : dict
+        Override dictionary whose values take precedence.
+
+    Returns
+    -------
+    dict
+        New dictionary with recursively merged contents.
+    """
     merged = base.copy()
     for k, v in override.items():
         if k in merged and isinstance(merged[k], dict) and isinstance(v, dict):
@@ -23,7 +60,24 @@ def _deep_merge(base: dict, override: dict) -> dict:
     return merged
 
 
-def _base_layout(**kwargs) -> dict:
+def _base_layout(**kwargs: object) -> dict:
+    """Build a Plotly layout dict with OTC-X brand defaults.
+
+    Sets the template to ``plotly_white``, enforces Inter typography,
+    white backgrounds, and high-contrast ``#1A1A2E`` axis text.  Caller
+    overrides are deep-merged so partial axis dicts do not clobber
+    defaults.
+
+    Parameters
+    ----------
+    **kwargs : object
+        Arbitrary Plotly layout properties to merge on top of the base.
+
+    Returns
+    -------
+    dict
+        Layout keyword dict suitable for ``fig.update_layout(**result)``.
+    """
     _axis_defaults = dict(
         color="#1A1A2E",
         tickfont=dict(color="#1A1A2E"),
@@ -52,6 +106,22 @@ def _base_layout(**kwargs) -> dict:
 
 
 def chart_market_activity(df_hist: pd.DataFrame) -> go.Figure:
+    """Build a dual-axis chart of market activity over the last 90 days.
+
+    Displays daily aggregate volume as bars on the primary y-axis and
+    total trade count as a line on the secondary y-axis.
+
+    Parameters
+    ----------
+    df_hist : pd.DataFrame
+        Full historical DataFrame with columns ``Datum``,
+        ``volume_today_chf``, and ``trades_today``.
+
+    Returns
+    -------
+    go.Figure
+        Plotly figure with dual-axis market activity visualisation.
+    """
     daily = (
         df_hist.groupby("Datum")
         .agg(vol=("volume_today_chf", "sum"), trades=("trades_today", "sum"))
@@ -94,6 +164,23 @@ def chart_market_activity(df_hist: pd.DataFrame) -> go.Figure:
 
 
 def chart_sector_treemap(latest: pd.DataFrame) -> go.Figure:
+    """Create a sector-allocation treemap coloured by average price change.
+
+    Box sizes represent aggregate CHF volume per sector; the colour scale
+    maps from red (negative average Δ%) through neutral to green
+    (positive average Δ%).
+
+    Parameters
+    ----------
+    latest : pd.DataFrame
+        Latest-snapshot DataFrame with ``Sektor``, ``volume_today_chf``,
+        ``Isin``, and ``price_change_pct``.
+
+    Returns
+    -------
+    go.Figure
+        Plotly treemap figure.
+    """
     g = (
         latest.groupby("Sektor", as_index=False)
         .agg(
@@ -126,6 +213,26 @@ def chart_sector_treemap(latest: pd.DataFrame) -> go.Figure:
 
 
 def chart_top_movers(latest: pd.DataFrame, n: int = 14) -> go.Figure:
+    """Horizontal bar chart of the top *n* gainers and losers by price change.
+
+    Securities with zero price change are excluded.  The chart shows
+    ``n // 2`` gainers and ``n // 2`` losers sorted from most negative
+    to most positive.
+
+    Parameters
+    ----------
+    latest : pd.DataFrame
+        Latest-snapshot DataFrame with ``price_change_pct``, ``Name``,
+        and ``Isin``.
+    n : int, optional
+        Total number of movers to display (default ``14``).
+
+    Returns
+    -------
+    go.Figure
+        Horizontal bar chart of top movers, or an empty figure if no
+        securities moved.
+    """
     df = latest[latest["price_change_pct"] != 0].copy()
     if df.empty:
         return go.Figure()
@@ -160,6 +267,19 @@ def chart_top_movers(latest: pd.DataFrame, n: int = 14) -> go.Figure:
 
 
 def chart_volume_by_sector(latest: pd.DataFrame) -> go.Figure:
+    """Horizontal bar chart of total CHF volume aggregated by sector.
+
+    Parameters
+    ----------
+    latest : pd.DataFrame
+        Latest-snapshot DataFrame with ``Sektor`` and
+        ``volume_today_chf``.
+
+    Returns
+    -------
+    go.Figure
+        Sorted horizontal bar chart with volumes labelled in CHF.
+    """
     s = (
         latest.groupby("Sektor")["volume_today_chf"]
         .sum()
@@ -188,10 +308,23 @@ def chart_volume_by_sector(latest: pd.DataFrame) -> go.Figure:
 
 
 def chart_scatter_volume_price(latest: pd.DataFrame) -> go.Figure:
-    """Volume vs Price-Change scatter — log-scaled X, per-sector colour.
+    """Volume vs. price-change scatter — log-scaled X, per-sector colour.
 
-    Outliers clipped to 1st–99th percentile to avoid crowding.
-    Zero-volume rows excluded from log axis.
+    Outliers are clipped to the 1st–99th percentile (volume) and
+    0.5th–99.5th percentile (price change) to avoid crowding.
+    Zero-volume rows are excluded because the X-axis is logarithmic.
+
+    Parameters
+    ----------
+    latest : pd.DataFrame
+        Latest-snapshot DataFrame with ``volume_today_chf``,
+        ``price_change_pct``, ``Name``, ``Isin``, and ``Sektor``.
+
+    Returns
+    -------
+    go.Figure
+        Scatter plot with log-scaled X-axis and per-sector colouring,
+        or an empty figure if no data survives filtering.
     """
     df = latest[latest["volume_today_chf"] > 0].copy()
     if df.empty:
@@ -260,7 +393,22 @@ def chart_scatter_volume_price(latest: pd.DataFrame) -> go.Figure:
 
 
 def chart_amihud_by_sector(df_hist: pd.DataFrame) -> go.Figure:
-    """Box-plot of Amihud illiquidity per sector (95th pct cutoff)."""
+    """Box-plot of Amihud illiquidity ratio per sector.
+
+    Values are capped at the 95th percentile to suppress extreme
+    outliers. Sectors are ordered by ascending median illiquidity so
+    the most liquid sectors appear first.
+
+    Parameters
+    ----------
+    df_hist : pd.DataFrame
+        Full historical DataFrame with ``amihud_daily`` and ``Sektor``.
+
+    Returns
+    -------
+    go.Figure
+        Plotly box-plot figure with per-sector colouring.
+    """
     df = df_hist[df_hist["amihud_daily"] > 0].copy()
     cap = df["amihud_daily"].quantile(0.95)
     df = df[df["amihud_daily"] <= cap]
@@ -301,13 +449,30 @@ def chart_amihud_by_sector(df_hist: pd.DataFrame) -> go.Figure:
 def chart_volatility_trend(df_hist: pd.DataFrame, n: int = 5,
                            show_raw_sma: bool = False,
                            selected_sector: str | None = None) -> go.Figure:
-    """Rolling volatility chart with optional EWMA smoothing and
-    hover-to-isolate interaction.
+    """Rolling volatility chart for the top *n* sectors by trade count.
+
+    Supports two smoothing modes: a raw 30-day SMA and a triple-smoothed
+    macro-trend series (SMA-90 → EWM-120 → EWM-60).  An optional
+    *selected_sector* parameter dims all other traces for
+    click-to-isolate interactivity.
 
     Parameters
     ----------
-    show_raw_sma : If True, show raw 30-day SMA instead of EWMA-smoothed series.
-    selected_sector : If set, highlight only this sector and dim others.
+    df_hist : pd.DataFrame
+        Full historical DataFrame with ``Sektor``, ``Datum``,
+        ``trades_today``, and ``volatility_daily``.
+    n : int, optional
+        Number of top sectors (by total trades) to display (default ``5``).
+    show_raw_sma : bool, optional
+        If ``True``, display the raw 30-day SMA instead of the
+        EWMA-smoothed series (default ``False``).
+    selected_sector : str or None, optional
+        When set, highlight only this sector and dim all others.
+
+    Returns
+    -------
+    go.Figure
+        Multi-line volatility trend figure.
     """
     top_sectors = (
         df_hist.groupby("Sektor")["trades_today"]
@@ -374,7 +539,26 @@ def chart_volatility_trend(df_hist: pd.DataFrame, n: int = 5,
 
 
 def chart_correlation_heatmap(df: pd.DataFrame, selected_cols: list[str] | None = None) -> go.Figure:
-    """Full-width correlation matrix with configurable metrics."""
+    """Lower-triangle correlation heatmap with configurable metric set.
+
+    Computes the Pearson correlation matrix for the chosen columns and
+    masks the upper triangle for a clean, publication-style layout.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Latest-snapshot (or filtered) DataFrame containing the numeric
+        columns referenced by *selected_cols*.
+    selected_cols : list[str] or None, optional
+        Column names to include.  Defaults to the first seven entries
+        from the canonical metric mapping when ``None``.
+
+    Returns
+    -------
+    go.Figure
+        Annotated heatmap coloured on a diverging blue–white–red scale
+        with ρ values overlaid.
+    """
     all_cols = {
         "price_change_pct": "Δ Price",
         "volatility_daily": "Volatility σ",
@@ -435,8 +619,25 @@ def chart_correlation_heatmap(df: pd.DataFrame, selected_cols: list[str] | None 
 
 
 def chart_anomaly_severity_treemap(latest: pd.DataFrame) -> go.Figure:
-    """Treemap showing securities grouped by anomaly severity tier —
-    each box is sized by anomaly_score and colour-coded by severity."""
+    """Treemap of securities grouped by anomaly severity tier.
+
+    Each box is sized by the security's ``anomaly_score`` and
+    colour-coded by severity tier (Alert → Critical → Severe → Extreme).
+    Clean securities (score 0) are excluded.
+
+    Parameters
+    ----------
+    latest : pd.DataFrame
+        Latest-snapshot DataFrame with ``anomaly_score``, ``Name``,
+        ``Isin``, ``Sektor``, ``volume_today_chf``,
+        ``price_change_pct``, and ``volatility_daily``.
+
+    Returns
+    -------
+    go.Figure
+        Hierarchical treemap figure, or an empty figure if no
+        anomalies exist.
+    """
     df = latest[latest["anomaly_score"] >= 1].copy()
     if df.empty:
         return go.Figure()
@@ -497,6 +698,26 @@ def chart_anomaly_severity_treemap(latest: pd.DataFrame) -> go.Figure:
 
 
 def chart_security_history(df_hist: pd.DataFrame, isin: str) -> go.Figure:
+    """Price-and-volume history chart for a single security.
+
+    Upper panel shows the last-price line overlaid with a ±1 σ
+    rolling-standard-deviation band (30-day window).  Lower panel
+    shows daily CHF volume as bars.
+
+    Parameters
+    ----------
+    df_hist : pd.DataFrame
+        Full historical DataFrame with ``Isin``, ``Datum``,
+        ``price_last``, and ``volume_today_chf``.
+    isin : str
+        ISIN identifier of the security to plot.
+
+    Returns
+    -------
+    go.Figure
+        Two-row subplot (price + volume), or an empty figure if the
+        ISIN has no history.
+    """
     sec = df_hist[df_hist["Isin"] == isin].sort_values("Datum")
     if sec.empty:
         return go.Figure()
@@ -567,16 +788,39 @@ def chart_3d_explorer(
     use_log: bool = False,
     remove_outliers: bool = False,
 ) -> go.Figure:
-    """Interactive 3D scatter plot with 5+ variable mapping.
+    """Interactive 3-D scatter plot with five-variable mapping.
+
+    Maps three numeric columns to spatial axes, a fourth to marker
+    colour, and a fifth to marker size.  Optionally applies log₁₀
+    transforms and percentile-based outlier removal.
 
     Parameters
     ----------
-    df : filtered dataframe (latest snapshot)
-    x_col, y_col, z_col : columns mapped to 3D axes
-    color_col : column mapped to colour
-    size_col : column mapped to marker size
-    use_log : apply log₁₀ transformation to numeric axes
-    remove_outliers : clip values beyond 1st–99th percentile
+    df : pd.DataFrame
+        Filtered latest-snapshot DataFrame.
+    x_col : str
+        Column name mapped to the X-axis.
+    y_col : str
+        Column name mapped to the Y-axis.
+    z_col : str
+        Column name mapped to the Z-axis.
+    color_col : str
+        Column name mapped to marker colour (continuous scale).
+    size_col : str
+        Column name mapped to marker size (normalised to ``[6, 35]``).
+    use_log : bool, optional
+        Apply ``log₁₀`` transformation to the three spatial axes
+        (default ``False``).  Negative / zero values are shifted before
+        the transform.
+    remove_outliers : bool, optional
+        Clip all numeric columns to the 1st–99th percentile
+        (default ``False``).
+
+    Returns
+    -------
+    go.Figure
+        Plotly 3-D scatter figure, or an empty figure if the cleaned
+        DataFrame is empty.
     """
     metric_labels = {
         "price_change_pct": "Δ Price %",
