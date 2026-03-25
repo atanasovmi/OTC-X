@@ -36,7 +36,7 @@
      ═══════════════════════════════════════════════════════════════ -->
 
 <a href="https://otc-x-radar.streamlit.app">
-  <img src="assets/cta-dashboard.svg" alt="Visit Live Dashboard" width="260"/>
+  <img src="https://img.shields.io/badge/▸_Visit_Live_Dashboard-B22222?style=for-the-badge&logoColor=white" alt="Visit Live Dashboard"/>
 </a>
 
 </div>
@@ -412,7 +412,7 @@ The live dashboard is publicly available — no installation required:
 <div align="center">
 
 <a href="https://otc-x-radar.streamlit.app">
-  <img src="assets/cta-dashboard.svg" alt="Visit Live Dashboard" width="240"/>
+  <img src="https://img.shields.io/badge/▸_Visit_Live_Dashboard-B22222?style=for-the-badge&logoColor=white" alt="Visit Live Dashboard"/>
 </a>
 
 </div>
@@ -706,7 +706,7 @@ Qualsiasi accesso a questo repository non costituisce una concessione di licenza
 <br/>
 
 <a href="https://otc-x-radar.streamlit.app">
-  <img src="assets/cta-dashboard.svg" alt="Visit Live Dashboard" width="240"/>
+  <img src="https://img.shields.io/badge/▸_Visit_Live_Dashboard-B22222?style=for-the-badge&logoColor=white" alt="Visit Live Dashboard"/>
 </a>
 
 <br/><br/>
