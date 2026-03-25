@@ -19,14 +19,14 @@
 <!-- Tech Stack Badges -->
 <p>
   <img src="https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white" alt="Python"/>
-  <img src="https://img.shields.io/badge/Polars-CD792C?style=flat&logo=polars&logoColor=white" alt="Polars"/>
+  <img src="https://img.shields.io/badge/Polars-000000?style=flat&logo=polars&logoColor=white" alt="Polars"/>
   <img src="https://img.shields.io/badge/Pandas-150458?style=flat&logo=pandas&logoColor=white" alt="Pandas"/>
-  <img src="https://img.shields.io/badge/NumPy-013243?style=flat&logo=numpy&logoColor=white" alt="NumPy"/>
+  <img src="https://img.shields.io/badge/NumPy-4DABCF?style=flat&logo=numpy&logoColor=white" alt="NumPy"/>
   <img src="https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white" alt="Streamlit"/>
-  <img src="https://img.shields.io/badge/Plotly-3F4F75?style=flat&logo=plotly&logoColor=white" alt="Plotly"/>
+  <img src="https://img.shields.io/badge/Plotly-AB63FA?style=flat&logo=plotly&logoColor=white" alt="Plotly"/>
   <img src="https://img.shields.io/badge/Apache_Parquet-50ABF1?style=flat&logo=apache&logoColor=white" alt="Parquet"/>
   <img src="https://img.shields.io/badge/GitHub_Actions-2088FF?style=flat&logo=githubactions&logoColor=white" alt="GitHub Actions"/>
-  <img src="https://img.shields.io/badge/pytest-0A9EDC?style=flat&logo=pytest&logoColor=white" alt="pytest"/>
+  <img src="https://img.shields.io/badge/pytest-009688?style=flat&logo=pytest&logoColor=white" alt="pytest"/>
 </p>
 
 <br/>
@@ -36,10 +36,7 @@
      ═══════════════════════════════════════════════════════════════ -->
 
 <a href="https://otc-x-radar.streamlit.app">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://capsule-render.vercel.app/api?type=rect&color=gradient&customColorList=12&height=48&text=▸%20%20Visit%20Live%20Dashboard&fontSize=18&fontColor=FFFFFF&fontAlignY=55"/>
-    <img src="https://capsule-render.vercel.app/api?type=rect&color=gradient&customColorList=12&height=48&text=▸%20%20Visit%20Live%20Dashboard&fontSize=18&fontColor=FFFFFF&fontAlignY=55" alt="Visit Live Dashboard" width="320"/>
-  </picture>
+  <img src="assets/cta-dashboard.svg" alt="Visit Live Dashboard" width="260"/>
 </a>
 
 </div>
@@ -116,17 +113,17 @@ flowchart TB
 </tr>
 <tr>
 <td><b>ETL</b></td>
-<td><img src="https://img.shields.io/badge/-Polars-CD792C?style=flat-square&logo=polars&logoColor=white" height="22" align="center"/></td>
+<td><img src="https://img.shields.io/badge/-Polars-000000?style=flat-square&logo=polars&logoColor=white" height="22" align="center"/></td>
 <td>High-performance DataFrame engine</td>
 </tr>
 <tr>
 <td><b>Analytics</b></td>
-<td><img src="https://img.shields.io/badge/-Pandas-150458?style=flat-square&logo=pandas&logoColor=white" height="22" align="center"/>  <img src="https://img.shields.io/badge/-NumPy-013243?style=flat-square&logo=numpy&logoColor=white" height="22" align="center"/></td>
+<td><img src="https://img.shields.io/badge/-Pandas-150458?style=flat-square&logo=pandas&logoColor=white" height="22" align="center"/>  <img src="https://img.shields.io/badge/-NumPy-4DABCF?style=flat-square&logo=numpy&logoColor=white" height="22" align="center"/></td>
 <td>Data manipulation & numerics</td>
 </tr>
 <tr>
 <td><b>Dashboard</b></td>
-<td><img src="https://img.shields.io/badge/-Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white" height="22" align="center"/>  <img src="https://img.shields.io/badge/-Plotly-3F4F75?style=flat-square&logo=plotly&logoColor=white" height="22" align="center"/></td>
+<td><img src="https://img.shields.io/badge/-Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white" height="22" align="center"/>  <img src="https://img.shields.io/badge/-Plotly-AB63FA?style=flat-square&logo=plotly&logoColor=white" height="22" align="center"/></td>
 <td>Interactive web UI with 11 chart types</td>
 </tr>
 <tr>
@@ -141,7 +138,7 @@ flowchart TB
 </tr>
 <tr>
 <td><b>Testing</b></td>
-<td><img src="https://img.shields.io/badge/-pytest-0A9EDC?style=flat-square&logo=pytest&logoColor=white" height="22" align="center"/></td>
+<td><img src="https://img.shields.io/badge/-pytest-009688?style=flat-square&logo=pytest&logoColor=white" height="22" align="center"/></td>
 <td>58 unit & integration tests</td>
 </tr>
 </table>
@@ -415,10 +412,7 @@ The live dashboard is publicly available — no installation required:
 <div align="center">
 
 <a href="https://otc-x-radar.streamlit.app">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://capsule-render.vercel.app/api?type=rect&color=gradient&customColorList=12&height=40&text=▸%20%20Visit%20Live%20Dashboard&fontSize=16&fontColor=FFFFFF&fontAlignY=55"/>
-    <img src="https://capsule-render.vercel.app/api?type=rect&color=gradient&customColorList=12&height=40&text=▸%20%20Visit%20Live%20Dashboard&fontSize=16&fontColor=FFFFFF&fontAlignY=55" alt="Visit Live Dashboard" width="280"/>
-  </picture>
+  <img src="assets/cta-dashboard.svg" alt="Visit Live Dashboard" width="240"/>
 </a>
 
 </div>
@@ -712,10 +706,7 @@ Qualsiasi accesso a questo repository non costituisce una concessione di licenza
 <br/>
 
 <a href="https://otc-x-radar.streamlit.app">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://capsule-render.vercel.app/api?type=rect&color=gradient&customColorList=12&height=40&text=▸%20%20Visit%20Live%20Dashboard&fontSize=16&fontColor=FFFFFF&fontAlignY=55"/>
-    <img src="https://capsule-render.vercel.app/api?type=rect&color=gradient&customColorList=12&height=40&text=▸%20%20Visit%20Live%20Dashboard&fontSize=16&fontColor=FFFFFF&fontAlignY=55" alt="Visit Live Dashboard" width="280"/>
-  </picture>
+  <img src="assets/cta-dashboard.svg" alt="Visit Live Dashboard" width="240"/>
 </a>
 
 <br/><br/>
