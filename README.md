@@ -4,10 +4,7 @@
      HERO BANNER — Swiss-inspired OTC-X identity
      ═══════════════════════════════════════════════════════════════ -->
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://capsule-render.vercel.app/api?type=waving&color=0:1A1A2E,50:B22222,100:1A1A2E&height=220&section=header&text=OTC%20%7C%20X&fontSize=72&fontColor=FFFFFF&fontAlignY=36&desc=Liquidity%20Radar%20%E2%80%A2%20Swiss%20OTC%20Market%20Intelligence&descSize=18&descAlignY=58&descColor=F5F6F8&animation=fadeIn"/>
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:F5F6F8,30:B22222,70:B22222,100:1A1A2E&height=220&section=header&text=OTC%20%7C%20X&fontSize=72&fontColor=FFFFFF&fontAlignY=36&desc=Liquidity%20Radar%20%E2%80%A2%20Swiss%20OTC%20Market%20Intelligence&descSize=18&descAlignY=58&descColor=F5F6F8&animation=fadeIn" width="100%"/>
-</picture>
+<img src="assets/hero-banner.svg" alt="OTC | X — Liquidity Radar • Swiss OTC Market Intelligence" width="100%"/>
 
 <br/>
 
@@ -19,13 +16,13 @@
 <!-- Tech Stack Badges -->
 <p>
   <img src="https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white" alt="Python"/>
-  <img src="https://img.shields.io/badge/Polars-000000?style=flat&logo=polars&logoColor=white" alt="Polars"/>
+  <img src="https://img.shields.io/badge/Polars-CD792C?style=flat&logo=polars&logoColor=white" alt="Polars"/>
   <img src="https://img.shields.io/badge/Pandas-150458?style=flat&logo=pandas&logoColor=white" alt="Pandas"/>
-  <img src="https://img.shields.io/badge/NumPy-4DABCF?style=flat&logo=numpy&logoColor=white" alt="NumPy"/>
+  <img src="https://img.shields.io/badge/NumPy-013243?style=flat&logo=numpy&logoColor=white" alt="NumPy"/>
   <img src="https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white" alt="Streamlit"/>
-  <img src="https://img.shields.io/badge/Plotly-AB63FA?style=flat&logo=plotly&logoColor=white" alt="Plotly"/>
-  <img src="https://img.shields.io/badge/Apache_Parquet-50ABF1?style=flat&logo=apache&logoColor=white" alt="Parquet"/>
-  <img src="https://img.shields.io/badge/GitHub_Actions-2088FF?style=flat&logo=githubactions&logoColor=white" alt="GitHub Actions"/>
+  <img src="https://img.shields.io/badge/Plotly-3F4F75?style=flat&logo=plotly&logoColor=white" alt="Plotly"/>
+  <img src="https://img.shields.io/badge/Apache_Parquet-47A248?style=flat&logo=apache&logoColor=white" alt="Parquet"/>
+  <img src="https://img.shields.io/badge/GitHub_Actions-181717?style=flat&logo=githubactions&logoColor=white" alt="GitHub Actions"/>
   <img src="https://img.shields.io/badge/pytest-009688?style=flat&logo=pytest&logoColor=white" alt="pytest"/>
 </p>
 
@@ -68,28 +65,55 @@
 
 ## 🔭 What is OTC-X?
 
+<table>
+<tr>
+<td width="50%">
+
+### 🎯 Problem
+The Swiss OTC market is **opaque**: fragmented data sources, no standardized liquidity metrics, and invisible trading signals make informed decision-making nearly impossible for institutional investors.
+
+</td>
+<td width="50%">
+
+### 👥 Zielgruppe
+**BEKB Trading Desk** and institutional stakeholders of the OTC-X platform — the teams who need real-time market intelligence across **243 Swiss unlisted equities**.
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 💡 Lösung
+A fully automated **end-to-end data pipeline**: from raw OTC-X API data through 4-stage ETL processing, 26-metric computation, and anomaly detection — to an interactive Streamlit dashboard with **11 chart types**.
+
+</td>
+<td width="50%">
+
+### ⭐ Wert & Einzigartigkeit
+The **only live liquidity radar** for Swiss OTC equities: automated anomaly scoring, rolling 30-day risk baselines, and institutional-grade analytics — **zero manual intervention**, refreshed daily via GitHub Actions.
+
+</td>
+</tr>
+</table>
+
 <div align="center">
 
 ```mermaid
 flowchart LR
-    P["<b>Problem</b><br/>The Swiss OTC market is opaque:<br/>fragmented data, no liquidity<br/>metrics, invisible signals"]
-    T["<b>Target</b><br/>BEKB Trading Desk and<br/>institutional stakeholders<br/>of the OTC-X platform"]
-    S["<b>Solution</b><br/>End-to-end pipeline from<br/>data collection through<br/>anomaly scoring to dashboard"]
+    P["🎯 <b>Problem</b><br/>Opaque market,<br/>fragmented data"]
+    T["👥 <b>Zielgruppe</b><br/>BEKB Trading Desk,<br/>institutional stakeholders"]
+    S["💡 <b>Lösung</b><br/>4-stage pipeline →<br/>interactive dashboard"]
+    V["⭐ <b>Wert</b><br/>Live liquidity radar,<br/>zero manual intervention"]
 
-    P -->|who has it?| T -->|how we solve it| S
+    P -->|who has it?| T -->|how we solve it| S -->|why it matters| V
 
-    style P fill:#7B2D8E,stroke:#5A1A6E,color:#FFFFFF
-    style T fill:#7B2D8E,stroke:#5A1A6E,color:#FFFFFF
-    style S fill:#7B2D8E,stroke:#5A1A6E,color:#FFFFFF
+    style P fill:#F8F9FA,stroke:#555555,color:#1A1A2E
+    style T fill:#F8F9FA,stroke:#555555,color:#1A1A2E
+    style S fill:#F8F9FA,stroke:#555555,color:#1A1A2E
+    style V fill:#F8F9FA,stroke:#B22222,color:#1A1A2E,stroke-width:2px
     linkStyle 0 stroke:#999,stroke-width:2px
     linkStyle 1 stroke:#999,stroke-width:2px
-```
-
-```mermaid
-flowchart TB
-    V["<b>Value & Uniqueness</b><br/>Turns 243 unlisted Swiss equities into a live liquidity radar: detects anomalies, scores risk,<br/>and surfaces insights through 11 interactive charts — fully automated, zero manual intervention."]
-
-    style V fill:#A0B800,stroke:#7A8E00,color:#1A1A2E
+    linkStyle 2 stroke:#999,stroke-width:2px
 ```
 
 </div>
@@ -113,27 +137,27 @@ flowchart TB
 </tr>
 <tr>
 <td><b>ETL</b></td>
-<td><img src="https://img.shields.io/badge/-Polars-000000?style=flat-square&logo=polars&logoColor=white" height="22" align="center"/></td>
+<td><img src="https://img.shields.io/badge/-Polars-CD792C?style=flat-square&logo=polars&logoColor=white" height="22" align="center"/></td>
 <td>High-performance DataFrame engine</td>
 </tr>
 <tr>
 <td><b>Analytics</b></td>
-<td><img src="https://img.shields.io/badge/-Pandas-150458?style=flat-square&logo=pandas&logoColor=white" height="22" align="center"/>  <img src="https://img.shields.io/badge/-NumPy-4DABCF?style=flat-square&logo=numpy&logoColor=white" height="22" align="center"/></td>
+<td><img src="https://img.shields.io/badge/-Pandas-150458?style=flat-square&logo=pandas&logoColor=white" height="22" align="center"/>  <img src="https://img.shields.io/badge/-NumPy-013243?style=flat-square&logo=numpy&logoColor=white" height="22" align="center"/></td>
 <td>Data manipulation & numerics</td>
 </tr>
 <tr>
 <td><b>Dashboard</b></td>
-<td><img src="https://img.shields.io/badge/-Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white" height="22" align="center"/>  <img src="https://img.shields.io/badge/-Plotly-AB63FA?style=flat-square&logo=plotly&logoColor=white" height="22" align="center"/></td>
+<td><img src="https://img.shields.io/badge/-Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white" height="22" align="center"/>  <img src="https://img.shields.io/badge/-Plotly-3F4F75?style=flat-square&logo=plotly&logoColor=white" height="22" align="center"/></td>
 <td>Interactive web UI with 11 chart types</td>
 </tr>
 <tr>
 <td><b>Storage</b></td>
-<td><img src="https://img.shields.io/badge/-Apache_Parquet-50ABF1?style=flat-square&logo=apache&logoColor=white" height="22" align="center"/></td>
+<td><img src="https://img.shields.io/badge/-Apache_Parquet-47A248?style=flat-square&logo=apache&logoColor=white" height="22" align="center"/></td>
 <td>Columnar data (zstd / snappy compression)</td>
 </tr>
 <tr>
 <td><b>CI / CD</b></td>
-<td><img src="https://img.shields.io/badge/-GitHub_Actions-2088FF?style=flat-square&logo=githubactions&logoColor=white" height="22" align="center"/></td>
+<td><img src="https://img.shields.io/badge/-GitHub_Actions-181717?style=flat-square&logo=githubactions&logoColor=white" height="22" align="center"/></td>
 <td>Automated daily pipeline (cron @ 05:00 UTC)</td>
 </tr>
 <tr>
@@ -425,7 +449,7 @@ The engine transforms raw trade records into a **26-column** analytical dataset.
 
 ### Price Dynamics
 
-$$\text{price\_change\_pct} = \frac{P_{\text{last}} - P_{\text{first}}}{P_{\text{first}}} \times 100$$
+$$\text{price change pct} = \frac{P_{\text{last}} - P_{\text{first}}}{P_{\text{first}}} \times 100$$
 
 $$r_{\log} = \ln\!\left(\frac{P_{\text{last}}}{P_{\text{first}}}\right)$$
 
@@ -451,7 +475,7 @@ Computed over **30 trading days** (not calendar days) per ISIN for: trades, volu
 
 ### Anomaly Scoring
 
-$$\boxed{\;\text{Score} = 3 \cdot \mathbb{1}_{[\text{vol\_spike}]} + 2 \cdot \mathbb{1}_{[\text{act\_spike}]} + 2 \cdot \mathbb{1}_{[\text{price\_gap}]}\;}$$
+$$\text{Score} = 3 \cdot \mathbf{1}_{\text{vol}} + 2 \cdot \mathbf{1}_{\text{act}} + 2 \cdot \mathbf{1}_{\text{price}}$$
 
 | Flag | Trigger | Weight |
 |:---|:---|:---:|
@@ -711,6 +735,6 @@ Qualsiasi accesso a questo repository non costituisce una concessione di licenza
 
 <br/><br/>
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:F5F6F8,50:B22222,100:1A1A2E&height=100&section=footer" width="100%"/>
+<img src="assets/footer-wave.svg" alt="" width="100%"/>
 
 </div>
