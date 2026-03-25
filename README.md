@@ -16,34 +16,31 @@
 
 <br/><br/>
 
-<!-- Tech Stack Icons -->
-<a href="https://skillicons.dev">
-  <img src="https://skillicons.dev/icons?i=py,css,html,git,github,githubactions,md,latex&theme=light&perline=8" alt="Tech Stack"/>
-</a>
+<!-- Tech Stack Badges -->
+<p>
+  <img src="https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white" alt="Python"/>
+  <img src="https://img.shields.io/badge/Polars-CD792C?style=flat&logo=polars&logoColor=white" alt="Polars"/>
+  <img src="https://img.shields.io/badge/Pandas-150458?style=flat&logo=pandas&logoColor=white" alt="Pandas"/>
+  <img src="https://img.shields.io/badge/NumPy-013243?style=flat&logo=numpy&logoColor=white" alt="NumPy"/>
+  <img src="https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white" alt="Streamlit"/>
+  <img src="https://img.shields.io/badge/Plotly-3F4F75?style=flat&logo=plotly&logoColor=white" alt="Plotly"/>
+  <img src="https://img.shields.io/badge/Apache_Parquet-50ABF1?style=flat&logo=apache&logoColor=white" alt="Parquet"/>
+  <img src="https://img.shields.io/badge/GitHub_Actions-2088FF?style=flat&logo=githubactions&logoColor=white" alt="GitHub Actions"/>
+  <img src="https://img.shields.io/badge/pytest-0A9EDC?style=flat&logo=pytest&logoColor=white" alt="pytest"/>
+</p>
 
-<br/><br/>
+<br/>
 
 <!-- ═══════════════════════════════════════════════════════════════
      LIVE DASHBOARD — ELEGANT CTA
      ═══════════════════════════════════════════════════════════════ -->
 
 <a href="https://otc-x-radar.streamlit.app">
-  <img src="https://img.shields.io/badge/Visit_Live_Dashboard-%E2%86%92-1A1A2E?style=for-the-badge&labelColor=1A1A2E&color=3D3D5C" alt="Visit Live Dashboard" height="44"/>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://capsule-render.vercel.app/api?type=rect&color=gradient&customColorList=12&height=48&text=▸%20%20Visit%20Live%20Dashboard&fontSize=18&fontColor=FFFFFF&fontAlignY=55"/>
+    <img src="https://capsule-render.vercel.app/api?type=rect&color=gradient&customColorList=12&height=48&text=▸%20%20Visit%20Live%20Dashboard&fontSize=18&fontColor=FFFFFF&fontAlignY=55" alt="Visit Live Dashboard" width="320"/>
+  </picture>
 </a>
-
-<br/><br/>
-
-<table>
-<tr>
-<td align="center" width="160"><b>Anomaly Detection</b></td>
-<td align="center" width="160"><b>11 Plotly Charts</b></td>
-<td align="center" width="160"><b>243 Securities</b></td>
-<td align="center" width="160"><b>20+ Year History</b></td>
-<td align="center" width="160"><b>Automated Daily</b></td>
-</tr>
-</table>
-
-<sub>Auto-updates daily at 05:00 UTC via GitHub Actions · Zero manual intervention</sub>
 
 </div>
 
@@ -65,7 +62,7 @@
 - [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
 - [Metrics Engine](#-metrics-engine)
-- [Contributing](#-contributing)
+- [Feedback & Ideas](#-feedback--ideas)
 - [Proprietary Notice & Terms of Use](#-proprietary-notice--terms-of-use)
 
 </details>
@@ -114,37 +111,37 @@ flowchart TB
 </tr>
 <tr>
 <td><b>Core</b></td>
-<td><img src="https://skillicons.dev/icons?i=py&theme=light" width="28" align="center"/> Python 3.10+</td>
+<td><img src="https://img.shields.io/badge/-Python_3.10+-3776AB?style=flat-square&logo=python&logoColor=white" height="22" align="center"/></td>
 <td>Runtime</td>
 </tr>
 <tr>
 <td><b>ETL</b></td>
-<td><img src="https://img.shields.io/badge/-Polars-CD792C?style=flat-square&logo=polars&logoColor=white" height="20" align="center"/> Polars</td>
+<td><img src="https://img.shields.io/badge/-Polars-CD792C?style=flat-square&logo=polars&logoColor=white" height="22" align="center"/></td>
 <td>High-performance DataFrame engine</td>
 </tr>
 <tr>
 <td><b>Analytics</b></td>
-<td><img src="https://img.shields.io/badge/-Pandas-150458?style=flat-square&logo=pandas&logoColor=white" height="20" align="center"/> Pandas · <img src="https://img.shields.io/badge/-NumPy-013243?style=flat-square&logo=numpy&logoColor=white" height="20" align="center"/> NumPy</td>
+<td><img src="https://img.shields.io/badge/-Pandas-150458?style=flat-square&logo=pandas&logoColor=white" height="22" align="center"/>  <img src="https://img.shields.io/badge/-NumPy-013243?style=flat-square&logo=numpy&logoColor=white" height="22" align="center"/></td>
 <td>Data manipulation & numerics</td>
 </tr>
 <tr>
 <td><b>Dashboard</b></td>
-<td><img src="https://img.shields.io/badge/-Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white" height="20" align="center"/> Streamlit · <img src="https://img.shields.io/badge/-Plotly-3F4F75?style=flat-square&logo=plotly&logoColor=white" height="20" align="center"/> Plotly</td>
+<td><img src="https://img.shields.io/badge/-Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white" height="22" align="center"/>  <img src="https://img.shields.io/badge/-Plotly-3F4F75?style=flat-square&logo=plotly&logoColor=white" height="22" align="center"/></td>
 <td>Interactive web UI with 11 chart types</td>
 </tr>
 <tr>
 <td><b>Storage</b></td>
-<td><img src="https://img.shields.io/badge/-Apache_Parquet-50ABF1?style=flat-square&logo=apache&logoColor=white" height="20" align="center"/> Parquet</td>
+<td><img src="https://img.shields.io/badge/-Apache_Parquet-50ABF1?style=flat-square&logo=apache&logoColor=white" height="22" align="center"/></td>
 <td>Columnar data (zstd / snappy compression)</td>
 </tr>
 <tr>
-<td><b>CI/CD</b></td>
-<td><img src="https://skillicons.dev/icons?i=githubactions&theme=light" width="28" align="center"/> GitHub Actions</td>
+<td><b>CI / CD</b></td>
+<td><img src="https://img.shields.io/badge/-GitHub_Actions-2088FF?style=flat-square&logo=githubactions&logoColor=white" height="22" align="center"/></td>
 <td>Automated daily pipeline (cron @ 05:00 UTC)</td>
 </tr>
 <tr>
 <td><b>Testing</b></td>
-<td><img src="https://img.shields.io/badge/-pytest-0A9EDC?style=flat-square&logo=pytest&logoColor=white" height="20" align="center"/> pytest</td>
+<td><img src="https://img.shields.io/badge/-pytest-0A9EDC?style=flat-square&logo=pytest&logoColor=white" height="22" align="center"/></td>
 <td>58 unit & integration tests</td>
 </tr>
 </table>
@@ -390,36 +387,41 @@ OTC-X/
 
 ## 🚀 Getting Started
 
-### Prerequisites
+> **Note:** This repository is proprietary software developed for the BEKB Trading Desk.
+> Local execution is restricted to authorized personnel only — see [Proprietary Notice](#-proprietary-notice--terms-of-use).
 
-- **Python 3.10+**
-- **pip** package manager
+### For BEKB Authorized Personnel
 
-### Installation
+**Prerequisites:** Python 3.10+ · pip
 
 ```bash
-git clone https://github.com/atanasovmi/OTC-X.git
-cd OTC-X
+# 1 — Install dependencies
 pip install -r requirements.txt
-```
 
-### Run the Data Pipeline
-
-```bash
+# 2 — Run the 4-stage data pipeline
 python -m backend.pipeline
-```
 
-### Launch the Dashboard
-
-```bash
+# 3 — Launch the Streamlit dashboard
 streamlit run frontend/app.py
-```
 
-### Run Tests
-
-```bash
+# 4 — Run the test suite
 python -m pytest tests/ -v
 ```
+
+### For Everyone Else
+
+The live dashboard is publicly available — no installation required:
+
+<div align="center">
+
+<a href="https://otc-x-radar.streamlit.app">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://capsule-render.vercel.app/api?type=rect&color=gradient&customColorList=12&height=40&text=▸%20%20Visit%20Live%20Dashboard&fontSize=16&fontColor=FFFFFF&fontAlignY=55"/>
+    <img src="https://capsule-render.vercel.app/api?type=rect&color=gradient&customColorList=12&height=40&text=▸%20%20Visit%20Live%20Dashboard&fontSize=16&fontColor=FFFFFF&fontAlignY=55" alt="Visit Live Dashboard" width="280"/>
+  </picture>
+</a>
+
+</div>
 
 ---
 
@@ -465,23 +467,23 @@ $$\boxed{\;\text{Score} = 3 \cdot \mathbb{1}_{[\text{vol\_spike}]} + 2 \cdot \ma
 
 ---
 
-## 🤝 Contributing
+## 💡 Feedback & Ideas
 
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/my-feature`)
-3. **Run** the test suite:
-   ```bash
-   python -m pytest tests/ -v
-   ```
-4. **Commit** & **Push**
-5. **Open** a Pull Request
+This project is proprietary, but feedback is welcome.
 
-### Development Guidelines
+If you have suggestions for improving analytics, visualization, or the pipeline:
 
-- Follow existing code conventions (type hints, NumPy-style docstrings, PEP 8)
-- Backend uses **Polars** · Frontend uses **Pandas**
-- All paths use `Path(__file__).resolve().parent` chains — no hardcoded paths
-- Swiss number formatting: thousands separator is `'` (apostrophe), currency is CHF
+1. **Open an [Issue](https://github.com/atanasovmi/OTC-X/issues)** — describe your idea, feature request, or bug report
+2. The author will evaluate and may integrate contributions with proper attribution
+
+> **Pull Requests** are reviewed on a case-by-case basis. All contributions become subject to the project's proprietary terms upon merging.
+
+### Development Conventions
+
+- Type hints + NumPy-style docstrings on all functions
+- Backend: **Polars** · Frontend: **Pandas**
+- Paths via `Path(__file__).resolve().parent` chains — no hardcoded paths
+- Swiss number formatting: `'` thousands separator, CHF currency
 
 ---
 
@@ -710,7 +712,10 @@ Qualsiasi accesso a questo repository non costituisce una concessione di licenza
 <br/>
 
 <a href="https://otc-x-radar.streamlit.app">
-<img src="https://img.shields.io/badge/Visit_Live_Dashboard-%E2%86%92-1A1A2E?style=for-the-badge&labelColor=1A1A2E&color=3D3D5C" alt="Visit Live Dashboard" height="36"/>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://capsule-render.vercel.app/api?type=rect&color=gradient&customColorList=12&height=40&text=▸%20%20Visit%20Live%20Dashboard&fontSize=16&fontColor=FFFFFF&fontAlignY=55"/>
+    <img src="https://capsule-render.vercel.app/api?type=rect&color=gradient&customColorList=12&height=40&text=▸%20%20Visit%20Live%20Dashboard&fontSize=16&fontColor=FFFFFF&fontAlignY=55" alt="Visit Live Dashboard" width="280"/>
+  </picture>
 </a>
 
 <br/><br/>
