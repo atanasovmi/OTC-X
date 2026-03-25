@@ -127,7 +127,7 @@ def compute_liquidity_metrics(df_daily: pl.DataFrame) -> pl.DataFrame:
     * ``spread_log_hl`` — ``ln(price_max / price_min)``, a proxy for
       the bid-ask spread.
     * ``amihud_daily`` — Amihud illiquidity ratio:
-      ``|log_returns| / volume_chf × 10⁶``.  Guarded against
+      ``|log_returns| / volume_chf * 10^6``.  Guarded against
       division by zero (returns ``None`` when volume is zero).
 
     Parameters
