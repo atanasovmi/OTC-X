@@ -1,0 +1,1169 @@
+% ═══════════════════════════════════════════════════════════════════════
+%  OTC-X  ·  Liquidity Radar  ·  Swiss OTC Market Intelligence
+%  ─────────────────────────────────────────────────────────────────────
+%  Requirements Engineering Catalogue  (nach IREB)
+%  Technischer Implementierungsleitfaden
+%  Beweggründe
+%  ─────────────────────────────────────────────────────────────────────
+%  Author :  Mihail Atanasov
+%  Date   :  March 2026
+%  ═══════════════════════════════════════════════════════════════════════
+
+\documentclass[
+  11pt,
+  a4paper,
+  twoside,
+  openany
+]{report}
+
+% ─── Typography & Language ────────────────────────────────────────────
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{setspace}
+\onehalfspacing
+
+% ─── Page Geometry ────────────────────────────────────────────────────
+\usepackage[
+  top=28mm,
+  bottom=30mm,
+  left=25mm,
+  right=25mm,
+  headheight=22pt
+]{geometry}
+
+% ─── Colour Palette — Swiss Institutional ─────────────────────────────
+\usepackage[dvipsnames,svgnames,x11names]{xcolor}
+
+\definecolor{SwissRed}{HTML}{B22222}          % Firebrick — BEKB accent
+\definecolor{DeepNavy}{HTML}{1A1A2E}          % Primary heading colour
+\definecolor{SlateGrey}{HTML}{4A5568}         % Body-text secondary
+\definecolor{LightSilver}{HTML}{F5F6F8}       % Background fills
+\definecolor{AccentGold}{HTML}{A0B800}        % Highlight / success
+\definecolor{MetricBlue}{HTML}{2B6CB0}        % Formula boxes
+\definecolor{WarnAmber}{HTML}{D69E2E}         % Warning tier
+\definecolor{CriticalOrange}{HTML}{DD6B20}    % Critical tier
+\definecolor{SevereRed}{HTML}{C53030}         % Severe tier
+\definecolor{CleanGreen}{HTML}{38A169}        % Clean tier
+
+% ─── Graphics & Tables ────────────────────────────────────────────────
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{colortbl}
+\usepackage{array}
+\usepackage{float}
+
+% ─── Mathematics ──────────────────────────────────────────────────────
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{bm}
+
+% ─── Boxes, Frames, Callouts ─────────────────────────────────────────
+\usepackage[most]{tcolorbox}
+\usepackage{mdframed}
+\usepackage{fancybox}
+
+% ─── Headers & Footers ───────────────────────────────────────────────
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE]{\small\textcolor{SlateGrey}{\leftmark}}
+\fancyhead[RO]{\small\textcolor{SlateGrey}{\rightmark}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+\renewcommand{\headrule}{\hbox to\headwidth{%
+  \color{SwissRed}\leaders\hrule height \headrulewidth\hfill}}
+
+% ─── Section Styling ─────────────────────────────────────────────────
+\usepackage{titlesec}
+
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries\color{DeepNavy}}
+  {\chaptertitlename\ \thechapter}{18pt}{\Huge}
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{SwissRed}}
+  {\thesection}{1em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{DeepNavy}}
+  {\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\color{SlateGrey}}
+  {\thesubsubsection}{1em}{}
+
+% ─── Hyperlinks ──────────────────────────────────────────────────────
+\usepackage[
+  colorlinks=true,
+  linkcolor=SwissRed,
+  citecolor=MetricBlue,
+  urlcolor=MetricBlue
+]{hyperref}
+\usepackage{bookmark}
+
+% ─── Code Listings ───────────────────────────────────────────────────
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{MetricBlue}\bfseries,
+  commentstyle=\color{SlateGrey}\itshape,
+  stringstyle=\color{SwissRed},
+  backgroundcolor=\color{LightSilver},
+  frame=single,
+  rulecolor=\color{SlateGrey!30},
+  breaklines=true,
+  numbers=left,
+  numberstyle=\tiny\color{SlateGrey},
+  tabsize=4,
+  showstringspaces=false
+}
+
+% ─── Enumerations ────────────────────────────────────────────────────
+\usepackage{enumitem}
+\setlist[itemize]{leftmargin=1.5em, itemsep=2pt}
+\setlist[enumerate]{leftmargin=1.5em, itemsep=2pt}
+
+% ─── Custom tcolorbox Environments ───────────────────────────────────
+
+% Requirement Box (IREB style)
+\newtcolorbox{requirement}[2][]{%
+  colback=LightSilver,
+  colframe=SwissRed,
+  fonttitle=\bfseries\color{white},
+  title={#2},
+  coltitle=white,
+  colbacktitle=SwissRed,
+  boxrule=0.8pt,
+  arc=2mm,
+  left=6pt, right=6pt, top=4pt, bottom=4pt,
+  #1
+}
+
+% Formula Box
+\newtcolorbox{formulabox}[2][]{%
+  colback=MetricBlue!5,
+  colframe=MetricBlue,
+  fonttitle=\bfseries\color{white},
+  title={#2},
+  coltitle=white,
+  colbacktitle=MetricBlue,
+  boxrule=0.6pt,
+  arc=2mm,
+  left=6pt, right=6pt, top=4pt, bottom=4pt,
+  #1
+}
+
+% Insight / Key-Takeaway Box
+\newtcolorbox{insightbox}[1][]{%
+  colback=AccentGold!8,
+  colframe=AccentGold!70!black,
+  boxrule=0.5pt,
+  arc=2mm,
+  left=6pt, right=6pt, top=4pt, bottom=4pt,
+  fontupper=\itshape,
+  #1
+}
+
+% Warning / Constraint Box
+\newtcolorbox{constraintbox}[2][]{%
+  colback=WarnAmber!8,
+  colframe=WarnAmber!80!black,
+  fonttitle=\bfseries,
+  title={#2},
+  boxrule=0.5pt,
+  arc=2mm,
+  left=6pt, right=6pt, top=4pt, bottom=4pt,
+  #1
+}
+
+% ─── Glossary Abbreviations ──────────────────────────────────────────
+\usepackage[acronym,toc]{glossaries}
+\makeglossaries
+
+\newacronym{ireb}{IREB}{International Requirements Engineering Board}
+\newacronym{otcx}{OTC-X}{Over-the-Counter Exchange (Berner Börse)}
+\newacronym{bekb}{BEKB}{Berner Kantonalbank AG}
+\newacronym{isin}{ISIN}{International Securities Identification Number}
+\newacronym{etl}{ETL}{Extract, Transform, Load}
+\newacronym{chf}{CHF}{Swiss Franc}
+\newacronym{api}{API}{Application Programming Interface}
+\newacronym{ci}{CI}{Continuous Integration}
+
+% ─── Document Meta ───────────────────────────────────────────────────
+\title{}
+\author{}
+\date{}
+
+% ═════════════════════════════════════════════════════════════════════
+\begin{document}
+
+% ─── TITLE PAGE ──────────────────────────────────────────────────────
+\begin{titlepage}
+\newgeometry{top=25mm, bottom=25mm, left=30mm, right=30mm}
+
+\begin{center}
+
+% Top rule
+\noindent\textcolor{SwissRed}{\rule{\textwidth}{2pt}}
+
+\vspace{12mm}
+
+% Project identity
+{\fontsize{42}{50}\selectfont\bfseries\textcolor{DeepNavy}{OTC\;\textcolor{SwissRed}{|}\;X}}
+
+\vspace{6mm}
+
+{\Large\textcolor{SlateGrey}{Liquidity Radar\;\textemdash\;Swiss OTC Market Intelligence}}
+
+\vspace{20mm}
+
+% Document title
+\begin{tcolorbox}[
+  colback=DeepNavy,
+  colframe=DeepNavy,
+  arc=3mm,
+  boxrule=0pt,
+  width=0.92\textwidth,
+  halign=center,
+  top=12pt, bottom=12pt
+]
+{\fontsize{18}{24}\selectfont\bfseries\color{white}
+Requirements Engineering Catalogue}\\[6pt]
+{\large\color{LightSilver}
+nach IREB\;\textbullet\;Technischer Implementierungsleitfaden\;\textbullet\;Beweggründe}
+\end{tcolorbox}
+
+\vspace{18mm}
+
+% Metadata block
+\begin{tabular}{r@{\hskip 10pt}l}
+  \textcolor{SlateGrey}{\textbf{Author}}   & Mihail Atanasov \\[4pt]
+  \textcolor{SlateGrey}{\textbf{Client}}    & BEKB Trading Desk, Berner Kantonalbank AG \\[4pt]
+  \textcolor{SlateGrey}{\textbf{Domain}}    & Swiss OTC Equities — 243 Unlisted Securities \\[4pt]
+  \textcolor{SlateGrey}{\textbf{Version}}   & 1.0 \\[4pt]
+  \textcolor{SlateGrey}{\textbf{Date}}      & March 2026 \\[4pt]
+  \textcolor{SlateGrey}{\textbf{Classification}} & \textcolor{SwissRed}{\textbf{Proprietary \& Confidential}}
+\end{tabular}
+
+\vfill
+
+% Bottom rule
+{\small\textcolor{SlateGrey}{Built with precision\;\;$\bullet$\;\;for the Swiss OTC market}}
+
+\vspace{4mm}
+
+\noindent\textcolor{SwissRed}{\rule{\textwidth}{2pt}}
+
+\end{center}
+\restoregeometry
+\end{titlepage}
+
+% ─── FRONT MATTER ────────────────────────────────────────────────────
+\pagenumbering{roman}
+\tableofcontents
+\clearpage
+\listoftables
+\clearpage
+
+% ═════════════════════════════════════════════════════════════════════
+%  CHAPTER 1 — BEWEGGRÜNDE  (Motivations & Vision)
+% ═════════════════════════════════════════════════════════════════════
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\chapter{Beweggründe — Motivations \& Vision}
+\label{ch:beweggruende}
+
+\section{The Genesis of an Idea}
+
+The Swiss \gls{otcx} market harbours a paradox that has long eluded the scrutiny it deserves: here lies a segment of the financial landscape encompassing \textbf{243 unlisted equities}, yet it remains cloaked in an opacity that defies modern standards of market transparency.  For institutional actors — traders, compliance officers, risk managers — the absence of consolidated liquidity intelligence is not merely an inconvenience; it is a structural impediment to sound decision-making.
+
+This project was conceived from a singular, compelling observation: \emph{the data exists, but the signal does not}.  Raw trade records, scattered across fragmented sources, offered no coherent narrative about liquidity conditions, price-impact dynamics, or anomalous market behaviour.  The ambition, therefore, was unequivocal — to architect an end-to-end intelligence platform that transforms disparate trade data into a \textbf{transparent, signal-rich radar} for the \gls{bekb} Trading Desk.
+
+\begin{insightbox}
+\textbf{Core Vision:}\; Turn the opaque Swiss OTC market into an automated, continuously updated liquidity radar — surfacing anomalies, scoring risk, and empowering informed action through 26 quantitative metrics and 11 interactive visualisations.
+\end{insightbox}
+
+\section{The Problem Space}
+
+The Swiss OTC market, administered through the Berner Börse, presents several characteristics that render conventional analysis inadequate:
+
+\begin{enumerate}[label=\textcolor{SwissRed}{\textbf{\arabic*.}}]
+  \item \textbf{Fragmentation}\;— Trade data is dispersed across individual security endpoints with no unified view.
+  \item \textbf{Illiquidity}\;— Many securities trade only sporadically; standard exchange metrics (VWAP, continuous order books) are inapplicable.
+  \item \textbf{Opacity}\;— No publicly available liquidity scoring, no anomaly alerting, no historical baseline comparison.
+  \item \textbf{Scale}\;— 243 securities spanning 20+ years of trading history amount to approximately 133\,000 individual trade records.
+  \item \textbf{Heterogeneity}\;— Sectors range from banking and insurance to industry and real estate, each exhibiting distinct liquidity profiles.
+\end{enumerate}
+
+\section{What I Learned}
+
+Building OTC-X was, in every meaningful sense, a journey through the full spectrum of data engineering and quantitative finance.  Three lessons stand out with particular clarity:
+
+\begin{enumerate}[label=\textcolor{MetricBlue}{\textbf{(\roman*)}}]
+  \item \textbf{Domain intimacy precedes technical elegance.}\;Understanding the microstructure of OTC markets — why the Amihud ratio matters, how off-book trades distort volume signals, why calendar days are misleading for rolling baselines — was the prerequisite that shaped every architectural decision.
+  \item \textbf{Simplicity is the ultimate sophistication.}\;The four-stage pipeline design emerged not from a desire for minimalism, but from the recognition that each transformation stage must be independently testable, recoverable, and explainable.  Fifty-eight tests validate not just correctness, but also the \emph{intent} behind each computation.
+  \item \textbf{Visualisation is not decoration; it is argumentation.}\;The eleven chart types in the dashboard are not ornamental.  Each one answers a specific analytical question — from the 3D market explorer that reveals hidden clustering to the anomaly treemap that converts numerical scores into spatial intuition.
+\end{enumerate}
+
+\section{Future Outlook — Weiterführung}
+
+The current iteration of OTC-X establishes a robust foundation.  The trajectory for continued development encompasses three strategic pillars:
+
+\begin{description}[style=nextline, leftmargin=1.5em]
+  \item[\textcolor{SwissRed}{Pillar I — Predictive Analytics}]
+  Integration of time-series forecasting (ARIMA, Prophet) to project liquidity conditions forward, enabling the trading desk to anticipate illiquidity events before they materialise.
+  \item[\textcolor{SwissRed}{Pillar II — Cross-Market Enrichment}]
+  Incorporating SIX Swiss Exchange reference data and macroeconomic indicators (SNB interest rates, CPI) to contextualise OTC movements within the broader Swiss financial ecosystem.
+  \item[\textcolor{SwissRed}{Pillar III — Real-Time Streaming}]
+  Transitioning from daily batch processing to near-real-time ingestion using WebSocket-based data feeds, reducing signal latency from 24 hours to minutes.
+\end{description}
+
+\begin{insightbox}
+The ultimate aspiration is to render OTC-X not merely a retrospective analytical tool, but a \textbf{forward-looking decision-support system} — a sentinel that watches the Swiss OTC market so that traders need not.
+\end{insightbox}
+
+
+% ═════════════════════════════════════════════════════════════════════
+%  CHAPTER 2 — REQUIREMENTS ENGINEERING  (nach IREB)
+% ═════════════════════════════════════════════════════════════════════
+\chapter{Anforderungskatalog — Requirements Engineering Catalogue}
+\label{ch:requirements}
+
+This chapter presents the requirements specification for OTC-X, structured in accordance with the \gls{ireb} Foundation Level methodology.  Requirements are classified into \textbf{functional requirements} (FR), \textbf{non-functional requirements} (NFR), and \textbf{constraints} (C), each assigned a unique identifier, priority (MoSCoW), and acceptance criterion.
+
+\section{Stakeholder Analysis}
+
+\begin{table}[H]
+\centering
+\caption{Stakeholder register — OTC-X Liquidity Radar}
+\label{tab:stakeholders}
+\rowcolors{2}{LightSilver}{white}
+\begin{tabularx}{\textwidth}{>{\bfseries}l X l}
+\toprule
+\textbf{Stakeholder} & \textbf{Interest / Concern} & \textbf{Influence} \\
+\midrule
+BEKB Trading Desk   & Primary consumer of liquidity signals; requires daily, actionable intelligence on 243 securities & High \\
+Compliance Officers  & Regulatory transparency; auditability of anomaly flags and data lineage & High \\
+Risk Management      & Portfolio-level illiquidity assessment; early-warning triggers for extreme events & Medium \\
+IT Operations        & Pipeline reliability, infrastructure cost, CI/CD stability & Medium \\
+Project Author       & Architectural integrity, scientific rigour, comprehensive test coverage & High \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Functional Requirements}
+
+\begin{requirement}{FR-01 \;\textbar\; Automated Security Discovery\hfill\textcolor{white}{Must}}
+\textbf{Description:}\;The system shall automatically discover and catalogue all actively traded securities on the OTC-X platform, extracting their ISIN, Valor number, name, and sector classification.\\[4pt]
+\textbf{Rationale:}\;A complete and current securities universe is the prerequisite for all downstream analytics.\\[4pt]
+\textbf{Acceptance Criterion:}\;The output file \texttt{securities.csv} contains $\geq 240$ valid entries with no duplicate ISINs.\\[4pt]
+\textbf{Trace:}\;\texttt{backend/operations/soft\_crawl.py}
+\end{requirement}
+
+\vspace{6pt}
+
+\begin{requirement}{FR-02 \;\textbar\; Historical Trade Retrieval\hfill\textcolor{white}{Must}}
+\textbf{Description:}\;The system shall retrieve the complete trade history for every catalogued security from the OTC-X \gls{api}, including date, time, price, volume, and off-book indicator.\\[4pt]
+\textbf{Rationale:}\;Historical depth (20+ years) enables robust baseline computation and long-term trend analysis.\\[4pt]
+\textbf{Acceptance Criterion:}\;Individual CSV files per ISIN are produced; total trade count $\geq 130{,}000$; ISIN-level integrity verified through checksums.\\[4pt]
+\textbf{Trace:}\;\texttt{backend/operations/fetcher.py}
+\end{requirement}
+
+\vspace{6pt}
+
+\begin{requirement}{FR-03 \;\textbar\; Data Consolidation \& Quality Assurance\hfill\textcolor{white}{Must}}
+\textbf{Description:}\;The system shall consolidate all individual trade files into a single, deduplicated, type-safe master dataset stored in Apache Parquet format with Zstandard compression.\\[4pt]
+\textbf{Rationale:}\;Columnar storage with compression minimises I/O cost and ensures schema consistency for the metrics engine.\\[4pt]
+\textbf{Acceptance Criterion:}\;\texttt{master\_trades.parquet} is produced; zero duplicate rows; all columns conform to the prescribed schema (Isin: String, Datum: Date, Zeit: Utf8, Kurs: Float64, Volumen: Float64, Off Book: Int8).\\[4pt]
+\textbf{Trace:}\;\texttt{backend/operations/build\_master\_parquet.py}
+\end{requirement}
+
+\vspace{6pt}
+
+\begin{requirement}{FR-04 \;\textbar\; Daily Metrics Computation (26 Columns)\hfill\textcolor{white}{Must}}
+\textbf{Description:}\;For each ISIN and each trading day, the system shall compute 26 liquidity metrics encompassing trade intensity, volume, price dynamics, volatility, illiquidity ratios, rolling baselines, and anomaly flags.\\[4pt]
+\textbf{Rationale:}\;The 26-metric schema constitutes the analytical core; it transforms raw trades into risk-relevant signals.\\[4pt]
+\textbf{Acceptance Criterion:}\;\texttt{daily\_metrics.parquet} produced with exactly 26 columns; schema validated against reference definition (see Appendix~\ref{app:schema}); rolling medians computed over trading-day windows.\\[4pt]
+\textbf{Trace:}\;\texttt{backend/operations/metrics.py}
+\end{requirement}
+
+\vspace{6pt}
+
+\begin{requirement}{FR-05 \;\textbar\; Anomaly Detection \& Scoring\hfill\textcolor{white}{Must}}
+\textbf{Description:}\;The system shall detect anomalous trading activity through three binary flags (volume spike, activity spike, price gap) and compute a weighted composite anomaly score on the integer range $[0,\,7]$.\\[4pt]
+\textbf{Rationale:}\;Automated anomaly detection enables the trading desk to prioritise attention on securities exhibiting unusual behaviour.\\[4pt]
+\textbf{Acceptance Criterion:}\;Anomaly scores correctly computed as $S = 3 \cdot \mathbb{1}_{[\mathrm{vol}]} + 2 \cdot \mathbb{1}_{[\mathrm{act}]} + 2 \cdot \mathbb{1}_{[\mathrm{gap}]}$; scores $\in \{0, 2, 3, 4, 5, 7\}$.\\[4pt]
+\textbf{Trace:}\;\texttt{backend/operations/metrics.py :: compute\_anomaly\_flags()}
+\end{requirement}
+
+\vspace{6pt}
+
+\begin{requirement}{FR-06 \;\textbar\; Interactive Dashboard (4 Tabs, 11 Charts)\hfill\textcolor{white}{Must}}
+\textbf{Description:}\;The system shall present a Streamlit-based web dashboard with four purpose-built tabs (Overview, Market Data, Analytics, Anomaly Monitor) delivering 11 interactive Plotly chart types.\\[4pt]
+\textbf{Rationale:}\;Visual intelligence is the primary consumption modality for the trading desk; interactivity enables ad-hoc exploration.\\[4pt]
+\textbf{Acceptance Criterion:}\;Dashboard loads within 5 seconds; all 11 chart types render without error; sector filtering, search, and CSV export functional.\\[4pt]
+\textbf{Trace:}\;\texttt{frontend/app.py}, \texttt{frontend/operations/charts.py}
+\end{requirement}
+
+\vspace{6pt}
+
+\begin{requirement}{FR-07 \;\textbar\; Security Deep-Dive with $\sigma$-Band Chart\hfill\textcolor{white}{Should}}
+\textbf{Description:}\;For any selected ISIN, the dashboard shall display a historical price chart with a rolling 30-day standard deviation band ($\pm 1\sigma$) overlaid on the price series, alongside a volume subplot.\\[4pt]
+\textbf{Rationale:}\;Per-security drill-down enables granular assessment of individual liquidity conditions and volatility regimes.\\[4pt]
+\textbf{Acceptance Criterion:}\;$\sigma$-band correctly computed from rolling 30-day price standard deviation; band renders as shaded fill; volume bars below.\\[4pt]
+\textbf{Trace:}\;\texttt{frontend/operations/charts.py :: chart\_security\_history()}
+\end{requirement}
+
+\vspace{6pt}
+
+\begin{requirement}{FR-08 \;\textbar\; 3D Market Explorer\hfill\textcolor{white}{Could}}
+\textbf{Description:}\;The Analytics tab shall provide a five-dimensional interactive 3D scatter plot, allowing the user to map any combination of 12 metric options to the X, Y, Z axes, colour, and size dimensions.\\[4pt]
+\textbf{Rationale:}\;Multi-dimensional exploration reveals latent market structure invisible in two-dimensional projections.\\[4pt]
+\textbf{Acceptance Criterion:}\;All five dimension selectors functional; log$_{10}$ transform toggle operational; outlier removal (1st–99th percentile) correctly filters data.\\[4pt]
+\textbf{Trace:}\;\texttt{frontend/app.py} (Analytics tab, 3D Explorer section)
+\end{requirement}
+
+\section{Non-Functional Requirements}
+
+\begin{requirement}{NFR-01 \;\textbar\; Performance\hfill\textcolor{white}{Must}}
+\textbf{Description:}\;The complete 4-stage pipeline shall execute within 5 minutes on standard CI hardware (GitHub Actions, 2~vCPU, 7~GB RAM).  Dashboard page load shall not exceed 5 seconds.\\[4pt]
+\textbf{Metric:}\;Pipeline wall-clock time $\leq 300$\,s; Streamlit initial render $\leq 5$\,s.\\[4pt]
+\textbf{Trace:}\;Pipeline receipt logs (\texttt{backend/logs/pipeline\_receipt\_*.log})
+\end{requirement}
+
+\vspace{6pt}
+
+\begin{requirement}{NFR-02 \;\textbar\; Reliability \& Recoverability\hfill\textcolor{white}{Must}}
+\textbf{Description:}\;Each pipeline stage shall be independently recoverable.  Failure in any stage shall halt subsequent stages, produce a diagnostic receipt log, and preserve all previously completed artefacts.\\[4pt]
+\textbf{Metric:}\;Receipt log generated even on failure; no data corruption on partial run.\\[4pt]
+\textbf{Trace:}\;\texttt{backend/pipeline.py :: \_run\_stage()}
+\end{requirement}
+
+\vspace{6pt}
+
+\begin{requirement}{NFR-03 \;\textbar\; Test Coverage\hfill\textcolor{white}{Must}}
+\textbf{Description:}\;The system shall maintain a minimum of 50 automated tests covering path resolution, backend operations, frontend utilities, and chart rendering.\\[4pt]
+\textbf{Metric:}\;$\geq 58$ tests passing (current baseline); all tests executed via \texttt{python -m pytest tests/ -v}.\\[4pt]
+\textbf{Trace:}\;\texttt{tests/test\_backend.py}, \texttt{tests/test\_frontend.py}, \texttt{tests/test\_paths.py}
+\end{requirement}
+
+\vspace{6pt}
+
+\begin{requirement}{NFR-04 \;\textbar\; Data Integrity \& Compression\hfill\textcolor{white}{\small Must}}
+\textbf{Description:}\;All persistent data artefacts shall use Apache Parquet format with either Snappy or Zstandard compression, ensuring both storage efficiency and schema fidelity.\\[4pt]
+\textbf{Metric:}\;Parquet files readable without schema override; compression ratio $\geq 3\times$ vs.\ raw CSV.\\[4pt]
+\textbf{Trace:}\;\texttt{backend/operations/build\_master\_parquet.py},\\ \texttt{backend/operations/metrics.py}
+\end{requirement}
+
+\vspace{6pt}
+
+\begin{requirement}{NFR-05 \;\textbar\; Maintainability \& Documentation\hfill\textcolor{white}{Should}}
+\textbf{Description:}\;All Python modules shall employ type hints on function signatures and NumPy-style docstrings with Parameters, Returns, and optional Notes sections.\\[4pt]
+\textbf{Metric:}\;100\% of public functions annotated; docstrings present on all 12 Python modules.\\[4pt]
+\textbf{Trace:}\;All \texttt{*.py} files
+\end{requirement}
+
+\section{Constraints}
+
+\begin{constraintbox}{C-01 \;\textbar\; Data Sovereignty}
+All data processing shall comply with the authorisation granted by \gls{bekb} (Schwarzenburgstrasse~160, 3001~Bern).  Data sovereignty remains with the project author until formal handover.  No third-party data egress permitted.
+\end{constraintbox}
+
+\vspace{6pt}
+
+\begin{constraintbox}{C-02 \;\textbar\; Technology Stack}
+The system is constrained to: Python~3.10+, Polars (ETL), Pandas/NumPy (analytics), Streamlit/Plotly (dashboard), Apache Parquet (storage), GitHub Actions (CI/CD), and pytest (testing).  No additional runtime dependencies without explicit approval.
+\end{constraintbox}
+
+\vspace{6pt}
+
+\begin{constraintbox}{C-03 \;\textbar\; Deployment Model}
+The dashboard shall be deployable via Streamlit Community Cloud.  The backend pipeline shall execute within GitHub Actions runners.  No proprietary cloud infrastructure required.
+\end{constraintbox}
+
+\section{Requirements Traceability Matrix}
+
+\begin{table}[H]
+\centering
+\caption{Traceability matrix — Requirements to implementation artefacts}
+\label{tab:traceability}
+\rowcolors{2}{LightSilver}{white}
+\small
+\begin{tabularx}{\textwidth}{l l l X}
+\toprule
+\textbf{ID} & \textbf{Priority} & \textbf{Module} & \textbf{Verification} \\
+\midrule
+FR-01 & Must   & \texttt{soft\_crawl.py}             & \texttt{test\_backend.py} — security count assertion \\
+FR-02 & Must   & \texttt{fetcher.py}                 & \texttt{test\_backend.py} — ISIN validation tests \\
+FR-03 & Must   & \texttt{build\_master\_parquet.py}   & \texttt{test\_paths.py} — file existence checks \\
+FR-04 & Must   & \texttt{metrics.py}                  & \texttt{test\_backend.py} — metrics computation tests \\
+FR-05 & Must   & \texttt{metrics.py}                  & \texttt{test\_backend.py} — anomaly score tests \\
+FR-06 & Must   & \texttt{app.py}, \texttt{charts.py}  & \texttt{test\_frontend.py} — chart smoke tests \\
+FR-07 & Should & \texttt{charts.py}                   & \texttt{test\_frontend.py} — chart render tests \\
+FR-08 & Could  & \texttt{app.py}                      & Manual acceptance testing \\
+\midrule
+NFR-01 & Must  & \texttt{pipeline.py}                 & Receipt log timing analysis \\
+NFR-02 & Must  & \texttt{pipeline.py}                 & Stage failure injection tests \\
+NFR-03 & Must  & \texttt{tests/}                      & \texttt{pytest} execution ($\geq 58$ passing) \\
+NFR-04 & Must  & \texttt{build\_master\_parquet.py}    & Parquet schema validation \\
+NFR-05 & Should & All \texttt{*.py}                    & Manual docstring audit \\
+\midrule
+C-01  & —      & Legal documentation                   & Proprietary Notice (README) \\
+C-02  & —      & \texttt{requirements.txt}             & Dependency manifest review \\
+C-03  & —      & \texttt{.github/workflows/}           & CI workflow validation \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+% ═════════════════════════════════════════════════════════════════════
+%  CHAPTER 3 — CUSTOMER JOURNEY
+% ═════════════════════════════════════════════════════════════════════
+\chapter{Customer Journey — Nutzererlebnis}
+\label{ch:customer-journey}
+
+The following customer journeys map the primary interaction pathways through OTC-X, illustrating how each stakeholder persona engages with the system to derive value.  These journeys are modelled using the five-phase framework (Awareness → Consideration → Decision → Action → Retention) adapted from the ISO~9241-210 standard for human-centred design.
+
+\section{Journey 1 — The Morning Briefing (BEKB Trader)}
+
+\begin{table}[H]
+\centering
+\caption{Customer journey — Daily trader briefing}
+\label{tab:journey-trader}
+\rowcolors{2}{LightSilver}{white}
+\small
+\begin{tabularx}{\textwidth}{>{\bfseries}l X l}
+\toprule
+\textbf{Phase} & \textbf{Action} & \textbf{Tab} \\
+\midrule
+Awareness     & Trader opens dashboard at 08:00; KPI cards instantly surface yesterday's market pulse: total volume, active ISINs, highest anomaly score & Overview \\
+Consideration & Sector treemap reveals unusual volume concentration in Banking; top movers highlight a 12\% price gap in a mid-cap industrial & Overview \\
+Decision      & Trader navigates to Anomaly Monitor; filters ``Severe'' tier; identifies 3 securities with score $\geq 5$ & Anomaly \\
+Action        & Clicks through to Market Data; examines historical $\sigma$-band chart for the flagged ISIN; exports CSV for compliance review & Market Data \\
+Retention     & Pipeline runs automatically at 05:00 UTC next day; fresh data awaits without manual intervention & Automated \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Journey 2 — The Risk Review (Compliance Officer)}
+
+\begin{table}[H]
+\centering
+\caption{Customer journey — Compliance risk review}
+\label{tab:journey-compliance}
+\rowcolors{2}{LightSilver}{white}
+\small
+\begin{tabularx}{\textwidth}{>{\bfseries}l X l}
+\toprule
+\textbf{Phase} & \textbf{Action} & \textbf{Tab} \\
+\midrule
+Awareness     & Weekly review triggered; officer accesses Analytics tab to assess systemic risk & Analytics \\
+Consideration & Correlation heatmap reveals unexpected coupling between volume and Amihud illiquidity in Insurance sector & Analytics \\
+Decision      & Amihud boxplot confirms elevated illiquidity; rolling volatility trend shows increasing $\sigma$ over 30 days & Analytics \\
+Action        & 3D Explorer used to map Volume $\times$ Amihud $\times$ Spread, sized by trade count; outlier cluster identified & Analytics \\
+Retention     & Findings documented; next week's review benchmarks against these baselines & Retention \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Journey 3 — The Sector Analyst}
+
+\begin{table}[H]
+\centering
+\caption{Customer journey — Sector-level analysis}
+\label{tab:journey-analyst}
+\rowcolors{2}{LightSilver}{white}
+\small
+\begin{tabularx}{\textwidth}{>{\bfseries}l X l}
+\toprule
+\textbf{Phase} & \textbf{Action} & \textbf{Tab} \\
+\midrule
+Awareness     & Analyst selects ``Real Estate'' from sector filter; all metrics recalculate for sector slice & Analytics \\
+Consideration & Volume-vs-Price scatter reveals real estate securities cluster in low-volume, high-price quadrant & Analytics \\
+Decision      & Analyst compares with Banking sector; switches correlation heatmap metrics to include \texttt{spread\_log\_hl} & Analytics \\
+Action        & Identifies 5 real estate ISINs with persistently high Amihud $\lambda > 50$; exports for portfolio review & Market Data \\
+Retention     & Monthly sector report generated from exported data; dashboard bookmarked for recurring access & Retention \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+% ═════════════════════════════════════════════════════════════════════
+%  CHAPTER 4 — TECHNISCHER IMPLEMENTIERUNGSLEITFADEN
+% ═════════════════════════════════════════════════════════════════════
+\chapter{Technischer Leitfaden — Implementation Guide}
+\label{ch:implementation}
+
+\section{Architectural Overview}
+
+OTC-X adheres to a \textbf{layered pipeline architecture} comprising four clearly delineated tiers: data acquisition, transformation, persistence, and presentation.  This separation of concerns is not incidental — it is a deliberate design principle ensuring that each layer can evolve, be tested, and fail independently without cascading effects.
+
+\begin{table}[H]
+\centering
+\caption{Architectural layers and their responsibilities}
+\label{tab:architecture}
+\rowcolors{2}{LightSilver}{white}
+\begin{tabularx}{\textwidth}{>{\bfseries}l l X}
+\toprule
+\textbf{Layer} & \textbf{Technology} & \textbf{Responsibility} \\
+\midrule
+Acquisition  & Python, Requests  & API interaction, security discovery, trade retrieval \\
+Transformation & Polars            & Deduplication, type casting, metrics computation \\
+Persistence    & Apache Parquet    & Columnar storage with Snappy/Zstd compression \\
+Presentation   & Streamlit, Plotly & Interactive 4-tab dashboard with 11 chart types \\
+Orchestration  & GitHub Actions    & Automated daily execution (cron @ 05:00 UTC) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{The Four-Stage ETL Pipeline}
+
+The pipeline is orchestrated by \texttt{pipeline.py}, which sequentially executes four stages with full output capture, timing instrumentation, and comprehensive receipt logging.
+
+\subsection{Stage 1 — Valor Extraction (\texttt{soft\_crawl.py})}
+
+The pipeline commences with a non-intrusive crawl of the OTC-X platform to discover the complete securities universe.  For each security, the following attributes are extracted:
+
+\begin{itemize}
+  \item \textbf{ISIN} — International Securities Identification Number (12-character alphanumeric)
+  \item \textbf{Valor} — Swiss-specific security identifier
+  \item \textbf{Name} — Company name
+  \item \textbf{Sektor} — Economic sector classification
+\end{itemize}
+
+The output, \texttt{securities.csv}, serves as the authoritative registry against which all subsequent stages operate.
+
+\subsection{Stage 2 — Trade Data Retrieval (\texttt{fetcher.py})}
+
+For every ISIN in the securities registry, the fetcher retrieves the complete trade history from the OTC-X API.  Key implementation details include:
+
+\begin{itemize}
+  \item \textbf{Retry logic} with exponential backoff for transient network failures
+  \item \textbf{Rate limiting} to respect API quotas and prevent throttling
+  \item \textbf{ISIN validation} using the ISO~6166 check-digit algorithm
+  \item \textbf{Logging} — each download session generates a timestamped log file in \texttt{backend/logs/}
+\end{itemize}
+
+Individual CSV files are produced per ISIN in \texttt{backend/data/trades/}, preserving the raw data for audit purposes.
+
+\subsection{Stage 3 — Data Consolidation (\texttt{build\_master\_parquet.py})}
+
+The consolidation stage merges 243 individual CSV files into a single, type-safe master dataset:
+
+\begin{enumerate}
+  \item \textbf{Schema enforcement} — columns cast to prescribed types (Date, Float64, Int8)
+  \item \textbf{Deduplication} — exact-match row deduplication eliminates retransmitted records
+  \item \textbf{Compression} — output written as \texttt{master\_trades.parquet} with Zstandard compression
+  \item \textbf{Validation} — row counts, ISIN counts, and null checks reported
+\end{enumerate}
+
+\subsection{Stage 4 — Metrics Engine (\texttt{metrics.py})}
+
+The metrics engine — the quantitative heart of OTC-X — transforms the master trade dataset into a 26-column analytical layer.  This stage is detailed exhaustively in Chapter~\ref{ch:metrics}.
+
+\section{Pipeline Orchestration \& Receipt Logging}
+
+The orchestrator (\texttt{pipeline.py}) employs a custom \texttt{\_TeeStream} class that mirrors all standard output to both the console and an internal buffer.  Upon completion, a comprehensive receipt is assembled containing:
+
+\begin{itemize}
+  \item \textbf{Per-stage status} — success/failure with elapsed time
+  \item \textbf{Data product statistics} — row counts, ISIN counts, file sizes
+  \item \textbf{Anomaly snapshot} — distribution of anomaly scores across the latest trading day
+  \item \textbf{Verbatim stage output} — complete stdout capture per stage
+\end{itemize}
+
+Receipts are written to \texttt{backend/logs/pipeline\_receipt\_\{timestamp\}.log} and committed to version control, providing a full audit trail of every pipeline execution.
+
+\section{Frontend Architecture}
+
+The Streamlit dashboard is composed of six purpose-built modules:
+
+\begin{table}[H]
+\centering
+\caption{Frontend module responsibilities}
+\label{tab:frontend-modules}
+\rowcolors{2}{LightSilver}{white}
+\begin{tabularx}{\textwidth}{>{\ttfamily}l X}
+\toprule
+\textbf{Module} & \textbf{Responsibility} \\
+\midrule
+config.py       & Brand constants, colour palettes, metric display names \\
+styles.py       & CSS injection (431 lines) — Swiss-precision theming with \texttt{\#B22222} accent \\
+utils.py        & CHF formatting, percentage colouring, score badge rendering \\
+data\_loader.py & Cached Parquet $\to$ Pandas loader with \texttt{@st.cache\_data} \\
+charts.py       & 11 Plotly chart builders (treemaps, heatmaps, 3D scatter, $\sigma$-bands) \\
+components.py   & Header rendering, KPI card assembly, table formatters \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Continuous Integration}
+
+The GitHub Actions workflow (\texttt{automation\_pipeline.yml}) executes the following sequence daily at 05:00 UTC:
+
+\begin{enumerate}
+  \item \textbf{Checkout} repository
+  \item \textbf{Install} Python 3.10+ and dependencies from \texttt{requirements.txt}
+  \item \textbf{Execute} \texttt{python -m backend.pipeline} — runs all four stages
+  \item \textbf{Commit} updated data artefacts and receipt logs to the repository
+  \item \textbf{Push} changes back to the main branch
+\end{enumerate}
+
+This fully automated cycle ensures that the dashboard always reflects the most recent trading data without any manual intervention.
+
+\section{Path Resolution Strategy}
+
+A consistent path resolution convention is employed throughout the codebase to ensure portability:
+
+\begin{lstlisting}[language=Python, caption={Path resolution pattern — no hardcoded paths}]
+from pathlib import Path
+
+# Backend operations: one parent up from operations/ to backend/
+script_dir = Path(__file__).resolve().parent
+data_dir = script_dir.parent / "data"
+
+# Frontend: three parents up to root, then into backend/data/
+root = Path(__file__).resolve().parent.parent.parent
+data_dir = root / "backend" / "data"
+\end{lstlisting}
+
+
+% ═════════════════════════════════════════════════════════════════════
+%  CHAPTER 5 — METRICS ENGINE — MATHEMATICAL FOUNDATIONS
+% ═════════════════════════════════════════════════════════════════════
+\chapter[Metrics Engine — Mathematische Grundlagen]{Metrics Engine —\\Mathematische Grundlagen}
+\label{ch:metrics}
+
+This chapter constitutes the scientific core of the document.  Every metric computed by \texttt{metrics.py} is presented with its mathematical definition, implementation rationale, and interpretation within the context of OTC market microstructure.
+
+The metrics engine executes a four-step transformation pipeline:
+
+\begin{enumerate}[label=\textcolor{SwissRed}{\textbf{Step \arabic*:}}, leftmargin=3.5em]
+  \item \textbf{Daily Aggregation} — group trades by ISIN $\times$ date
+  \item \textbf{Liquidity Metrics} — derive price dynamics, illiquidity, and spread proxies
+  \item \textbf{Rolling Baselines} — compute 30-trading-day medians per ISIN
+  \item \textbf{Anomaly Detection} — flag deviations and compute composite scores
+\end{enumerate}
+
+% ─── STEP 1 ──────────────────────────────────────────────────────────
+\section{Step 1: Daily Aggregation}
+
+Raw trades are grouped by $(\text{ISIN},\, \text{Date})$ to produce one observation per security per trading day.  Let $\mathcal{T}_{i,d}$ denote the set of trades for security $i$ on date $d$, with $|\mathcal{T}_{i,d}| = n$ trades.
+
+\begin{formulabox}{Trade Intensity}
+\[
+  N_{i,d} = |\mathcal{T}_{i,d}|
+\]
+The number of trades executed for security $i$ on date $d$.  Stored as \texttt{trades\_today} (\texttt{UInt32}).
+\end{formulabox}
+
+\begin{formulabox}{Volume — Units \& CHF Value}
+\[
+  V_{i,d}^{\text{units}} = \sum_{k=1}^{n} v_k
+  \qquad\qquad
+  V_{i,d}^{\text{CHF}} = \sum_{k=1}^{n} v_k \cdot p_k
+\]
+where $v_k$ and $p_k$ are the volume (units) and price of the $k$-th trade, respectively.\\[4pt]
+\texttt{volume\_today\_units} (Float64)\;\;\textbar\;\;\texttt{volume\_today\_chf} (Float64)
+\end{formulabox}
+
+\begin{formulabox}{Price Bounds \& Reference Prices}
+\[
+  P_{i,d}^{\min} = \min_{k} \, p_k
+  \qquad
+  P_{i,d}^{\max} = \max_{k} \, p_k
+  \qquad
+  P_{i,d}^{\text{first}} = p_1
+  \qquad
+  P_{i,d}^{\text{last}} = p_n
+\]
+Trades are sorted chronologically by time within each day before selecting the first and last prices.\\[4pt]
+\texttt{price\_min}, \texttt{price\_max}, \texttt{price\_first}, \texttt{price\_last} (all Float64)
+\end{formulabox}
+
+\begin{formulabox}{Intraday Volatility}
+\[
+  \sigma_{i,d} = \sqrt{\frac{1}{n-1} \sum_{k=1}^{n} \left(p_k - \bar{p}\right)^2}
+  \qquad\text{where}\qquad
+  \bar{p} = \frac{1}{n}\sum_{k=1}^{n} p_k
+\]
+The sample standard deviation of all intraday prices.  For single-trade days ($n=1$), $\sigma_{i,d} = 0$.\\[4pt]
+\texttt{volatility\_daily} (Float64)
+\end{formulabox}
+
+\begin{formulabox}{Maximum Trade Duration}
+Let $\tau_1 < \tau_2 < \cdots < \tau_n$ be the trade timestamps (in minutes since midnight):
+\[
+  \Delta\tau_{i,d}^{\max} = \max_{k \in \{2,\ldots,n\}} \left(\tau_k - \tau_{k-1}\right)
+\]
+The longest gap between consecutive trades within the day (in minutes).  For single-trade days, $\Delta\tau_{i,d}^{\max} = 0$.\\[4pt]
+\texttt{trade\_duration\_min} (Float64)
+\end{formulabox}
+
+\begin{formulabox}{Off-Book Percentage}
+\[
+  \text{OB}_{i,d} = \frac{\sum_{k=1}^{n} \mathbb{1}_{[\text{off-book}]}(k)}{n} \times 100
+\]
+The proportion of trades executed off the central order book, expressed as a percentage.\\[4pt]
+\texttt{off\_book\_pct} (Float64)
+\end{formulabox}
+
+% ─── STEP 2 ──────────────────────────────────────────────────────────
+\section{Step 2: Liquidity Metrics}
+
+Four derived metrics capture the liquidity characteristics of each security on each trading day.
+
+\begin{formulabox}{Price Change (\%)}
+\[
+  \Delta P_{i,d} = \frac{P_{i,d}^{\text{last}} - P_{i,d}^{\text{first}}}{P_{i,d}^{\text{first}}} \times 100
+\]
+The percentage change from the opening to the closing price.  Null and NaN values are replaced with $0.0$.\\[4pt]
+\texttt{price\_change\_pct} (Float64)
+\end{formulabox}
+
+\begin{formulabox}{Log Returns}
+\[
+  r_{i,d} = \ln\!\left(\frac{P_{i,d}^{\text{last}}}{P_{i,d}^{\text{first}}}\right)
+\]
+The natural logarithm of the intraday price ratio.  Log returns possess the desirable property of \emph{time-additivity}: $r_{[t_1, t_3]} = r_{[t_1, t_2]} + r_{[t_2, t_3]}$, making them the preferred return measure in quantitative finance.\\[4pt]
+\texttt{log\_returns} (Float64)
+\end{formulabox}
+
+\begin{formulabox}{Spread Proxy — Corwin–Schultz Estimator}
+\[
+  S_{i,d}^{\text{HL}} = \ln\!\left(\frac{P_{i,d}^{\max}}{P_{i,d}^{\min}}\right)
+\]
+This high-low spread estimator, inspired by the Corwin--Schultz (2012) methodology, serves as a proxy for the bid-ask spread in the absence of explicit order-book data.  A wider spread indicates higher implicit transaction costs and, by extension, lower liquidity.\\[4pt]
+\texttt{spread\_log\_hl} (Float64)
+\end{formulabox}
+
+\begin{formulabox}{Amihud Illiquidity Ratio ($\lambda$)}
+\[
+  \lambda_{i,d} =
+  \begin{cases}
+    \displaystyle\frac{|r_{i,d}|}{V_{i,d}^{\text{CHF}}} \times 10^{6} & \text{if } V_{i,d}^{\text{CHF}} > 0 \\[8pt]
+    \text{null} & \text{if } V_{i,d}^{\text{CHF}} = 0
+  \end{cases}
+\]
+The Amihud (2002) illiquidity ratio quantifies the price impact per unit of trading volume.  A higher $\lambda$ indicates that a security's price is more sensitive to traded volume — the hallmark of an illiquid asset.\\[4pt]
+The scaling factor $10^6$ normalises the ratio to a human-readable range.  Division by zero is explicitly guarded against.\\[4pt]
+\texttt{amihud\_daily} (Float64)
+\end{formulabox}
+
+\begin{insightbox}
+\textbf{Why Amihud?}\;In the OTC-X market, where continuous order books are absent and trades are sporadic, the Amihud ratio provides a robust, model-free measure of illiquidity that requires only price and volume data — both of which are available from trade records.
+\end{insightbox}
+
+% ─── STEP 3 ──────────────────────────────────────────────────────────
+\section{Step 3: Rolling Baselines (30 Trading Days)}
+
+To distinguish genuine anomalies from normal variation, the engine computes rolling medians over a window of 30 \emph{trading days} per ISIN.  The critical distinction is that these are not calendar days — each row represents a day on which the security actually traded.
+
+\begin{formulabox}{Rolling Median}
+For any metric $x$ and window size $w = 30$:
+\[
+  \tilde{x}_{i,t}^{(w)} = \operatorname{median}\!\left(x_{i,t-w+1},\; x_{i,t-w+2},\; \ldots,\; x_{i,t}\right)
+\]
+where the indices refer to the $w$ most recent trading days for security $i$.\\[6pt]
+\textbf{Implementation detail:}\;\texttt{min\_samples=1} ensures that newly listed securities with fewer than 30 trading sessions still receive a baseline estimate from whatever data is available.
+\end{formulabox}
+
+Four baselines are computed:
+
+\begin{table}[H]
+\centering
+\caption{Rolling baseline columns}
+\label{tab:baselines}
+\rowcolors{2}{LightSilver}{white}
+\begin{tabularx}{\textwidth}{l l X}
+\toprule
+\textbf{Baseline Column} & \textbf{Source} & \textbf{Interpretation} \\
+\midrule
+\texttt{trades\_30d\_median}     & \texttt{trades\_today}      & Typical daily trade count over the last 30 sessions \\
+\texttt{volume\_30d\_median}     & \texttt{volume\_today\_chf}  & Typical daily CHF volume over the last 30 sessions \\
+\texttt{volatility\_30d\_median} & \texttt{volatility\_daily}   & Typical intraday volatility over the last 30 sessions \\
+\texttt{amihud\_30d\_median}     & \texttt{amihud\_daily}       & Typical illiquidity level over the last 30 sessions \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{insightbox}
+\textbf{Why medians rather than means?}\;The median is robust to outliers — a single extreme trading day (e.g., a corporate event) will not distort the baseline.  This is particularly important in OTC markets where the distribution of daily volumes and price changes is heavily right-skewed.
+\end{insightbox}
+
+% ─── STEP 4 ──────────────────────────────────────────────────────────
+\section{Step 4: Anomaly Detection}
+
+The anomaly detection module converts baseline deviations into a structured, interpretable scoring system.
+
+\subsection{Binary Anomaly Flags}
+
+Three independent binary flags are evaluated for each observation:
+
+\begin{formulabox}{Volume Spike}
+\[
+  \mathbb{1}_{[\text{vol\_spike}]} =
+  \begin{cases}
+    1 & \text{if } V_{i,d}^{\text{CHF}} > 1.5 \times \tilde{V}_{i,d}^{(30)} \\
+    0 & \text{otherwise}
+  \end{cases}
+\]
+Triggered when today's CHF volume exceeds 150\% of the 30-trading-day rolling median.
+\end{formulabox}
+
+\begin{formulabox}{Activity Spike}
+\[
+  \mathbb{1}_{[\text{act\_spike}]} =
+  \begin{cases}
+    1 & \text{if } N_{i,d} > 1.5 \times \tilde{N}_{i,d}^{(30)} \\
+    0 & \text{otherwise}
+  \end{cases}
+\]
+Triggered when today's trade count exceeds 150\% of the 30-trading-day rolling median.
+\end{formulabox}
+
+\begin{formulabox}{Price Gap}
+\[
+  \mathbb{1}_{[\text{price\_gap}]} =
+  \begin{cases}
+    1 & \text{if } |\Delta P_{i,d}| > 5\% \\
+    0 & \text{otherwise}
+  \end{cases}
+\]
+Triggered when the absolute intraday price change exceeds the 5\% threshold.
+\end{formulabox}
+
+\subsection{Composite Anomaly Score}
+
+The three binary flags are combined into a single weighted score:
+
+\begin{formulabox}{Anomaly Score $S \in [0,\,7]$}
+\[
+  \boxed{\;S_{i,d} = 3 \cdot \mathbb{1}_{[\text{vol\_spike}]} + 2 \cdot \mathbb{1}_{[\text{act\_spike}]} + 2 \cdot \mathbb{1}_{[\text{price\_gap}]}\;}
+\]
+\textbf{Weight rationale:}
+\begin{itemize}
+  \item \textbf{Volume spike (weight 3):}\;Volume is the strongest signal of institutional interest or market-moving events.
+  \item \textbf{Activity spike (weight 2):}\;Elevated trade frequency may indicate information asymmetry.
+  \item \textbf{Price gap (weight 2):}\;Large price movements in illiquid markets warrant equal scrutiny.
+\end{itemize}
+\end{formulabox}
+
+The score maps to the following severity tiers:
+
+\begin{table}[H]
+\centering
+\caption{Anomaly severity tiers}
+\label{tab:severity}
+\begin{tabularx}{\textwidth}{c l X}
+\toprule
+\textbf{Score} & \textbf{Tier} & \textbf{Interpretation} \\
+\midrule
+\cellcolor{CleanGreen!15} 0 & \textcolor{CleanGreen}{\textbf{Clean}} & No flags triggered; normal trading activity \\
+\cellcolor{WarnAmber!15} 2 & \textcolor{WarnAmber}{\textbf{Alert}} & Single flag (activity or price gap) triggered \\
+\cellcolor{WarnAmber!15} 3 & \textcolor{WarnAmber}{\textbf{Alert}} & Volume spike alone triggered \\
+\cellcolor{CriticalOrange!15} 4 & \textcolor{CriticalOrange}{\textbf{Critical}} & Two flags triggered simultaneously \\
+\cellcolor{SevereRed!15} 5 & \textcolor{SevereRed}{\textbf{Severe}} & Volume spike + one additional flag \\
+\cellcolor{SevereRed!20} 7 & \textcolor{SevereRed}{\textbf{Extreme}} & All three flags triggered simultaneously \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{insightbox}
+The set of achievable scores is $\{0, 2, 3, 4, 5, 7\}$ — scores of 1 and 6 are not possible given the weight assignment.  This discrete structure simplifies dashboard tier filtering and compliance reporting.
+\end{insightbox}
+
+
+% ═════════════════════════════════════════════════════════════════════
+%  CHAPTER 6 — DASHBOARD & VISUALISATION
+% ═════════════════════════════════════════════════════════════════════
+\chapter{Dashboard — Visualisation Architecture}
+\label{ch:dashboard}
+
+\section{Design Philosophy}
+
+The OTC-X dashboard embodies three principles drawn from the Swiss tradition of institutional design:
+
+\begin{enumerate}[label=\textcolor{SwissRed}{\textbf{\arabic*.}}]
+  \item \textbf{Clarity over ornamentation}\;— every visual element serves an analytical purpose; decorative components are absent.
+  \item \textbf{Progressive disclosure}\;— information is layered across four tabs, from high-level KPIs to granular per-security drill-downs.
+  \item \textbf{Contextual intelligence}\;— tooltips, formulas, and help icons accompany charts to ensure that users understand \emph{what} they see and \emph{why} it matters.
+\end{enumerate}
+
+\section{Tab Architecture}
+
+\begin{table}[H]
+\centering
+\caption{Dashboard tab structure and chart inventory}
+\label{tab:dashboard-tabs}
+\rowcolors{2}{LightSilver}{white}
+\begin{tabularx}{\textwidth}{c >{\bfseries}l X c}
+\toprule
+\textbf{\#} & \textbf{Tab} & \textbf{Content} & \textbf{Charts} \\
+\midrule
+1 & Overview       & KPI cards, 90-day activity, sector treemap, top movers, volume breakdown & 4 \\
+2 & Market Data    & Full 26-column explorer, search/sort/export, security deep-dive with $\sigma$-band & 1 \\
+3 & Analytics      & Correlation heatmap, volume-price scatter, Amihud boxplots, volatility trend, 3D explorer & 5 \\
+4 & Anomaly Monitor & Risk severity cards, anomaly treemap, active alerts table with clickable ISINs & 1 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Chart Type Reference}
+
+\begin{table}[H]
+\centering
+\caption{Complete chart gallery — 11 interactive visualisation types}
+\label{tab:chart-gallery}
+\rowcolors{2}{LightSilver}{white}
+\small
+\begin{tabularx}{\textwidth}{c l l X}
+\toprule
+\textbf{\#} & \textbf{Chart} & \textbf{Type} & \textbf{Analytical Purpose} \\
+\midrule
+1  & Market Activity      & Dual-axis (bar+line) & 90-day volume trend + trade count overlay \\
+2  & Sector Treemap       & Treemap              & Proportional sector allocation by volume; colour = avg price change \\
+3  & Top Movers           & Horizontal bar       & Top gainers and losers by daily price change \\
+4  & Volume by Sector     & Horizontal bar       & Total CHF volume per sector, descending \\
+5  & Security History     & Subplot (line+bar)   & Price series $\pm\sigma$ band + volume bars for any ISIN \\
+6  & Correlation Matrix   & Heatmap              & Lower-triangle Pearson correlation: $\rho(X,Y) = \frac{\text{cov}(X,Y)}{\sigma_X \sigma_Y}$ \\
+7  & Volume vs.\ Price   & Scatter              & Log-scale volume $\times$ price change, coloured by sector \\
+8  & Amihud by Sector     & Box plot             & Illiquidity $\lambda$ distribution across sectors \\
+9  & Volatility Trend     & Line                 & Rolling volatility with SMA/EWMA smoothing per sector \\
+10 & Anomaly Treemap      & Treemap              & Hierarchical severity visualisation \\
+11 & 3D Market Explorer   & 3D scatter           & 5-dimensional interactive visualisation (X, Y, Z, colour, size) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+% ═════════════════════════════════════════════════════════════════════
+%  CHAPTER 7 — QUALITY ASSURANCE & TESTING
+% ═════════════════════════════════════════════════════════════════════
+\chapter{Quality Assurance \& Testing}
+\label{ch:testing}
+
+\section{Test Strategy}
+
+The OTC-X test suite comprises \textbf{58 automated tests} distributed across three test modules, covering the full spectrum from path resolution to chart rendering:
+
+\begin{table}[H]
+\centering
+\caption{Test distribution across modules}
+\label{tab:test-modules}
+\rowcolors{2}{LightSilver}{white}
+\begin{tabularx}{\textwidth}{>{\ttfamily}l c X}
+\toprule
+\textbf{Module} & \textbf{Tests} & \textbf{Coverage Focus} \\
+\midrule
+test\_paths.py    & $\sim$10 & Path resolution correctness; file existence validation \\
+test\_backend.py  & $\sim$25 & Backend imports, ISIN calculation, time parsing, metrics logic \\
+test\_frontend.py & $\sim$23 & Formatter utilities, configuration constants, chart smoke tests \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Test Execution}
+
+\begin{lstlisting}[language=bash, caption={Test execution command}]
+python -m pytest tests/ -v
+\end{lstlisting}
+
+All tests are designed to execute without requiring the full dataset or live API access, enabling rapid feedback during development and reliable \gls{ci} validation.
+
+\section{Verification Strategy per Requirement}
+
+Each functional and non-functional requirement traces to at least one verification method:
+
+\begin{itemize}
+  \item \textbf{Automated tests}\;— correctness of computations, imports, and formatters
+  \item \textbf{Pipeline receipts}\;— performance metrics, data product statistics
+  \item \textbf{Manual acceptance}\;— dashboard interactivity, visual correctness
+  \item \textbf{Schema validation}\;— Parquet column types and ordering
+\end{itemize}
+
+
+% ═════════════════════════════════════════════════════════════════════
+%  APPENDIX — OUTPUT SCHEMA REFERENCE
+% ═════════════════════════════════════════════════════════════════════
+\appendix
+
+\chapter{Output Schema Reference}
+\label{app:schema}
+
+\begin{longtable}{c >{\ttfamily}l l p{6.5cm}}
+\caption{Complete schema of \texttt{daily\_metrics.parquet} (26 columns)} \\
+\toprule
+\textbf{\#} & \textbf{Column} & \textbf{Type} & \textbf{Description} \\
+\midrule
+\endfirsthead
+\caption[]{(continued)} \\
+\toprule
+\textbf{\#} & \textbf{Column} & \textbf{Type} & \textbf{Description} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\rowcolor{LightSilver}
+1  & Isin                  & String   & International Securities Identification Number \\
+2  & Name                  & String   & Company name (from securities metadata) \\
+\rowcolor{LightSilver}
+3  & Sektor                & String   & Economic sector classification \\
+4  & Datum                 & Date     & Trading date \\
+\rowcolor{LightSilver}
+5  & trades\_today          & UInt32   & Number of trades on this date \\
+6  & volume\_today\_units    & Float64  & Total volume in units \\
+\rowcolor{LightSilver}
+7  & volume\_today\_chf      & Float64  & Total volume in CHF \\
+8  & price\_min             & Float64  & Intraday low price \\
+\rowcolor{LightSilver}
+9  & price\_max             & Float64  & Intraday high price \\
+10 & price\_first           & Float64  & Opening price (first trade of day) \\
+\rowcolor{LightSilver}
+11 & price\_last            & Float64  & Closing price (last trade of day) \\
+12 & price\_change\_pct      & Float64  & Daily price change (\%) \\
+\rowcolor{LightSilver}
+13 & log\_returns           & Float64  & Natural log of price ratio \\
+14 & volatility\_daily      & Float64  & Intraday price standard deviation \\
+\rowcolor{LightSilver}
+15 & amihud\_daily          & Float64  & Amihud illiquidity ratio ($\lambda$) \\
+16 & spread\_log\_hl         & Float64  & Log high-low spread proxy \\
+\rowcolor{LightSilver}
+17 & trade\_duration\_min    & Float64  & Max gap between consecutive trades (min) \\
+18 & off\_book\_pct          & Float64  & Percentage of off-book trades \\
+\rowcolor{LightSilver}
+19 & trades\_30d\_median     & Float64  & 30-trading-day rolling median of trade count \\
+20 & volume\_30d\_median     & Float64  & 30-trading-day rolling median of CHF volume \\
+\rowcolor{LightSilver}
+21 & volatility\_30d\_median & Float64  & 30-trading-day rolling median of volatility \\
+22 & amihud\_30d\_median     & Float64  & 30-trading-day rolling median of Amihud $\lambda$ \\
+\rowcolor{LightSilver}
+23 & volume\_spike          & Boolean  & Flag: $V > 1.5 \times \tilde{V}_{30}$ \\
+24 & activity\_spike        & Boolean  & Flag: $N > 1.5 \times \tilde{N}_{30}$ \\
+\rowcolor{LightSilver}
+25 & price\_gap             & Boolean  & Flag: $|\Delta P\%| > 5$ \\
+26 & anomaly\_score         & UInt8    & Composite anomaly score $\in [0, 7]$ \\
+\end{longtable}
+
+
+\chapter{Glossary of Abbreviations}
+\label{app:glossary}
+
+\printglossary[type=\acronymtype, title={}, nonumberlist]
+
+\vfill
+
+% ─── COLOPHON ────────────────────────────────────────────────────────
+\begin{center}
+\noindent\textcolor{SwissRed}{\rule{0.6\textwidth}{1pt}}\\[8pt]
+{\small\textcolor{SlateGrey}{OTC\;|\;X\;\;·\;\;Liquidity Radar\;\;·\;\;Swiss OTC Market Intelligence}}\\[4pt]
+{\footnotesize\textcolor{SlateGrey}{Built with precision\;\;$\bullet$\;\;for the Swiss OTC market}}\\[4pt]
+{\footnotesize\textcolor{SlateGrey}{March 2026}}
+\end{center}
+
+\end{document}

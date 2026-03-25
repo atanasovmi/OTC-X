@@ -207,3 +207,26 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 .pytest_cache/
+
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.lot
+*.out
+*.toc
+*.synctex.gz
+*.synctex(busy)
+*.run.xml
+*.bcf
+*.glg
+*.glo
+*.gls
+*.ist
+*.acn
+*.acr
+*.alg
+docs/*.pdf
