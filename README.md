@@ -5,8 +5,8 @@
      ═══════════════════════════════════════════════════════════════ -->
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://capsule-render.vercel.app/api?type=waving&color=0:1A1A2E,15:B22222,85:B22222,100:1A1A2E&height=220&section=header&text=OTC%20%7C%20X&fontSize=72&fontColor=FFFFFF&fontAlignY=36&desc=Liquidity%20Radar%20%E2%80%A2%20Swiss%20OTC%20Market%20Intelligence&descSize=18&descAlignY=58&descColor=F5F6F8&animation=twinkling"/>
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:F5F6F8,30:B22222,70:B22222,100:1A1A2E&height=220&section=header&text=OTC%20%7C%20X&fontSize=72&fontColor=FFFFFF&fontAlignY=36&desc=Liquidity%20Radar%20%E2%80%A2%20Swiss%20OTC%20Market%20Intelligence&descSize=18&descAlignY=58&descColor=F5F6F8&animation=twinkling" width="100%"/>
+  <source media="(prefers-color-scheme: dark)" srcset="https://capsule-render.vercel.app/api?type=waving&color=0:1A1A2E%2C15:B22222%2C85:B22222%2C100:1A1A2E&height=220&section=header&text=OTC%20%7C%20X&fontSize=72&fontColor=FFFFFF&fontAlignY=36&desc=Liquidity%20Radar%20%E2%80%A2%20Swiss%20OTC%20Market%20Intelligence&descSize=18&descAlignY=58&descColor=F5F6F8&animation=twinkling"/>
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:F5F6F8%2C30:B22222%2C70:B22222%2C100:1A1A2E&height=220&section=header&text=OTC%20%7C%20X&fontSize=72&fontColor=FFFFFF&fontAlignY=36&desc=Liquidity%20Radar%20%E2%80%A2%20Swiss%20OTC%20Market%20Intelligence&descSize=18&descAlignY=58&descColor=F5F6F8&animation=twinkling" width="100%"/>
 </picture>
 
 <br/>
@@ -19,6 +19,8 @@
 <!-- Tech Stack Badges -->
 <p>
   <img src="https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white" alt="Python"/>
+  <img src="https://img.shields.io/badge/LaTeX-008080?style=flat&logo=latex&logoColor=white" alt="LaTeX"/>
+  <img src="https://img.shields.io/badge/Rust-000000?style=flat&logo=rust&logoColor=white" alt="Rust"/>
   <img src="https://img.shields.io/badge/Polars-000000?style=flat&logo=polars&logoColor=white" alt="Polars"/>
   <img src="https://img.shields.io/badge/Pandas-150458?style=flat&logo=pandas&logoColor=white" alt="Pandas"/>
   <img src="https://img.shields.io/badge/NumPy-013243?style=flat&logo=numpy&logoColor=white" alt="NumPy"/>
@@ -135,13 +137,13 @@ flowchart LR
 </tr>
 <tr>
 <td><b>Core</b></td>
-<td><img src="https://img.shields.io/badge/-Python_3.10+-3776AB?style=flat-square&logo=python&logoColor=white" height="22" align="center"/></td>
-<td>Runtime</td>
+<td><img src="https://img.shields.io/badge/-Python_3.10+-3776AB?style=flat-square&logo=python&logoColor=white" height="22" align="center"/>  <img src="https://img.shields.io/badge/-LaTeX-008080?style=flat-square&logo=latex&logoColor=white" height="22" align="center"/></td>
+<td>Runtime & Requirements engineering</td>
 </tr>
 <tr>
 <td><b>ETL</b></td>
-<td><img src="https://img.shields.io/badge/-Polars-000000?style=flat-square&logo=polars&logoColor=white" height="22" align="center"/></td>
-<td>High-performance DataFrame engine</td>
+<td><img src="https://img.shields.io/badge/-Rust-000000?style=flat-square&logo=rust&logoColor=white" height="22" align="center"/>  <img src="https://img.shields.io/badge/-Polars-000000?style=flat-square&logo=polars&logoColor=white" height="22" align="center"/>  <img src="https://img.shields.io/badge/-Requests-2CA5E0?style=flat-square&logoColor=white" height="22" align="center"/></td>
+<td>Rust-based high-performance engine & API ingestion</td>
 </tr>
 <tr>
 <td><b>Analytics</b></td>
@@ -150,13 +152,13 @@ flowchart LR
 </tr>
 <tr>
 <td><b>Dashboard</b></td>
-<td><img src="https://img.shields.io/badge/-Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white" height="22" align="center"/>  <img src="https://img.shields.io/badge/-Plotly-3F4F75?style=flat-square&logo=plotly&logoColor=white" height="22" align="center"/></td>
-<td>Interactive web UI with 11 chart types</td>
+<td><img src="https://img.shields.io/badge/-Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white" height="22" align="center"/>  <img src="https://img.shields.io/badge/-Plotly-3F4F75?style=flat-square&logo=plotly&logoColor=white" height="22" align="center"/><br/><br/><img src="https://img.shields.io/badge/-CSS3-1572B6?style=flat-square&logo=css3&logoColor=white" height="22" align="center"/>  <img src="https://img.shields.io/badge/-HTML5-E34F26?style=flat-square&logo=html5&logoColor=white" height="22" align="center"/></td>
+<td>Interactive web UI with custom styling & 11 chart types</td>
 </tr>
 <tr>
 <td><b>Storage</b></td>
-<td><img src="https://img.shields.io/badge/-Apache_Parquet-47A248?style=flat-square&logo=apache&logoColor=white" height="22" align="center"/></td>
-<td>Columnar data (zstd / snappy compression)</td>
+<td><img src="https://img.shields.io/badge/-Apache_Parquet-47A248?style=flat-square&logo=apache&logoColor=white" height="22" align="center"/>  <img src="https://img.shields.io/badge/-PyArrow-000000?style=flat-square&logo=apache&logoColor=white" height="22" align="center"/></td>
+<td>Columnar data serialization (zstd / snappy compression)</td>
 </tr>
 <tr>
 <td><b>CI / CD</b></td>
