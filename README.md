@@ -16,18 +16,13 @@
 
 <br/><br/>
 
-<!-- Tech Stack Badges -->
+<!-- Status Badges -->
 <p>
-  <img src="https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white" alt="Python"/>
-  <img src="https://img.shields.io/badge/LaTeX-008080?style=flat&logo=latex&logoColor=white" alt="LaTeX"/>
-  <img src="https://img.shields.io/badge/Polars-000000?style=flat&logo=polars&logoColor=white" alt="Polars"/>
-  <img src="https://img.shields.io/badge/Pandas-150458?style=flat&logo=pandas&logoColor=white" alt="Pandas"/>
-  <img src="https://img.shields.io/badge/NumPy-013243?style=flat&logo=numpy&logoColor=white" alt="NumPy"/>
-  <img src="https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white" alt="Streamlit"/>
-  <img src="https://img.shields.io/badge/Plotly-3F4F75?style=flat&logo=plotly&logoColor=white" alt="Plotly"/>
-  <img src="https://img.shields.io/badge/Apache_Parquet-47A248?style=flat&logo=apache&logoColor=white" alt="Parquet"/>
-  <img src="https://img.shields.io/badge/GitHub_Actions-F6811E?style=flat&logo=githubactions&logoColor=white" alt="GitHub Actions"/>
-  <img src="https://img.shields.io/badge/pytest-009688?style=flat&logo=pytest&logoColor=white" alt="pytest"/>
+  <img src="https://img.shields.io/badge/License-Proprietary-B22222?style=flat&logo=law&logoColor=white" alt="License"/>
+  <img src="https://img.shields.io/badge/Target-BEKB_Trading_Desk-150458?style=flat" alt="Target Audience"/>
+  <img src="https://img.shields.io/badge/Pipeline-Automated_Daily-F6811E?style=flat&logo=githubactions&logoColor=white" alt="Pipeline"/>
+  <img src="https://img.shields.io/badge/Tests-58_Passing-009688?style=flat&logo=pytest&logoColor=white" alt="Tests"/>
+  <img src="https://img.shields.io/badge/Dashboard-Live-FF4B4B?style=flat&logo=streamlit&logoColor=white" alt="Dashboard Status"/>
 </p>
 
 <br/>
