@@ -4,7 +4,10 @@
      HERO BANNER — Swiss-inspired OTC-X identity
      ═══════════════════════════════════════════════════════════════ -->
 
-<img src="assets/hero-banner.svg" alt="OTC | X — Liquidity Radar • Swiss OTC Market Intelligence" width="100%"/>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://capsule-render.vercel.app/api?type=waving&color=0:1A1A2E,50:B22222,100:1A1A2E&height=220&section=header&text=OTC%20%7C%20X&fontSize=72&fontColor=FFFFFF&fontAlignY=36&desc=Liquidity%20Radar%20%E2%80%A2%20Swiss%20OTC%20Market%20Intelligence&descSize=18&descAlignY=58&descColor=F5F6F8"/>
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:F5F6F8,30:B22222,70:B22222,100:1A1A2E&height=220&section=header&text=OTC%20%7C%20X&fontSize=72&fontColor=FFFFFF&fontAlignY=36&desc=Liquidity%20Radar%20%E2%80%A2%20Swiss%20OTC%20Market%20Intelligence&descSize=18&descAlignY=58&descColor=F5F6F8" width="100%"/>
+</picture>
 
 <br/>
 
@@ -16,13 +19,13 @@
 <!-- Tech Stack Badges -->
 <p>
   <img src="https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white" alt="Python"/>
-  <img src="https://img.shields.io/badge/Polars-CD792C?style=flat&logo=polars&logoColor=white" alt="Polars"/>
+  <img src="https://img.shields.io/badge/Polars-000000?style=flat&logo=polars&logoColor=white" alt="Polars"/>
   <img src="https://img.shields.io/badge/Pandas-150458?style=flat&logo=pandas&logoColor=white" alt="Pandas"/>
   <img src="https://img.shields.io/badge/NumPy-013243?style=flat&logo=numpy&logoColor=white" alt="NumPy"/>
   <img src="https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white" alt="Streamlit"/>
   <img src="https://img.shields.io/badge/Plotly-3F4F75?style=flat&logo=plotly&logoColor=white" alt="Plotly"/>
   <img src="https://img.shields.io/badge/Apache_Parquet-47A248?style=flat&logo=apache&logoColor=white" alt="Parquet"/>
-  <img src="https://img.shields.io/badge/GitHub_Actions-181717?style=flat&logo=githubactions&logoColor=white" alt="GitHub Actions"/>
+  <img src="https://img.shields.io/badge/GitHub_Actions-F6811E?style=flat&logo=githubactions&logoColor=white" alt="GitHub Actions"/>
   <img src="https://img.shields.io/badge/pytest-009688?style=flat&logo=pytest&logoColor=white" alt="pytest"/>
 </p>
 
@@ -137,7 +140,7 @@ flowchart LR
 </tr>
 <tr>
 <td><b>ETL</b></td>
-<td><img src="https://img.shields.io/badge/-Polars-CD792C?style=flat-square&logo=polars&logoColor=white" height="22" align="center"/></td>
+<td><img src="https://img.shields.io/badge/-Polars-000000?style=flat-square&logo=polars&logoColor=white" height="22" align="center"/></td>
 <td>High-performance DataFrame engine</td>
 </tr>
 <tr>
@@ -157,7 +160,7 @@ flowchart LR
 </tr>
 <tr>
 <td><b>CI / CD</b></td>
-<td><img src="https://img.shields.io/badge/-GitHub_Actions-181717?style=flat-square&logo=githubactions&logoColor=white" height="22" align="center"/></td>
+<td><img src="https://img.shields.io/badge/-GitHub_Actions-F6811E?style=flat-square&logo=githubactions&logoColor=white" height="22" align="center"/></td>
 <td>Automated daily pipeline (cron @ 05:00 UTC)</td>
 </tr>
 <tr>
@@ -227,28 +230,28 @@ KPI cards · 90-day market activity · Sector treemap · Top movers
 
 <!-- Replace the URL below with your own screenshot -->
 <div align="center">
-<img src="https://github.com/user-attachments/assets/placeholder-overview" alt="Overview Tab" width="100%"/>
+<img src="docs/screenshots/tab-overview.png" alt="Overview Tab" width="100%"/>
 </div>
 
 ### 🗂️ Market Data
 Full 26-column data explorer · Search & sort · CSV download · Security deep-dive
 
 <div align="center">
-<img src="https://github.com/user-attachments/assets/placeholder-market-data" alt="Market Data Tab" width="100%"/>
+<img src="docs/screenshots/tab-market-data.png" alt="Market Data Tab" width="100%"/>
 </div>
 
 ### 📊 Analytics
 Correlation matrix · Amihud boxplots · Rolling volatility · 3D market explorer
 
 <div align="center">
-<img src="https://github.com/user-attachments/assets/placeholder-analytics" alt="Analytics Tab" width="100%"/>
+<img src="docs/screenshots/tab-analytics.png" alt="Analytics Tab" width="100%"/>
 </div>
 
 ### 🚨 Anomaly Monitor
 Risk severity cards · Anomaly treemap · Active alerts table
 
 <div align="center">
-<img src="https://github.com/user-attachments/assets/placeholder-anomaly" alt="Anomaly Monitor Tab" width="100%"/>
+<img src="docs/screenshots/tab-anomaly.png" alt="Anomaly Monitor Tab" width="100%"/>
 </div>
 
 <details>
@@ -735,6 +738,6 @@ Qualsiasi accesso a questo repository non costituisce una concessione di licenza
 
 <br/><br/>
 
-<img src="assets/footer-wave.svg" alt="" width="100%"/>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:F5F6F8,50:B22222,100:1A1A2E&height=100&section=footer" width="100%"/>
 
 </div>
