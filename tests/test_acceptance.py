@@ -8,6 +8,7 @@ import polars as pl
 import pandas as pd
 import numpy as np
 from pathlib import Path
+from datetime import date, timedelta
 from pytest_bdd import scenarios, given, when, then, parsers
 
 # ═══════════════════════════════════════════════════════════
@@ -19,13 +20,13 @@ scenarios("features/anomaly_detection.feature")
 
 def _build_normal_days(n: int, price: float = 100.0, volume: float = 50.0) -> list[dict]:
     """Helper to build N days of uniform trading data."""
+    base_date = date(2024, 1, 1)
     records = []
-    for d in range(1, n + 1):
-        month = (d - 1) // 28 + 1
-        day_in_month = (d - 1) % 28 + 1
+    for d in range(n):
+        dt = base_date + timedelta(days=d)
         records.append({
             "Isin": "CH0000000001",
-            "Datum": f"2024-{month:02d}-{day_in_month:02d}",
+            "Datum": dt.isoformat(),
             "Zeit": "10:00:00",
             "Kurs": price,
             "Volumen": volume,
@@ -36,9 +37,9 @@ def _build_normal_days(n: int, price: float = 100.0, volume: float = 50.0) -> li
 
 def _spike_date(n: int) -> str:
     """Return a date string one day after n normal days."""
-    month = n // 28 + 1
-    day_in_month = n % 28 + 1
-    return f"2024-{month:02d}-{day_in_month:02d}"
+    base_date = date(2024, 1, 1)
+    dt = base_date + timedelta(days=n)
+    return dt.isoformat()
 
 
 @given("a security with 30 days of normal volume around 50 units", target_fixture="anomaly_context")
