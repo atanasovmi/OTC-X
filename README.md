@@ -39,7 +39,11 @@
 
 <br/>
 
+<br/>
+
 ---
+
+<br/>
 
 ## 📖 Table of Contents
 
@@ -60,7 +64,11 @@
 
 </details>
 
+<br/>
+
 ---
+
+<br/>
 
 ## 🔭 What is OTC-X?
 
@@ -117,7 +125,11 @@ flowchart LR
 
 </div>
 
+<br/>
+
 ---
+
+<br/>
 
 ## 🛠️ Tech Stack
 
@@ -168,7 +180,11 @@ flowchart LR
 
 </div>
 
+<br/>
+
 ---
+
+<br/>
 
 ## ✨ Key Features
 
@@ -215,7 +231,11 @@ flowchart LR
 </tr>
 </table>
 
+<br/>
+
 ---
+
+<br/>
 
 ## 🖥️ Dashboard Preview
 
@@ -269,7 +289,11 @@ Risk severity cards · Anomaly treemap · Active alerts table
 
 </details>
 
+<br/>
+
 ---
+
+<br/>
 
 ## 🏗️ Architecture
 
@@ -314,7 +338,11 @@ flowchart TD
     GHA -->|triggers| Pipeline
 ```
 
+<br/>
+
 ---
+
+<br/>
 
 ## 🔄 Data Pipeline
 
@@ -354,7 +382,11 @@ flowchart LR
 
 </details>
 
+<br/>
+
 ---
+
+<br/>
 
 ## 📁 Project Structure
 
@@ -403,7 +435,11 @@ OTC-X/
 └── README.md                          # ← You are here
 ```
 
+<br/>
+
 ---
+
+<br/>
 
 ## 🚀 Getting Started
 
@@ -440,7 +476,11 @@ The live dashboard is publicly available — no installation required:
 
 </div>
 
+<br/>
+
 ---
+
+<br/>
 
 ## 📐 Metrics Engine
 
@@ -482,7 +522,11 @@ $$\text{Score} = 3 \cdot \mathbf{1}_{\text{vol}} + 2 \cdot \mathbf{1}_{\text{act
 | Activity Spike | $N_{\text{trades}} > 1.5 \times \tilde{N}_{30}$ | **2** |
 | Price Gap | $\lvert\Delta P\%\rvert > 5$ | **2** |
 
+<br/>
+
 ---
+
+<br/>
 
 ## 💡 Feedback & Ideas
 
@@ -502,7 +546,11 @@ If you have suggestions for improving analytics, visualization, or the pipeline:
 - Paths via `Path(__file__).resolve().parent` chains — no hardcoded paths
 - Swiss number formatting: `'` thousands separator, CHF currency
 
+<br/>
+
 ---
+
+<br/>
 
 ## ⚖️ Proprietary Notice & Terms of Use
 
@@ -718,7 +766,11 @@ Qualsiasi accesso a questo repository non costituisce una concessione di licenza
 
 </details>
 
+<br/>
+
 ---
+
+<br/>
 
 <div align="center">
 
