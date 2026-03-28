@@ -21,7 +21,7 @@
   <img src="https://img.shields.io/badge/License-Proprietary-B22222?style=flat&logo=law&logoColor=white" alt="License"/>
   <img src="https://img.shields.io/badge/Target-BEKB_Trading_Desk-150458?style=flat" alt="Target Audience"/>
   <img src="https://img.shields.io/badge/Pipeline-Automated_Daily-F6811E?style=flat&logo=githubactions&logoColor=white" alt="Pipeline"/>
-  <img src="https://img.shields.io/badge/Tests-58_Passing-009688?style=flat&logo=pytest&logoColor=white" alt="Tests"/>
+  <img src="https://img.shields.io/badge/Tests-120_Passing-009688?style=flat&logo=pytest&logoColor=white" alt="Tests"/>
   <img src="https://img.shields.io/badge/Dashboard-Live-FF4B4B?style=flat&logo=streamlit&logoColor=white" alt="Dashboard Status"/>
 </p>
 
@@ -174,7 +174,7 @@ flowchart LR
 <tr>
 <td><b>Testing</b></td>
 <td><img src="https://img.shields.io/badge/-pytest-009688?style=flat-square&logo=pytest&logoColor=white" height="22" align="center"/></td>
-<td>58 unit & integration tests</td>
+<td>120 unit & integration tests</td>
 </tr>
 </table>
 
