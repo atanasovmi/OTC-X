@@ -13,6 +13,10 @@ import pandas as pd
 import requests
 from pathlib import Path
 
+# Generous timeout for the securities-universe request which returns a
+# larger JSON payload (~240 items) than individual trade CSV downloads.
+TIMEOUT: int = 30
+
 
 def run_crawl() -> pd.DataFrame:
     """Crawl the OTC-X API and persist the securities universe to CSV.
@@ -39,7 +43,7 @@ def run_crawl() -> pd.DataFrame:
         'User-Agent': 'OTC-X-DataProcessor/1.0'
     }
     
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, timeout=TIMEOUT)
     response.raise_for_status()
     
     items = response.json().get('items', [])

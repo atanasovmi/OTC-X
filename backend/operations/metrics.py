@@ -452,9 +452,7 @@ def main() -> None:
         print("   Ensure master_trades.parquet and securities_enriched.csv exist in data/")
         exit(1)
     except Exception as e:
-        print(f"\n[ERROR] CRITICAL ERROR: {e}")
-        import traceback
-        traceback.print_exc()
+        print(f"\n[ERROR] CRITICAL ERROR: {type(e).__name__}: {e}")
         exit(1)
 
 
