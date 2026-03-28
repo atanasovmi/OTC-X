@@ -50,7 +50,6 @@ def run_crawl() -> pd.DataFrame:
     data = []
     
     for item in items:
-        # Extract desired fields
         data.append({
             "NAME": item.get("name", "Unknown"),
             "SEKTOR": item.get("sector", "Unknown"),

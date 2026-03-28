@@ -5,9 +5,9 @@ on:
     - cron: '0 5 * * *'
   workflow_dispatch:
 
-# CRITICAL: Antigravity missed this. Without it, you can't push data back.
+# Required for the commit-and-push step to write back pipeline artifacts
 permissions:
-  contents: write 
+  contents: write
 
 jobs:
   run-pipeline:
@@ -21,7 +21,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          cache: 'pip' # Good addition: speeds up daily dependency installation
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
@@ -31,7 +31,7 @@ jobs:
       - name: Run main orchestrator
         run: python -m backend.pipeline
 
-      # CRITICAL: Antigravity missed this. Without it, your new data is destroyed when the VM shuts down.
+      # Persist pipeline artifacts back to the repository
       - name: Commit and push new data
         run: |
           git config --global user.name 'github-actions[bot]'

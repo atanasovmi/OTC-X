@@ -180,10 +180,7 @@ def build_master_parquet() -> None:
         f.write(", ".join(header) + "\n")
         
         # Write rows
-        # Using Polars efficient iter_rows is okay for 130k, or we can construct a single csv string column?
-        # Constructing a single string column is vectorised and faster.
-        
-        # Create a single joined string column
+        # Vectorised string concatenation for CSV output
         csv_lines = df_display.select(
             pl.concat_str(
                 [
