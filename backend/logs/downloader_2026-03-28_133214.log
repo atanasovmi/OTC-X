@@ -1,0 +1,12 @@
+[2026-03-28 13:32:17] OTC-X Trade Downloader started
+[2026-03-28 13:32:17] Loaded 243 rows from C:\Users\mihae\PycharmProjects\OTC-X\backend\data\securities.csv
+[2026-03-28 13:32:17] Processing: CH0136182570 (acrevis Bank N)
+[2026-03-28 13:32:18] ✓ CH0136182570: 3537 trades downloaded
+[2026-03-28 13:32:19] Processing: CH0006668930 (ADEV Solarstrom AG, Liestal)
+[2026-03-28 13:32:19] ✓ CH0006668930: 470 trades downloaded
+[2026-03-28 13:32:20] Processing: CH0006524265 (ADEV Wasserkraftwerk AG, Liestal)
+[2026-03-28 13:32:20] ✓ CH0006524265: 210 trades downloaded
+[2026-03-28 13:32:21] Processing: CH0010497532 (ADEV Windkraft AG, Liestal)
+[2026-03-28 13:32:21] ✓ CH0010497532: 148 trades downloaded
+[2026-03-28 13:32:22] Processing: CH0034900248 (AG für Erstellung billiger Wohnhäuser in Winterthu)
+[2026-03-28 13:32:22] ✓ CH0034900248: 118 trades downloaded
