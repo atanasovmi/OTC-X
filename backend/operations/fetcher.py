@@ -220,7 +220,7 @@ def download_trades(isin: str, session: requests.Session) -> str:
                 line_count = len(text_content.strip().split('\n')) - 1 # Header
                 line_count = max(0, line_count)
                 logger.info(f"✓ {isin}: {line_count} trades downloaded")
-            except:
+            except Exception:
                 logger.info(f"✓ {isin}: downloaded (binary/unknown size)")
                 
             return 'success'

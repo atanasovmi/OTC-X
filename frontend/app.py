@@ -18,6 +18,7 @@ if _PROJECT_ROOT not in sys.path:
 import streamlit as st
 import pandas as pd
 import numpy as np
+from html import escape as _esc
 
 from frontend.operations.config import SEVERITY_TIERS
 from frontend.operations.styles import inject_css
@@ -650,14 +651,17 @@ def main() -> None:
                 if r.get("price_gap", False):
                     flags.append("Gap")
                 flag_str = ", ".join(flags) if flags else "—"
+                safe_isin = _esc(str(r['Isin']))
+                safe_name = _esc(str(r.get('Name', ''))[:30])
+                safe_sektor = _esc(str(r.get('Sektor', ''))[:20])
                 arows += (
                     f"<tr>"
-                    f"<td class='isin'><a href='https://www.otc-x.ch/security/{r['Isin']}' "
+                    f"<td class='isin'><a href='https://www.otc-x.ch/security/{safe_isin}' "
                     f"target='_blank' style='color:#B22222;text-decoration:none;'>"
-                    f"{r['Isin']}</a></td>"
+                    f"{safe_isin}</a></td>"
                     f"<td class='left' style='font-family:Inter;font-weight:500;"
-                    f"color:#1A1A2E;'>{str(r.get('Name',''))[:30]}</td>"
-                    f"<td class='sektor left'>{str(r.get('Sektor',''))[:20]}</td>"
+                    f"color:#1A1A2E;'>{safe_name}</td>"
+                    f"<td class='sektor left'>{safe_sektor}</td>"
                     f"<td>{date}</td>"
                     f"<td>{fmt_chf(r.get('volume_today_chf', 0))}</td>"
                     f"<td>{int(r.get('trades_today', 0))}</td>"

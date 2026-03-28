@@ -39,7 +39,7 @@ def run_crawl() -> pd.DataFrame:
         'User-Agent': 'OTC-X-DataProcessor/1.0'
     }
     
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, timeout=30)
     response.raise_for_status()
     
     items = response.json().get('items', [])

@@ -126,14 +126,17 @@ def render_market_table(df: pd.DataFrame, n: int = 50) -> None:
         vol_chf = r.get("volume_today_chf", 0)
         trades = int(r.get("trades_today", 0))
         vola = r.get("volatility_daily", 0)
+        safe_isin = _esc(str(r['Isin']))
+        safe_name = _esc(str(r.get('Name', ''))[:34])
+        safe_sektor = _esc(str(r.get('Sektor', ''))[:22])
         rows += (
             f"<tr>"
-            f"<td class='isin'><a href='https://www.otc-x.ch/security/{r['Isin']}' "
+            f"<td class='isin'><a href='https://www.otc-x.ch/security/{safe_isin}' "
             f"target='_blank' style='color:#B22222;text-decoration:none;'>"
-            f"{r['Isin']}</a></td>"
-            f"<td class='name left'>{str(r.get('Name',''))[:34]}</td>"
+            f"{safe_isin}</a></td>"
+            f"<td class='name left'>{safe_name}</td>"
             f"<td class='sektor left'>"
-            f"{str(r.get('Sektor',''))[:22]}</td>"
+            f"{safe_sektor}</td>"
             f"<td>{date}</td>"
             f"<td>{fmt_chf(vol_chf)}</td>"
             f"<td>{fmt_num(vol_units)}</td>"
