@@ -18,11 +18,11 @@
 
 <!-- Status Badges -->
 <p>
-  <img src="https://img.shields.io/badge/License-Proprietary-B22222?style=flat&logo=law&logoColor=white" alt="License"/>
+  <a href="LICENSE.md"><img src="https://img.shields.io/badge/License-Proprietary-B22222?style=flat&logo=law&logoColor=white" alt="License"/></a>
   <img src="https://img.shields.io/badge/Target-BEKB_Trading_Desk-150458?style=flat" alt="Target Audience"/>
-  <img src="https://img.shields.io/badge/Pipeline-Automated_Daily-F6811E?style=flat&logo=githubactions&logoColor=white" alt="Pipeline"/>
-  <img src="https://img.shields.io/badge/Tests-120_Passing-009688?style=flat&logo=pytest&logoColor=white" alt="Tests"/>
-  <img src="https://img.shields.io/badge/Dashboard-Live-FF4B4B?style=flat&logo=streamlit&logoColor=white" alt="Dashboard Status"/>
+  <a href="https://github.com/atanasovmi/OTC-X/actions/workflows/automation_pipeline.yml"><img src="https://img.shields.io/badge/Pipeline-Automated_Daily-F6811E?style=flat&logo=githubactions&logoColor=white" alt="Pipeline"/></a>
+  <a href="https://docs.pytest.org"><img src="https://img.shields.io/badge/Tests-pytest_·_BDD-696969?style=flat&logo=pytest&logoColor=white" alt="Tests"/></a>
+  <a href="https://otc-x-radar.streamlit.app"><img src="https://img.shields.io/badge/Dashboard-Live-FF4B4B?style=flat&logo=streamlit&logoColor=white" alt="Dashboard Status"/></a>
 </p>
 
 <br/>
@@ -58,6 +58,7 @@
 - [Data Pipeline](#-data-pipeline)
 - [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
+- [Documentation Toolchain](#-documentation-toolchain)
 - [Metrics Engine](#-metrics-engine)
 - [Feedback & Ideas](#-feedback--ideas)
 - [Proprietary Notice & Terms of Use](#-proprietary-notice--terms-of-use)
@@ -103,28 +104,6 @@ The **only live liquidity radar** for Swiss OTC equities: automated anomaly scor
 </tr>
 </table>
 
-<div align="center">
-
-```mermaid
-flowchart LR
-    P["🎯 <b>Problem</b><br/>Opaque market,<br/>fragmented data"]
-    T["👥 <b>Zielgruppe</b><br/>BEKB Trading Desk,<br/>institutional stakeholders"]
-    S["💡 <b>Lösung</b><br/>4-stage pipeline →<br/>interactive dashboard"]
-    V["⭐ <b>Wert</b><br/>Live liquidity radar,<br/>zero manual intervention"]
-
-    P -->|who has it?| T -->|how we solve it| S -->|why it matters| V
-
-    style P fill:#F8F9FA,stroke:#555555,color:#1A1A2E
-    style T fill:#F8F9FA,stroke:#555555,color:#1A1A2E
-    style S fill:#F8F9FA,stroke:#555555,color:#1A1A2E
-    style V fill:#F8F9FA,stroke:#B22222,color:#1A1A2E,stroke-width:2px
-    linkStyle 0 stroke:#999,stroke-width:2px
-    linkStyle 1 stroke:#999,stroke-width:2px
-    linkStyle 2 stroke:#999,stroke-width:2px
-```
-
-</div>
-
 <br/>
 
 ---
@@ -143,38 +122,43 @@ flowchart LR
 </tr>
 <tr>
 <td><b>Core</b></td>
-<td><img src="https://img.shields.io/badge/-Python_3.10+-3776AB?style=flat-square&logo=python&logoColor=white" height="22" align="center"/>  <img src="https://img.shields.io/badge/-LaTeX-008080?style=flat-square&logo=latex&logoColor=white" height="22" align="center"/></td>
-<td>Runtime & Requirements engineering</td>
+<td><a href="https://python.org"><img src="https://img.shields.io/badge/-Python_3.10+-3776AB?style=flat-square&logo=python&logoColor=white" height="22" align="center"/></a></td>
+<td>Runtime environment</td>
 </tr>
 <tr>
 <td><b>ETL</b></td>
-<td><img src="https://img.shields.io/badge/-Rust-000000?style=flat-square&logo=rust&logoColor=white" height="22" align="center"/>  <img src="https://img.shields.io/badge/-Polars-000000?style=flat-square&logo=polars&logoColor=white" height="22" align="center"/>  <img src="https://img.shields.io/badge/-Requests-2CA5E0?style=flat-square&logoColor=white" height="22" align="center"/></td>
-<td>Rust-based high-performance engine & API ingestion</td>
+<td><a href="https://pola.rs"><img src="https://img.shields.io/badge/-Polars-000000?style=flat-square&logo=polars&logoColor=white" height="22" align="center"/></a>  <a href="https://rust-lang.org"><img src="https://img.shields.io/badge/-Rust_Engine-000000?style=flat-square&logo=rust&logoColor=white" height="22" align="center"/></a>  <a href="https://docs.python-requests.org"><img src="https://img.shields.io/badge/-Requests-D4A017?style=flat-square&logoColor=white" height="22" align="center"/></a></td>
+<td>Rust-based high-performance DataFrame engine & API ingestion</td>
 </tr>
 <tr>
 <td><b>Analytics</b></td>
-<td><img src="https://img.shields.io/badge/-Pandas-150458?style=flat-square&logo=pandas&logoColor=white" height="22" align="center"/>  <img src="https://img.shields.io/badge/-NumPy-013243?style=flat-square&logo=numpy&logoColor=white" height="22" align="center"/></td>
+<td><a href="https://pandas.pydata.org"><img src="https://img.shields.io/badge/-Pandas-150458?style=flat-square&logo=pandas&logoColor=white" height="22" align="center"/></a>  <a href="https://numpy.org"><img src="https://img.shields.io/badge/-NumPy-013243?style=flat-square&logo=numpy&logoColor=white" height="22" align="center"/></a></td>
 <td>Data manipulation & numerics</td>
 </tr>
 <tr>
 <td><b>Dashboard</b></td>
-<td><img src="https://img.shields.io/badge/-Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white" height="22" align="center"/>  <img src="https://img.shields.io/badge/-Plotly-3F4F75?style=flat-square&logo=plotly&logoColor=white" height="22" align="center"/><br/><br/><img src="https://img.shields.io/badge/-CSS3-1572B6?style=flat-square&logo=css3&logoColor=white" height="22" align="center"/>  <img src="https://img.shields.io/badge/-HTML5-E34F26?style=flat-square&logo=html5&logoColor=white" height="22" align="center"/></td>
-<td>Interactive web UI with custom styling & 11 chart types</td>
+<td><a href="https://streamlit.io"><img src="https://img.shields.io/badge/-Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white" height="22" align="center"/></a>  <a href="https://plotly.com/python/"><img src="https://img.shields.io/badge/-Plotly-3F4F75?style=flat-square&logo=plotly&logoColor=white" height="22" align="center"/></a><br/><br/><a href="https://developer.mozilla.org/en-US/docs/Web/CSS"><img src="https://img.shields.io/badge/-CSS3-1572B6?style=flat-square&logo=css3&logoColor=white" height="22" align="center"/></a>  <a href="https://developer.mozilla.org/en-US/docs/Web/HTML"><img src="https://img.shields.io/badge/-HTML5-E34F26?style=flat-square&logo=html5&logoColor=white" height="22" align="center"/></a></td>
+<td>Interactive web UI with 431-line Swiss-design CSS & 11 chart types</td>
 </tr>
 <tr>
 <td><b>Storage</b></td>
-<td><img src="https://img.shields.io/badge/-Apache_Parquet-47A248?style=flat-square&logo=apache&logoColor=white" height="22" align="center"/>  <img src="https://img.shields.io/badge/-PyArrow-000000?style=flat-square&logo=apache&logoColor=white" height="22" align="center"/></td>
-<td>Columnar data serialization (zstd / snappy compression)</td>
+<td><a href="https://parquet.apache.org"><img src="https://img.shields.io/badge/-Apache_Parquet-47A248?style=flat-square&logo=apache&logoColor=white" height="22" align="center"/></a>  <a href="https://arrow.apache.org/docs/python/"><img src="https://img.shields.io/badge/-PyArrow-000000?style=flat-square&logo=apache&logoColor=white" height="22" align="center"/></a></td>
+<td>Columnar data serialization (Zstandard compression)</td>
 </tr>
 <tr>
 <td><b>CI / CD</b></td>
-<td><img src="https://img.shields.io/badge/-GitHub_Actions-F6811E?style=flat-square&logo=githubactions&logoColor=white" height="22" align="center"/></td>
+<td><a href="https://github.com/features/actions"><img src="https://img.shields.io/badge/-GitHub_Actions-F6811E?style=flat-square&logo=githubactions&logoColor=white" height="22" align="center"/></a></td>
 <td>Automated daily pipeline (cron @ 05:00 UTC)</td>
 </tr>
 <tr>
 <td><b>Testing</b></td>
-<td><img src="https://img.shields.io/badge/-pytest-009688?style=flat-square&logo=pytest&logoColor=white" height="22" align="center"/></td>
-<td>120 unit & integration tests</td>
+<td><a href="https://docs.pytest.org"><img src="https://img.shields.io/badge/-pytest-696969?style=flat-square&logo=pytest&logoColor=white" height="22" align="center"/></a>  <a href="https://pytest-bdd.readthedocs.io"><img src="https://img.shields.io/badge/-pytest--bdd-696969?style=flat-square&logo=pytest&logoColor=white" height="22" align="center"/></a></td>
+<td>Unit, integration, system & BDD acceptance tests</td>
+</tr>
+<tr>
+<td><b>Docs</b></td>
+<td><a href="https://www.latex-project.org"><img src="https://img.shields.io/badge/-LaTeX-008080?style=flat-square&logo=latex&logoColor=white" height="22" align="center"/></a>  <a href="https://miktex.org"><img src="https://img.shields.io/badge/-MiKTeX-00838F?style=flat-square&logo=latex&logoColor=white" height="22" align="center"/></a>  <a href="https://strawberryperl.com"><img src="https://img.shields.io/badge/-Strawberry_Perl-39457E?style=flat-square&logo=perl&logoColor=white" height="22" align="center"/></a></td>
+<td>53-page IREB requirements catalogue (PDF compilation)</td>
 </tr>
 </table>
 
@@ -346,41 +330,24 @@ flowchart TD
 
 ## 🔄 Data Pipeline
 
-```mermaid
-flowchart LR
-    subgraph Stage1 [" "]
-        S1["🔍 <b>Stage 1</b>\nValor Extraction"]
-    end
-    subgraph Stage2 [" "]
-        S2["📥 <b>Stage 2</b>\nTrade Download"]
-    end
-    subgraph Stage3 [" "]
-        S3["🔨 <b>Stage 3</b>\nParquet Build"]
-    end
-    subgraph Stage4 [" "]
-        S4["📐 <b>Stage 4</b>\nMetrics Engine"]
-    end
-    subgraph Done [" "]
-        S5["✅ <b>Receipt Log</b>"]
-    end
+<div align="center">
 
-    Stage1 -->|"securities.csv"| Stage2
-    Stage2 -->|"trades/*.csv"| Stage3
-    Stage3 -->|"master_trades.parquet"| Stage4
-    Stage4 -->|"daily_metrics.parquet"| Done
-```
+<code>OTC-X API</code>&ensp;⟶&ensp;<code>Discovery</code>&ensp;⟶&ensp;<code>Collection</code>&ensp;⟶&ensp;<code>Consolidation</code>&ensp;⟶&ensp;<code>Intelligence</code>&ensp;⟶&ensp;<code>Dashboard</code>
 
-<details>
-<summary><b>Stage Details</b></summary>
+<br/>
 
-| Stage | Module | Input | Output | Description |
-|:---:|:---|:---|:---|:---|
-| **①** | `soft_crawl.py` | OTC-X API | `securities.csv` | Fetch 243 Swiss securities (Name, Sektor, Valor, ISIN) |
-| **②** | `fetcher.py` | API + securities.csv | `trades/*.csv` | Download trade history per ISIN with retry logic & rate limiting |
-| **③** | `build_master_parquet.py` | `trades/*.csv` | `master_trades.parquet` | Consolidate, clean, cast types, deduplicate, compress (zstd) |
-| **④** | `metrics.py` | `master_trades.parquet` | `daily_metrics.parquet` | Compute 26 daily metrics, rolling baselines, anomaly flags |
+<sub>Orchestrated by <a href="backend/pipeline.py"><code>pipeline.py</code></a> · Automated daily @ 05:00 UTC via GitHub Actions</sub>
 
-</details>
+</div>
+
+<br/>
+
+| Stage | Module | What happens | Output |
+|:---:|:---|:---|:---|
+| **①** | [`soft_crawl.py`](backend/operations/soft_crawl.py) | Discovers 243 securities from the OTC-X API (ISIN, Valor, Sektor) | `securities.csv` |
+| **②** | [`fetcher.py`](backend/operations/fetcher.py) | Downloads per-ISIN trade history with retry logic & rate limiting | `trades/*.csv` |
+| **③** | [`build_master_parquet.py`](backend/operations/build_master_parquet.py) | Deduplicates, type-casts, compresses into columnar storage (Zstandard) | `master_trades.parquet` |
+| **④** | [`metrics.py`](backend/operations/metrics.py) | Computes 26 daily metrics, 30-day rolling baselines, anomaly flags | `daily_metrics.parquet` |
 
 <br/>
 
@@ -400,12 +367,12 @@ OTC-X/
 │   │   ├── soft_crawl.py              # Stage 1: Valor extraction from API
 │   │   ├── fetcher.py                 # Stage 2: Trade data download + ISIN validation
 │   │   ├── build_master_parquet.py    # Stage 3: CSV → Parquet consolidation
-│   │   └── metrics.py                 # Stage 4: 26-metric liquidity engine
+│   │   └── metrics.py                 # Stage 4: 26-metric liquidity engine (460 LOC)
 │   ├── 📂 data/                       # Pipeline output artifacts
 │   │   ├── securities.csv             #   → 243 securities metadata
 │   │   ├── securities_enriched.csv    #   → Enriched with computed ISINs
 │   │   ├── master_trades.parquet      #   → Deduplicated trade master
-│   │   ├── daily_metrics.parquet      #   → 75K rows × 26 metrics
+│   │   ├── daily_metrics.parquet      #   → 75K+ rows × 26 metrics
 │   │   └── 📂 trades/                 #   → 243 individual trade CSVs
 │   └── 📂 logs/                       # Execution receipt logs
 │
@@ -414,24 +381,46 @@ OTC-X/
 │   ├── app.py                         # 🖥️ Dashboard entry point (4 tabs)
 │   └── 📂 operations/
 │       ├── config.py                  # Brand constants & palettes
-│       ├── styles.py                  # CSS injection (431 lines)
+│       ├── styles.py                  # Swiss-design CSS injection (448 LOC)
 │       ├── utils.py                   # CHF/pct/badge formatters
 │       ├── data_loader.py             # Cached Parquet → Pandas loader
-│       ├── charts.py                  # 11 Plotly chart builders
+│       ├── charts.py                  # 11 Plotly chart builders (937 LOC)
 │       └── components.py              # Header, KPIs, table renderers
 │
 ├── 📂 tests/                          # ── Test Suite ─────────────────────
 │   ├── test_backend.py                # Backend imports, ISIN calc, metrics
 │   ├── test_frontend.py               # Formatters, configs, chart smoke tests
-│   └── test_paths.py                  # Path resolution & file existence
+│   ├── test_paths.py                  # Path resolution & file existence
+│   ├── test_integration.py            # Cross-module integration tests
+│   ├── test_system.py                 # End-to-end system & edge-case tests
+│   ├── test_acceptance.py             # BDD step definitions (pytest-bdd)
+│   └── 📂 features/                   # Gherkin feature files
+│       ├── anomaly_detection.feature  #   → Severity scoring scenarios
+│       ├── dashboard_loading.feature  #   → UI load & tab navigation
+│       ├── data_pipeline.feature      #   → ETL stage validation
+│       └── formatting.feature         #   → CHF/number display rules
 │
-├── 📂 .github/workflows/
-│   └── automation_pipeline.yml        # ⏰ Daily pipeline (05:00 UTC cron)
+├── 📂 docs/                           # ── Documentation ──────────────────
+│   ├── OTC_X_Anforderungskatalog_Final.tex   # IREB requirements catalogue (LaTeX)
+│   ├── OTC_X_Anforderungskatalog_Final.pdf   # Compiled 53-page PDF
+│   └── 📂 screenshots/               # Dashboard tab captures
+│       ├── tab-overview.png
+│       ├── tab-market-data.png
+│       ├── tab-analytics.png
+│       └── tab-anomaly.png
+│
+├── 📂 .github/
+│   ├── 📂 workflows/
+│   │   └── automation_pipeline.yml    # ⏰ Daily pipeline (05:00 UTC cron)
+│   └── 📂 agents/
+│       └── my-agent.agent.md          # GitHub Copilot agent config
 │
 ├── 📂 .streamlit/
 │   └── config.toml                    # Theme: Swiss red (#B22222) on light
 │
 ├── requirements.txt                   # Python dependencies
+├── LICENSE.md                         # Proprietary terms (EN/DE/FR/IT)
+├── SECURITY.md                        # Security policy & vulnerability reporting
 └── README.md                          # ← You are here
 ```
 
@@ -475,6 +464,45 @@ The live dashboard is publicly available — no installation required:
 </a>
 
 </div>
+
+<br/>
+
+---
+
+<br/>
+
+## 📄 Documentation Toolchain
+
+The `docs/` directory contains a **53-page IREB-compliant Requirements Engineering catalogue** written in LaTeX. To compile the PDF locally, the following toolchain is required:
+
+### Prerequisites
+
+| Tool | Purpose | Download |
+|:---|:---|:---|
+| **MiKTeX** | LaTeX distribution (pdflatex, makeglossaries, latexmk) | [miktex.org](https://miktex.org/download) |
+| **Strawberry Perl** | Required by `latexmk` and `makeglossaries` on Windows | [strawberryperl.com](https://strawberryperl.com) |
+
+> **Installation order matters:** Install Strawberry Perl **first**, then MiKTeX. MiKTeX's `latexmk` depends on a Perl interpreter being available on `PATH`.
+
+### Compile the PDF
+
+```bash
+# One-liner: compile + clean auxiliary files
+latexmk -pdf OTC_X_Anforderungskatalog_Final.tex && latexmk -c && del *.acn *.acr *.alg *.glo *.glg *.gls *.ist *.aux *.log *.toc *.lof *.lot *.out *.fls *.fdb_latexmk
+```
+
+<details>
+<summary><b>What this does (step by step)</b></summary>
+
+| Command | Effect |
+|:---|:---|
+| `latexmk -pdf` | Runs `pdflatex` → `makeglossaries` → `pdflatex` (×2) automatically, resolving all cross-references, glossary entries, and table of contents in the correct order |
+| `latexmk -c` | Removes standard auxiliary files (`.aux`, `.log`, `.fls`, etc.) |
+| `del *.acn ...` | Removes glossary and index intermediaries that `latexmk -c` does not cover |
+
+The compiled PDF is written to `docs/OTC_X_Anforderungskatalog_Final.pdf`.
+
+</details>
 
 <br/>
 
@@ -778,7 +806,11 @@ Qualsiasi accesso a questo repository non costituisce una concessione di licenza
 
 <sub>Built with precision 🇨🇭 for the Swiss OTC market</sub>
 
-<br/>
+<br/><br/>
+
+<sub>**Mihael Atanasov** · <a href="mailto:mihaelatanasov22@gmail.com">mihaelatanasov22@gmail.com</a></sub>
+
+<br/><br/>
 
 <a href="https://otc-x-radar.streamlit.app">
   <img src="https://img.shields.io/badge/▸_Visit_Live_Dashboard-B22222?style=for-the-badge&logoColor=white" alt="Visit Live Dashboard"/>

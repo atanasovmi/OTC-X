@@ -1,8 +1,8 @@
-pandas
-numpy
-requests
-polars
-pyarrow
-streamlit
-plotly
-pytest-bdd
+pandas==3.0.1
+numpy==2.4.3
+requests==2.33.0
+polars==1.39.3
+pyarrow==23.0.1
+streamlit==1.55.0
+plotly==6.6.0
+pytest-bdd==8.1.0
