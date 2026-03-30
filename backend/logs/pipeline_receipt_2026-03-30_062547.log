@@ -1,0 +1,268 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                            OTC-X PIPELINE RECEIPT                            ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+  Run Date:     2026-03-30
+  Start Time:   06:25:47
+  End Time:     06:30:42
+  Duration:     0:04:55.136240
+  Status:       ALL STAGES PASSED
+
+────────────────────────────────────────────────────────────────────────────────
+  STAGE EXECUTION SUMMARY
+────────────────────────────────────────────────────────────────────────────────
+  Stage 1: Valor Extraction
+    Status:   ✓ SUCCESS
+    Duration: 4.1s
+
+  Stage 2: Trade Data Retrieval
+    Status:   ✓ SUCCESS
+    Duration: 289.9s
+
+  Stage 3: Data Consolidation (Parquet)
+    Status:   ✓ SUCCESS
+    Duration: 0.8s
+
+  Stage 4: Liquidity Metrics Engine
+    Status:   ✓ SUCCESS
+    Duration: 0.3s
+
+────────────────────────────────────────────────────────────────────────────────
+  DATA PRODUCTS
+────────────────────────────────────────────────────────────────────────────────
+  Date Range:        2004-02-16 → 2026-03-27
+  Securities CSV:    243 securities
+  Trade CSVs:        972 files in data/trades/
+  Master Parquet:    137,163 rows, 224 ISINs (1.00 MB)
+  Daily Metrics:     75,397 rows, 224 ISINs, 10 sectors
+
+────────────────────────────────────────────────────────────────────────────────
+  ANOMALY SNAPSHOT (latest day per ISIN)
+────────────────────────────────────────────────────────────────────────────────
+  Total ISINs:       224
+  Clean (score 0):   131
+  Flagged (score>0): 93
+
+  Score  Count
+  ─────  ─────
+      2      16
+      3      30
+      4       4
+      5      34
+      7       9
+
+────────────────────────────────────────────────────────────────────────────────
+  STAGE DETAIL LOGS
+────────────────────────────────────────────────────────────────────────────────
+  ┌─ Stage 1: Valor Extraction
+  │ Fetching securities dynamically from OTC-X API...
+  │ Fertig! 243 Valoren extrahiert.
+  │ Gespeichert in: /home/runner/work/OTC-X/OTC-X/backend/data/securities.csv
+  │ Gespeichert in: /home/runner/work/OTC-X/OTC-X/backend/data/securities_enriched.csv
+  └─ OK (4.1s)
+
+  ┌─ Stage 2: Trade Data Retrieval
+  └─ OK (289.9s)
+
+  ┌─ Stage 3: Data Consolidation (Parquet)
+  │ ============================================================
+  │ OTC-X Data Ingestion Pipeline
+  │ ============================================================
+  │ Scanning: /home/runner/work/OTC-X/OTC-X/backend/data/trades
+  │   [SKIP] CH0039576860.csv (empty/header-only)
+  │   [SKIP] CH0039576753_20260330_062845.csv (empty/header-only)
+  │   [SKIP] CH0017915668_20260328_235833.csv (empty/header-only)
+  │   [SKIP] CH0017915643_20260328_235838.csv (empty/header-only)
+  │   [SKIP] CH0017915684_20260328_235831.csv (empty/header-only)
+  │   [SKIP] CH0039576787_20260328_235827.csv (empty/header-only)
+  │   [SKIP] CH0286266488_20260328_235849.csv (empty/header-only)
+  │   [SKIP] CH0039576860_20260329_061034.csv (empty/header-only)
+  │   [SKIP] CH0039576852_20260330_062853.csv (empty/header-only)
+  │   [SKIP] CH0017915726.csv (empty/header-only)
+  │   [SKIP] CH0039576852.csv (empty/header-only)
+  │   [SKIP] CH0580517032.csv (empty/header-only)
+  │   [SKIP] CH0017915692_20260329_061031.csv (empty/header-only)
+  │   [SKIP] CH0213109793.csv (empty/header-only)
+  │   [SKIP] CH0002218664_20260329_061054.csv (empty/header-only)
+  │   [SKIP] CH0286266488_20260330_062907.csv (empty/header-only)
+  │   [SKIP] CH0002218698_20260329_061055.csv (empty/header-only)
+  │   [SKIP] CH0580517032_20260330_062632.csv (empty/header-only)
+  │   [SKIP] CH0039576837_20260329_061032.csv (empty/header-only)
+  │   [SKIP] CH0017915684_20260329_061033.csv (empty/header-only)
+  │   [SKIP] CH0039576787.csv (empty/header-only)
+  │   [SKIP] CH0017915718_20260330_062844.csv (empty/header-only)
+  │   [SKIP] CH0017915718.csv (empty/header-only)
+  │   [SKIP] CH0039576753.csv (empty/header-only)
+  │   [SKIP] CH0039576837_20260330_062848.csv (empty/header-only)
+  │   [SKIP] CH0039576837.csv (empty/header-only)
+  │   [SKIP] CH0017915668_20260330_062852.csv (empty/header-only)
+  │   [SKIP] CH0017915668_20260329_061035.csv (empty/header-only)
+  │   [SKIP] CH0039576860_20260328_235832.csv (empty/header-only)
+  │   [SKIP] CH1159308571.csv (empty/header-only)
+  │   [SKIP] CH0017915726_20260329_061039.csv (empty/header-only)
+  │   [SKIP] CH0017915643_20260329_061040.csv (empty/header-only)
+  │   [SKIP] CH0017915643_20260330_062857.csv (empty/header-only)
+  │   [SKIP] CH0017915692_20260328_235829.csv (empty/header-only)
+  │   [SKIP] CH0017915742_20260329_061026.csv (empty/header-only)
+  │   [SKIP] CH0017915726_20260330_062855.csv (empty/header-only)
+  │   [SKIP] CH0017915692.csv (empty/header-only)
+  │   [SKIP] CH0286266488_20260329_061050.csv (empty/header-only)
+  │   [SKIP] CH0017915684.csv (empty/header-only)
+  │   [SKIP] CH0017915635_20260328_235839.csv (empty/header-only)
+  │   [SKIP] CH0039576852_20260329_061036.csv (empty/header-only)
+  │   [SKIP] CH0002218698_20260328_235853.csv (empty/header-only)
+  │   [SKIP] CH0213109793_20260329_061038.csv (empty/header-only)
+  │   [SKIP] CH0580517032_20260329_060817.csv (empty/header-only)
+  │   [SKIP] CH0017915718_20260329_061027.csv (empty/header-only)
+  │   [SKIP] CH0002218698.csv (empty/header-only)
+  │   [SKIP] CH0039576787_20260330_062846.csv (empty/header-only)
+  │   [SKIP] CH1159308571_20260328_235657.csv (empty/header-only)
+  │   [SKIP] CH0039576787_20260329_061029.csv (empty/header-only)
+  │   [SKIP] CH0580517032_20260328_235612.csv (empty/header-only)
+  │   [SKIP] CH0017915726_20260328_235837.csv (empty/header-only)
+  │   [SKIP] CH0039576753_20260328_235826.csv (empty/header-only)
+  │   [SKIP] CH0286266488.csv (empty/header-only)
+  │   [SKIP] CH1159308571_20260329_060901.csv (empty/header-only)
+  │   [SKIP] CH0039576753_20260329_061028.csv (empty/header-only)
+  │   [SKIP] CH0213109793_20260330_062854.csv (empty/header-only)
+  │   [SKIP] CH0017915635_20260329_061041.csv (empty/header-only)
+  │   [SKIP] CH0017915718_20260328_235825.csv (empty/header-only)
+  │   [SKIP] CH0002218698_20260330_062912.csv (empty/header-only)
+  │   [SKIP] CH0002218664_20260330_062911.csv (empty/header-only)
+  │   [SKIP] CH0017915692_20260330_062847.csv (empty/header-only)
+  │   [SKIP] CH0039576852_20260328_235834.csv (empty/header-only)
+  │   [SKIP] CH0017915742_20260328_235824.csv (empty/header-only)
+  │   [SKIP] CH0002218664.csv (empty/header-only)
+  │   [SKIP] CH0017915668.csv (empty/header-only)
+  │   [SKIP] CH0002218664_20260328_235852.csv (empty/header-only)
+  │   [SKIP] CH1159308571_20260330_062716.csv (empty/header-only)
+  │   [SKIP] CH0017915635_20260330_062858.csv (empty/header-only)
+  │   [SKIP] CH0017915635.csv (empty/header-only)
+  │   [SKIP] CH0039576860_20260330_062851.csv (empty/header-only)
+  │   [SKIP] CH0017915742_20260330_062842.csv (empty/header-only)
+  │   [SKIP] CH0017915643.csv (empty/header-only)
+  │   [SKIP] CH0039576837_20260328_235830.csv (empty/header-only)
+  │   [SKIP] CH0017915684_20260330_062850.csv (empty/header-only)
+  │   [SKIP] CH0017915742.csv (empty/header-only)
+  │   [SKIP] CH0213109793_20260328_235836.csv (empty/header-only)
+  │ 
+  │ Found 972 files total.
+  │ Processing 896 valid files...
+  │ Skipped 76 empty/header-only files.
+  │ 
+  │ Raw rows ingested: 556,312
+  │ 
+  │ Applying data cleaning transformations...
+  │ Data Quality: 137163/137163 records have valid Price/Volume data (100.0%)
+  │ Rows after deduplication: 137,163
+  │ 
+  │ Writing output files...
+  │   [OK] Parquet: master_trades.parquet (1024.4 KB)
+  │   -> Formatting data for CSV output...
+  │   [OK] CSV: master_trades_cleaned.csv (7618.5 KB)
+  │ 
+  │ ============================================================
+  │ AUDIT SUMMARY
+  │ ============================================================
+  │ Processed 896 files, Skipped 76 empty files.
+  │ Total rows: 137,163
+  │ 
+  │ Schema:
+  │   Isin            String
+  │   Datum           Date
+  │   Zeit            String
+  │   Kurs            Float64
+  │   Volumen         Float64
+  │   Off Book        Boolean
+  │ 
+  │ Sample Data (first 5 rows):
+  │ shape: (5, 6)
+  │ ┌──────────────┬────────────┬───────┬───────┬─────────┬──────────┐
+  │ │ Isin         ┆ Datum      ┆ Zeit  ┆ Kurs  ┆ Volumen ┆ Off Book │
+  │ │ ---          ┆ ---        ┆ ---   ┆ ---   ┆ ---     ┆ ---      │
+  │ │ str          ┆ date       ┆ str   ┆ f64   ┆ f64     ┆ bool     │
+  │ ╞══════════════╪════════════╪═══════╪═══════╪═════════╪══════════╡
+  │ │ CH0025889160 ┆ 2022-06-28 ┆ 14:35 ┆ 0.35  ┆ 1600.0  ┆ false    │
+  │ │ CH0001992681 ┆ 2025-09-10 ┆ 12:33 ┆ 879.0 ┆ 38.0    ┆ false    │
+  │ │ CH0011322200 ┆ 2009-08-07 ┆ 15:06 ┆ 370.0 ┆ 10.0    ┆ false    │
+  │ │ CH0026212446 ┆ 2024-09-12 ┆ 14:57 ┆ 0.45  ┆ 1467.0  ┆ false    │
+  │ │ CH0001514501 ┆ 2024-04-11 ┆ 12:12 ┆ 81.0  ┆ 2.0     ┆ false    │
+  │ └──────────────┴────────────┴───────┴───────┴─────────┴──────────┘
+  │ ============================================================
+  │ Pipeline complete! [SUCCESS]
+  └─ OK (0.8s)
+
+  ┌─ Stage 4: Liquidity Metrics Engine
+  │ ======================================================================
+  │ OTC-X Liquidity Metrics Engine - Starting
+  │ Timestamp: 2026-03-30 06:30:42
+  │ ======================================================================
+  │ 
+  │ [1/4] Loading input data...
+  │       Trades: /home/runner/work/OTC-X/OTC-X/backend/data/master_trades.parquet
+  │       -> 137,163 trades loaded (224 ISINs)
+  │       Securities: /home/runner/work/OTC-X/OTC-X/backend/data/securities_enriched.csv
+  │       -> 243 securities loaded (11 sectors)
+  │ 
+  │ [2/4] Computing liquidity metrics...
+  │     Step 1/4: Daily aggregation...
+  │              75,397 daily observations
+  │     Step 2/4: Liquidity metrics...
+  │     Step 3/4: Rolling baselines (30 trading days)...
+  │     Step 4/4: Anomaly detection...
+  │ 
+  │ [3/4] Enriching with security metadata...
+  │       -> Final shape: (75397, 26)
+  │ 
+  │ [4/4] Saving output...
+  │       -> Written to: /home/runner/work/OTC-X/OTC-X/backend/data/daily_metrics.parquet
+  │       -> Size: 2.44 MB
+  │ 
+  │ ======================================================================
+  │ SUCCESS! Pipeline completed.
+  │ ======================================================================
+  │ Total rows:       75,397
+  │ Unique ISINs:     224
+  │ Unique Sectors:   10
+  │ Date range:       2004-02-16 to 2026-03-27
+  │ Elapsed time:     0.3 seconds
+  │ 
+  │ Output Schema:
+  │   Isin                      String
+  │   Name                      String
+  │   Sektor                    String
+  │   Datum                     Date
+  │   trades_today              UInt32
+  │   volume_today_units        Float64
+  │   volume_today_chf          Float64
+  │   price_min                 Float64
+  │   price_max                 Float64
+  │   price_first               Float64
+  │   price_last                Float64
+  │   price_change_pct          Float64
+  │   log_returns               Float64
+  │   volatility_daily          Float64
+  │   amihud_daily              Float64
+  │   spread_log_hl             Float64
+  │   trade_duration_min        Float64
+  │   off_book_pct              Float64
+  │   trades_30d_median         Float64
+  │   volume_30d_median         Float64
+  │   volatility_30d_median     Float64
+  │   amihud_30d_median         Float64
+  │   volume_spike              Boolean
+  │   activity_spike            Boolean
+  │   price_gap                 Boolean
+  │   anomaly_score             UInt8
+  │ 
+  │ High-anomaly observations (score >= 5): 14,213 total
+  │   2026-03-27 | CH0001457826 | Score: 5 | Price Change: 0.68%
+  │   2026-03-27 | CH0005701708 | Score: 5 | Price Change: 2.78%
+  │   2026-03-27 | CH0020502743 | Score: 5 | Price Change: 0.71%
+  │   2026-03-27 | CH0020603475 | Score: 5 | Price Change: 0.00%
+  │   2026-03-26 | CH0001430930 | Score: 5 | Price Change: 0.00%
+  └─ OK (0.3s)
+
+════════════════════════════════════════════════════════════════════════════════
+  End of receipt — 2026-03-30 06:30:42
+════════════════════════════════════════════════════════════════════════════════
