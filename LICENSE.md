@@ -40,7 +40,7 @@ Data sovereignty remains with the author until the formal handover to the BEKB. 
 
 Unauthorized use by any third party is strictly prohibited. This includes, but is not limited to:
 
-**Prohibition of Local Execution:** Users are not permitted to clone, compile, or execute this code in any local or external cloud environment.
+**Local Execution:** Cloning, compiling, or executing this code locally is restricted to authorized BEKB personnel only.
 
 **Data Extraction Restraints (Anti-Scraping):**
 
@@ -93,7 +93,7 @@ Die Datensouveränität verbleibt beim Autor bis zur formellen Übergabe an die 
 
 Die unbefugte Nutzung durch Dritte ist streng untersagt. Dies umfasst insbesondere:
 
-**Verbot der lokalen Ausführung:** Benutzer sind nicht berechtigt, diesen Code in einer lokalen oder externen Cloud-Umgebung zu klonen, zu kompilieren oder auszuführen.
+**Lokale Ausführung:** Das Klonen, Kompilieren oder Ausführen dieses Codes ist ausschliesslich autorisiertem BEKB-Personal vorbehalten.
 
 **Datenextraktionsbeschränkungen (Anti-Scraping):**
 
@@ -146,7 +146,7 @@ La souveraineté des données reste auprès de l'auteur jusqu'à la remise forme
 
 L'utilisation non autorisée par un tiers est strictement interdite. Cela inclut, mais sans s'y limiter :
 
-**Interdiction d'exécution locale :** Les utilisateurs ne sont pas autorisés à cloner, compiler ou exécuter ce code dans un environnement local ou cloud externe.
+**Exécution locale :** Le clonage, la compilation ou l'exécution de ce code est réservé exclusivement au personnel autorisé de la BEKB.
 
 **Restrictions d'extraction de données (anti-scraping) :**
 
@@ -199,7 +199,7 @@ La sovranità dei dati rimane all'autore fino alla consegna formale alla BEKB. N
 
 L'uso non autorizzato da parte di terzi è severamente vietato. Ciò include, a titolo esemplificativo:
 
-**Divieto di esecuzione locale:** Gli utenti non sono autorizzati a clonare, compilare o eseguire questo codice in qualsiasi ambiente locale o cloud esterno.
+**Esecuzione locale:** La clonazione, la compilazione o l'esecuzione di questo codice è riservata esclusivamente al personale autorizzato della BEKB.
 
 **Restrizioni sull'estrazione dei dati (anti-scraping):**
 

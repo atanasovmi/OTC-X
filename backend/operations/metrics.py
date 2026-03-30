@@ -8,7 +8,7 @@ suitable for institutional dashboards and anomaly detection.
 Input
 -----
 - ``data/master_trades.parquet`` — ≈133 k trades spanning 20+ years.
-- ``data/securities_enriched.csv`` — ISIN → Name / Sektor mapping.
+- ``data/securities.csv`` — ISIN → Name / Sektor mapping.
 
 Output
 ------
@@ -27,9 +27,20 @@ Metrics computed
 Plus: 30-trading-day rolling medians and composite anomaly flags.
 """
 
+import logging
 import polars as pl
 from pathlib import Path
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
+
+# ── Tunable parameters ──────────────────────────────────────────────
+ROLLING_WINDOW_DAYS  = 30    # Trading-day window for rolling medians
+SPIKE_MULTIPLIER     = 1.5   # Volume/activity spike threshold (× median)
+PRICE_GAP_PCT        = 5.0   # Minimum |price_change_pct| for a gap flag
+WEIGHT_VOLUME        = 3     # Anomaly score contribution: volume spike
+WEIGHT_ACTIVITY      = 2     # Anomaly score contribution: activity spike
+WEIGHT_PRICE_GAP     = 2     # Anomaly score contribution: price gap
 
 
 def parse_time_to_minutes(zeit_col: pl.Expr) -> pl.Expr:
@@ -215,22 +226,22 @@ def compute_rolling_baselines(df_metrics: pl.DataFrame) -> pl.DataFrame:
     df_rolling = df_sorted.with_columns([
         pl.col("trades_today")
         .cast(pl.Float64)
-        .rolling_median(window_size=30, min_samples=1)
+        .rolling_median(window_size=ROLLING_WINDOW_DAYS, min_samples=1)
         .over("Isin")
         .alias("trades_30d_median"),
-        
+
         pl.col("volume_today_chf")
-        .rolling_median(window_size=30, min_samples=1)
+        .rolling_median(window_size=ROLLING_WINDOW_DAYS, min_samples=1)
         .over("Isin")
         .alias("volume_30d_median"),
-        
+
         pl.col("volatility_daily")
-        .rolling_median(window_size=30, min_samples=1)
+        .rolling_median(window_size=ROLLING_WINDOW_DAYS, min_samples=1)
         .over("Isin")
         .alias("volatility_30d_median"),
-        
+
         pl.col("amihud_daily")
-        .rolling_median(window_size=30, min_samples=1)
+        .rolling_median(window_size=ROLLING_WINDOW_DAYS, min_samples=1)
         .over("Isin")
         .alias("amihud_30d_median"),
     ])
@@ -244,15 +255,15 @@ def compute_anomaly_flags(df_rolling: pl.DataFrame) -> pl.DataFrame:
     Three binary flags are created and combined into a weighted
     composite anomaly score (range 0–7):
 
-    +-----------------+------------------------------+--------+
-    | Flag            | Condition                    | Weight |
-    +=================+==============================+========+
-    | volume_spike    | volume > 1.5 × 30d median   | 3      |
-    +-----------------+------------------------------+--------+
-    | activity_spike  | trades > 1.5 × 30d median   | 2      |
-    +-----------------+------------------------------+--------+
-    | price_gap       | |price_change_pct| > 5 %    | 2      |
-    +-----------------+------------------------------+--------+
+    +----------------+------------------------------------------+--------+
+    | Flag           | Condition                                | Weight |
+    +================+==========================================+========+
+    | volume_spike   | volume > SPIKE_MULTIPLIER × 30d median   | 3      |
+    +----------------+------------------------------------------+--------+
+    | activity_spike | trades > SPIKE_MULTIPLIER × 30d median   | 2      |
+    +----------------+------------------------------------------+--------+
+    | price_gap      | |price_change_pct| > PRICE_GAP_PCT       | 2      |
+    +----------------+------------------------------------------+--------+
 
     Parameters
     ----------
@@ -268,18 +279,18 @@ def compute_anomaly_flags(df_rolling: pl.DataFrame) -> pl.DataFrame:
         ``anomaly_score`` (``UInt8``, 0–7).
     """
     df_anomaly = df_rolling.with_columns([
-        # Volume spike: > 1.5x median
-        (pl.col("volume_today_chf") > pl.col("volume_30d_median") * 1.5)
+        # Volume spike: exceeds rolling median by multiplier
+        (pl.col("volume_today_chf") > pl.col("volume_30d_median") * SPIKE_MULTIPLIER)
         .fill_null(False)
         .alias("volume_spike"),
-        
-        # Activity spike: > 1.5x median
-        (pl.col("trades_today").cast(pl.Float64) > pl.col("trades_30d_median") * 1.5)
+
+        # Activity spike: exceeds rolling median by multiplier
+        (pl.col("trades_today").cast(pl.Float64) > pl.col("trades_30d_median") * SPIKE_MULTIPLIER)
         .fill_null(False)
         .alias("activity_spike"),
-        
-        # Price gap: |change| > 5%
-        (pl.col("price_change_pct").abs() > 5.0)
+
+        # Price gap: absolute change exceeds threshold
+        (pl.col("price_change_pct").abs() > PRICE_GAP_PCT)
         .fill_null(False)
         .alias("price_gap"),
     ])
@@ -287,9 +298,9 @@ def compute_anomaly_flags(df_rolling: pl.DataFrame) -> pl.DataFrame:
     # Compute weighted anomaly score (0-7 range)
     df_anomaly = df_anomaly.with_columns([
         (
-            pl.col("volume_spike").cast(pl.UInt8) * 3
-            + pl.col("activity_spike").cast(pl.UInt8) * 2
-            + pl.col("price_gap").cast(pl.UInt8) * 2
+            pl.col("volume_spike").cast(pl.UInt8) * WEIGHT_VOLUME
+            + pl.col("activity_spike").cast(pl.UInt8) * WEIGHT_ACTIVITY
+            + pl.col("price_gap").cast(pl.UInt8) * WEIGHT_PRICE_GAP
         ).alias("anomaly_score")
     ])
     
@@ -320,17 +331,17 @@ def compute_daily_metrics(df_trades: pl.DataFrame) -> pl.DataFrame:
         Complete daily metrics with anomaly scores — one row per
         ISIN per trading day.
     """
-    print("    Step 1/4: Daily aggregation...")
+    logger.info("    Step 1/4: Daily aggregation...")
     df_daily = compute_daily_aggregates(df_trades)
-    print(f"             {len(df_daily):,} daily observations")
-    
-    print("    Step 2/4: Liquidity metrics...")
+    logger.info("             %s daily observations", f"{len(df_daily):,}")
+
+    logger.info("    Step 2/4: Liquidity metrics...")
     df_metrics = compute_liquidity_metrics(df_daily)
-    
-    print("    Step 3/4: Rolling baselines (30 trading days)...")
+
+    logger.info("    Step 3/4: Rolling baselines (%d trading days)...", ROLLING_WINDOW_DAYS)
     df_rolling = compute_rolling_baselines(df_metrics)
-    
-    print("    Step 4/4: Anomaly detection...")
+
+    logger.info("    Step 4/4: Anomaly detection...")
     df_anomaly = compute_anomaly_flags(df_rolling)
     
     return df_anomaly
@@ -347,43 +358,43 @@ def main() -> None:
     Raises
     ------
     FileNotFoundError
-        If ``master_trades.parquet`` or ``securities_enriched.csv`` is
+        If ``master_trades.parquet`` or ``securities.csv`` is
         missing from ``backend/data/``.
     """
     start_time = datetime.now()
     
-    print("=" * 70)
-    print("OTC-X Liquidity Metrics Engine - Starting")
-    print(f"Timestamp: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
-    print("=" * 70)
+    logger.info("=" * 70)
+    logger.info("OTC-X Liquidity Metrics Engine - Starting")
+    logger.info("Timestamp: %s", start_time.strftime('%Y-%m-%d %H:%M:%S'))
+    logger.info("=" * 70)
     
     # Setup paths relative to script location
     script_dir = Path(__file__).resolve().parent
     trades_path = script_dir.parent / "data" / "master_trades.parquet"
-    securities_path = script_dir.parent / "data" / "securities_enriched.csv"
+    securities_path = script_dir.parent / "data" / "securities.csv"
     output_path = script_dir.parent / "data" / "daily_metrics.parquet"
     
     try:
         # 1. Load Data
-        print("\n[1/4] Loading input data...")
-        print(f"      Trades: {trades_path.resolve()}")
+        logger.info("[1/4] Loading input data...")
+        logger.info("      Trades: %s", trades_path.resolve())
         df_trades = pl.read_parquet(trades_path)
-        print(f"      -> {len(df_trades):,} trades loaded ({df_trades['Isin'].n_unique()} ISINs)")
-        
-        print(f"      Securities: {securities_path.resolve()}")
+        logger.info("      -> %s trades loaded (%d ISINs)", f"{len(df_trades):,}", df_trades['Isin'].n_unique())
+
+        logger.info("      Securities: %s", securities_path.resolve())
         df_sec = pl.read_csv(
             securities_path,
             schema_overrides={"VALOR": pl.String},  # Avoid int parsing issues
             truncate_ragged_lines=True  # Handle any ragged lines
         )
-        print(f"      -> {len(df_sec):,} securities loaded ({df_sec['SEKTOR'].n_unique()} sectors)")
+        logger.info("      -> %s securities loaded (%d sectors)", f"{len(df_sec):,}", df_sec['SEKTOR'].n_unique())
         
         # 2. Compute Metrics
-        print("\n[2/4] Computing liquidity metrics...")
+        logger.info("[2/4] Computing liquidity metrics...")
         df_metrics = compute_daily_metrics(df_trades)
         
         # 3. Enrich with Metadata
-        print("\n[3/4] Enriching with security metadata...")
+        logger.info("[3/4] Enriching with security metadata...")
         df_final = df_metrics.join(
             df_sec.select(["ISIN", "NAME", "SEKTOR"]),
             left_on="Isin",
@@ -409,52 +420,50 @@ def main() -> None:
         # Handle missing metadata gracefully
         missing_meta = df_final.filter(pl.col("Name").is_null()).select("Isin").unique()
         if len(missing_meta) > 0:
-            print(f"      [!] {len(missing_meta)} ISINs have no metadata (Name/Sektor will be null)")
-        
-        print(f"      -> Final shape: {df_final.shape}")
+            logger.warning("      [!] %d ISINs have no metadata (Name/Sektor will be null)", len(missing_meta))
+
+        logger.info("      -> Final shape: %s", df_final.shape)
         
         # 4. Save Output
-        print("\n[4/4] Saving output...")
+        logger.info("[4/4] Saving output...")
         df_final.write_parquet(output_path, compression="snappy")
         output_size_mb = output_path.stat().st_size / (1024 * 1024)
-        print(f"      -> Written to: {output_path.resolve()}")
-        print(f"      -> Size: {output_size_mb:.2f} MB")
+        logger.info("      -> Written to: %s", output_path.resolve())
+        logger.info("      -> Size: %.2f MB", output_size_mb)
         
         # Summary
         elapsed = (datetime.now() - start_time).total_seconds()
-        print("\n" + "=" * 70)
-        print("SUCCESS! Pipeline completed.")
-        print("=" * 70)
-        print(f"Total rows:       {len(df_final):,}")
-        print(f"Unique ISINs:     {df_final['Isin'].n_unique()}")
-        print(f"Unique Sectors:   {df_final['Sektor'].n_unique()}")
-        print(f"Date range:       {df_final['Datum'].min()} to {df_final['Datum'].max()}")
-        print(f"Elapsed time:     {elapsed:.1f} seconds")
-        
+        logger.info("=" * 70)
+        logger.info("SUCCESS! Pipeline completed.")
+        logger.info("=" * 70)
+        logger.info("Total rows:       %s", f"{len(df_final):,}")
+        logger.info("Unique ISINs:     %d", df_final['Isin'].n_unique())
+        logger.info("Unique Sectors:   %d", df_final['Sektor'].n_unique())
+        logger.info("Date range:       %s to %s", df_final['Datum'].min(), df_final['Datum'].max())
+        logger.info("Elapsed time:     %.1f seconds", elapsed)
+
         # Schema printout
-        print("\nOutput Schema:")
+        logger.info("Output Schema:")
         for col, dtype in df_final.schema.items():
-            print(f"  {col:25} {dtype}")
+            logger.info("  %-25s %s", col, dtype)
         
         # Sample anomalies
         high_anomaly = df_final.filter(pl.col("anomaly_score") >= 5).sort("Datum", descending=True)
         if len(high_anomaly) > 0:
-            print(f"\nHigh-anomaly observations (score >= 5): {len(high_anomaly):,} total")
-            # Show top 5 as simple text (avoid Unicode table borders on Windows)
+            logger.info("High-anomaly observations (score >= 5): %s total", f"{len(high_anomaly):,}")
             for row in high_anomaly.head(5).iter_rows(named=True):
-                try:
-                    print(f"  {row['Datum']} | {row['Isin']} | Score: {row['anomaly_score']} | Price Change: {row['price_change_pct']:.2f}%")
-                except UnicodeEncodeError:
-                    print(f"  {row['Datum']} | {row['Isin']} | Score: {row['anomaly_score']} | Price Change: {row['price_change_pct']:.2f}%")
+                logger.info("  %s | %s | Score: %d | Price Change: %.2f%%",
+                            row['Datum'], row['Isin'], row['anomaly_score'], row['price_change_pct'])
         
     except FileNotFoundError as e:
-        print(f"\n[ERROR] FILE NOT FOUND: {e}")
-        print("   Ensure master_trades.parquet and securities_enriched.csv exist in data/")
+        logger.error("FILE NOT FOUND: %s", e)
+        logger.error("   Ensure master_trades.parquet and securities.csv exist in data/")
         exit(1)
     except Exception as e:
-        print(f"\n[ERROR] CRITICAL ERROR: {type(e).__name__}: {e}")
+        logger.error("CRITICAL ERROR: %s: %s", type(e).__name__, e)
         exit(1)
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
     main()

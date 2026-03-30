@@ -33,7 +33,7 @@ class TestBackendPaths:
         src = ROOT / "backend" / "operations" / "metrics.py"
         script_dir = src.resolve().parent
         assert script_dir.parent / "data" / "master_trades.parquet" == ROOT / "backend" / "data" / "master_trades.parquet"
-        assert script_dir.parent / "data" / "securities_enriched.csv" == ROOT / "backend" / "data" / "securities_enriched.csv"
+        assert script_dir.parent / "data" / "securities.csv" == ROOT / "backend" / "data" / "securities.csv"
         assert script_dir.parent / "data" / "daily_metrics.parquet" == ROOT / "backend" / "data" / "daily_metrics.parquet"
 
 
@@ -55,8 +55,8 @@ class TestDataFilesExist:
     def test_securities_csv_exists(self):
         assert (ROOT / "backend" / "data" / "securities.csv").exists()
 
-    def test_securities_enriched_exists(self):
-        assert (ROOT / "backend" / "data" / "securities_enriched.csv").exists()
+    def test_securities_csv_canonical_exists(self):
+        assert (ROOT / "backend" / "data" / "securities.csv").exists()
 
     def test_master_trades_exists(self):
         assert (ROOT / "backend" / "data" / "master_trades.parquet").exists()
