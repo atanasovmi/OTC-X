@@ -1,0 +1,555 @@
+[2026-04-15 06:29:03] OTC-X Trade Downloader started
+[2026-04-15 06:29:03] Loaded 242 rows from /home/runner/work/OTC-X/OTC-X/backend/data/securities.csv
+[2026-04-15 06:29:03] Processing: CH0136182570 (acrevis Bank N)
+[2026-04-15 06:29:04] ✓ CH0136182570: 3556 trades downloaded
+[2026-04-15 06:29:05] Processing: CH0006668930 (ADEV Solarstrom AG, Liestal)
+[2026-04-15 06:29:05] ✓ CH0006668930: 470 trades downloaded
+[2026-04-15 06:29:06] Processing: CH0006524265 (ADEV Wasserkraftwerk AG, Liestal)
+[2026-04-15 06:29:06] ✓ CH0006524265: 211 trades downloaded
+[2026-04-15 06:29:07] Processing: CH0010497532 (ADEV Windkraft AG, Liestal)
+[2026-04-15 06:29:07] ✓ CH0010497532: 148 trades downloaded
+[2026-04-15 06:29:08] Processing: CH0034900248 (AG für Erstellung billiger Wohnhäuser in Winterthu)
+[2026-04-15 06:29:09] ✓ CH0034900248: 119 trades downloaded
+[2026-04-15 06:29:10] Processing: CH0001402418 (Agruna AG)
+[2026-04-15 06:29:10] ✓ CH0001402418: 330 trades downloaded
+[2026-04-15 06:29:11] Processing: CH0002599352 (Aletsch Bahnen N)
+[2026-04-15 06:29:11] ✓ CH0002599352: 395 trades downloaded
+[2026-04-15 06:29:12] Processing: CH0011322200 (Alpha Rheintal Bank, Heerbrugg)
+[2026-04-15 06:29:12] ✓ CH0011322200: 1187 trades downloaded
+[2026-04-15 06:29:13] Processing: CH0001418216 (Aluminium-Laufen AG Liesberg)
+[2026-04-15 06:29:13] ✓ CH0001418216: 215 trades downloaded
+[2026-04-15 06:29:14] Processing: CH0185254742 (Andermatt-Sedrun Sport AG)
+[2026-04-15 06:29:14] ✓ CH0185254742: 427 trades downloaded
+[2026-04-15 06:29:15] Processing: CH0026212446 (Appenzeller Bahnen)
+[2026-04-15 06:29:16] ✓ CH0026212446: 235 trades downloaded
+[2026-04-15 06:29:17] Processing: CH0001430930 (Arosa Bergbahnen AG, Arosa)
+[2026-04-15 06:29:17] ✓ CH0001430930: 775 trades downloaded
+[2026-04-15 06:29:18] Processing: CH0001457826 (Auto AG Schwyz, Schwyz)
+[2026-04-15 06:29:18] ✓ CH0001457826: 96 trades downloaded
+[2026-04-15 06:29:19] Processing: CH0029706766 (Auto AG Uri)
+[2026-04-15 06:29:19] ✓ CH0029706766: 23 trades downloaded
+[2026-04-15 06:29:20] Processing: CH0032018688 (Auto Hldg N)
+[2026-04-15 06:29:20] ✓ CH0032018688: 1524 trades downloaded
+[2026-04-15 06:29:21] Processing: CH0023777235 (aventron N)
+[2026-04-15 06:29:21] ✓ CH0023777235: 607 trades downloaded
+[2026-04-15 06:29:22] Processing: CH0003857031 (Bad Schinznach AG, Schinznach)
+[2026-04-15 06:29:23] ✓ CH0003857031: 1035 trades downloaded
+[2026-04-15 06:29:24] Processing: CH0001314852 (Bank in Zuzwil)
+[2026-04-15 06:29:24] ✓ CH0001314852: 47 trades downloaded
+[2026-04-15 06:29:25] Processing: CH0039074692 (Bank Leerau)
+[2026-04-15 06:29:25] ✓ CH0039074692: 149 trades downloaded
+[2026-04-15 06:29:26] Processing: CH0013792848 (Bank Oberaargau N)
+[2026-04-15 06:29:26] ✓ CH0013792848: 541 trades downloaded
+[2026-04-15 06:29:27] Processing: CH0001351862 (Bank SLM N)
+[2026-04-15 06:29:27] ✓ CH0001351862: 471 trades downloaded
+[2026-04-15 06:29:28] Processing: CH0049588129 (Bank von Roll AG)
+[2026-04-15 06:29:28] ✓ CH0049588129: 252 trades downloaded
+[2026-04-15 06:29:29] Processing: CH0303601253 (BB Adelboden N)
+[2026-04-15 06:29:30] ✓ CH0303601253: 346 trades downloaded
+[2026-04-15 06:29:31] Processing: CH0574732894 (BB Lauterbrunnen-Muerren N)
+[2026-04-15 06:29:31] ✓ CH0574732894: 16 trades downloaded
+[2026-04-15 06:29:32] Processing: CH0010756531 (BBO Bank Brienz-Oberhasli)
+[2026-04-15 06:29:32] ✓ CH0010756531: 393 trades downloaded
+[2026-04-15 06:29:33] Processing: CH0001507406 (BB Piz Mundaun AG)
+[2026-04-15 06:29:33] ✓ CH0001507406: 103 trades downloaded
+[2026-04-15 06:29:34] Processing: CH0002353867 (BB Soerenberg AG)
+[2026-04-15 06:29:34] ✓ CH0002353867: 230 trades downloaded
+[2026-04-15 06:29:35] Processing: CH0010726963 (Beau-Rivage Palace SA, Lausanne-Ouchy)
+[2026-04-15 06:29:35] ✓ CH0010726963: 786 trades downloaded
+[2026-04-15 06:29:36] Processing: CH0024700483 (Belalp-Bahnen, Naters)
+[2026-04-15 06:29:37] ✓ CH0024700483: 29 trades downloaded
+[2026-04-15 06:29:38] Processing: CH0187392300 (Bellwald Sportbahnen N)
+[2026-04-15 06:29:38] ✓ CH0187392300: 10 trades downloaded
+[2026-04-15 06:29:39] Processing: CH0002332093 (Bergbahnen Brigels N)
+[2026-04-15 06:29:39] ✓ CH0002332093: 148 trades downloaded
+[2026-04-15 06:29:40] Processing: CH0018384120 (Bergbahnen Destination Gstaad N)
+[2026-04-15 06:29:40] ✓ CH0018384120: 432 trades downloaded
+[2026-04-15 06:29:41] Processing: CH0292081723 (Bergbahnen Disentis N)
+[2026-04-15 06:29:41] ✓ CH0292081723: 91 trades downloaded
+[2026-04-15 06:29:42] Processing: CH0580517032 (Bergbahnen Hohsaas N)
+[2026-04-15 06:29:42] ✓ CH0580517032: 0 trades downloaded
+[2026-04-15 06:29:43] Processing: CH0036505888 (Bergbahnen Meiringen-Hasliberg N)
+[2026-04-15 06:29:44] ✓ CH0036505888: 438 trades downloaded
+[2026-04-15 06:29:45] Processing: CH0342666572 (Bergbahnen Scuol N)
+[2026-04-15 06:29:45] ✓ CH0342666572: 244 trades downloaded
+[2026-04-15 06:29:46] Processing: CH0016568880 (Bergbahnen Splügen-Tambo N)
+[2026-04-15 06:29:46] ✓ CH0016568880: 46 trades downloaded
+[2026-04-15 06:29:47] Processing: CH0045885032 (Bergbahnen Wildhaus AG)
+[2026-04-15 06:29:47] ✓ CH0045885032: 91 trades downloaded
+[2026-04-15 06:29:48] Processing: CH0014874918 (Bernerland Bank, Sumiswald)
+[2026-04-15 06:29:48] ✓ CH0014874918: 896 trades downloaded
+[2026-04-15 06:29:49] Processing: CH0322776573 (Berner Oberland-Bahnen N)
+[2026-04-15 06:29:49] ✓ CH0322776573: 230 trades downloaded
+[2026-04-15 06:29:50] Processing: CH0011100341 (BERNEXPO N)
+[2026-04-15 06:29:51] ✓ CH0011100341: 2147 trades downloaded
+[2026-04-15 06:29:52] Processing: CH0018043619 (Biene-Bank im Rheintal)
+[2026-04-15 06:29:52] ✓ CH0018043619: 375 trades downloaded
+[2026-04-15 06:29:53] Processing: CH0025889160 (BLS N)
+[2026-04-15 06:29:53] ✓ CH0025889160: 1401 trades downloaded
+[2026-04-15 06:29:54] Processing: CH0012684657 (Bobst Group N)
+[2026-04-15 06:29:55] ✓ CH0012684657: 3118 trades downloaded
+[2026-04-15 06:29:56] Processing: CH0545753953 (Bondpartners N)
+[2026-04-15 06:29:56] ✓ CH0545753953: 154 trades downloaded
+[2026-04-15 06:29:57] Processing: CH0001542635 (Brauerei Schützengarten AG N)
+[2026-04-15 06:29:57] ✓ CH0001542635: 161 trades downloaded
+[2026-04-15 06:29:58] Processing: CH0001542643 (Brauerei Schützengarten AG PS)
+[2026-04-15 06:29:58] ✓ CH0001542643: 635 trades downloaded
+[2026-04-15 06:29:59] Processing: CH0002052501 (Brunni-Bahnen N)
+[2026-04-15 06:29:59] ✓ CH0002052501: 569 trades downloaded
+[2026-04-15 06:30:00] Processing: CH0009438109 (BS Bank, Schaffhausen)
+[2026-04-15 06:30:00] ✓ CH0009438109: 500 trades downloaded
+[2026-04-15 06:30:01] Processing: CH0002657978 (Bystronic -B- N)
+[2026-04-15 06:30:02] ✓ CH0002657978: 423 trades downloaded
+[2026-04-15 06:30:03] Processing: CH0001570057 (Caran d`Ache, Genève, Serie B)
+[2026-04-15 06:30:03] ✓ CH0001570057: 89 trades downloaded
+[2026-04-15 06:30:04] Processing: CH0102022560 (CasaInvest N)
+[2026-04-15 06:30:04] ✓ CH0102022560: 865 trades downloaded
+[2026-04-15 06:30:05] Processing: CH1127803547 (Casale Holding Rg)
+[2026-04-15 06:30:05] ✓ CH1127803547: 14 trades downloaded
+[2026-04-15 06:30:06] Processing: CH0004959505 (Casino de Montreux SA Nom 100)
+[2026-04-15 06:30:06] ✓ CH0004959505: 448 trades downloaded
+[2026-04-15 06:30:07] Processing: CH0004959471 (Casino de Montreux SA Nom 50)
+[2026-04-15 06:30:07] ✓ CH0004959471: 33 trades downloaded
+[2026-04-15 06:30:08] Processing: CH0324791133 (Chemholding N)
+[2026-04-15 06:30:09] ✓ CH0324791133: 4 trades downloaded
+[2026-04-15 06:30:10] Processing: CH0020603475 (CKW N)
+[2026-04-15 06:30:10] ✓ CH0020603475: 1455 trades downloaded
+[2026-04-15 06:30:11] Processing: CH0010583448 (Clientis Bank Aareland N)
+[2026-04-15 06:30:11] ✓ CH0010583448: 259 trades downloaded
+[2026-04-15 06:30:12] Processing: CH0001336319 (Clientis Bank Oberuzwil AG)
+[2026-04-15 06:30:12] ✓ CH0001336319: 66 trades downloaded
+[2026-04-15 06:30:13] Processing: CH0010621925 (Clientis Bank Toggenburg)
+[2026-04-15 06:30:13] ✓ CH0010621925: 210 trades downloaded
+[2026-04-15 06:30:14] Processing: CH0001357000 (Clientis Sparkasse Oftringen)
+[2026-04-15 06:30:14] ✓ CH0001357000: 190 trades downloaded
+[2026-04-15 06:30:15] Processing: CH0001579363 (CMSA Holding SA)
+[2026-04-15 06:30:16] ✓ CH0001579363: 1301 trades downloaded
+[2026-04-15 06:30:17] Processing: CH0032462910 (Corvatsch AG Nom 3, Silvaplana)
+[2026-04-15 06:30:17] ✓ CH0032462910: 528 trades downloaded
+[2026-04-15 06:30:18] Processing: CH1100211528 (Crédit Mutuel de la Vallée N)
+[2026-04-15 06:30:18] ✓ CH1100211528: 33 trades downloaded
+[2026-04-15 06:30:19] Processing: CH0019556908 (Cresta Palace Celerina N)
+[2026-04-15 06:30:19] ✓ CH0019556908: 230 trades downloaded
+[2026-04-15 06:30:20] Processing: CH0433137400 (Davos Klosters Bergbahnen N)
+[2026-04-15 06:30:20] ✓ CH0433137400: 522 trades downloaded
+[2026-04-15 06:30:21] Processing: CH0109916244 (Diavolezza Lagalb N)
+[2026-04-15 06:30:21] ✓ CH0109916244: 57 trades downloaded
+[2026-04-15 06:30:22] Processing: CH0001665147 (Dolder Hotel AG, Zürich)
+[2026-04-15 06:30:23] ✓ CH0001665147: 557 trades downloaded
+[2026-04-15 06:30:24] Processing: CH0578688241 (Drahtseilbahn Marzili N)
+[2026-04-15 06:30:24] ✓ CH0578688241: 8 trades downloaded
+[2026-04-15 06:30:25] Processing: CH0001669255 (Drahtseilbahn Marzili-Stadt Bern N)
+[2026-04-15 06:30:25] ✓ CH0001669255: 36 trades downloaded
+[2026-04-15 06:30:26] Processing: CH0001777876 (ebs Erdgas + Biogas)
+[2026-04-15 06:30:26] ✓ CH0001777876: 48 trades downloaded
+[2026-04-15 06:30:27] Processing: CH1159308571 (EcoRenova N)
+[2026-04-15 06:30:27] ✓ CH1159308571: 1 trades downloaded
+[2026-04-15 06:30:28] Processing: CH0102699540 (Energ Elec du Simplon E.E.S.)
+[2026-04-15 06:30:28] ✓ CH0102699540: 94 trades downloaded
+[2026-04-15 06:30:29] Processing: CH0014386996 (Energie Zürichsee Linth N)
+[2026-04-15 06:30:30] ✓ CH0014386996: 820 trades downloaded
+[2026-04-15 06:30:31] Processing: CH0031926105 (Engadin Mountains AG)
+[2026-04-15 06:30:31] ✓ CH0031926105: 678 trades downloaded
+[2026-04-15 06:30:32] Processing: CH0129442221 (Eniwa Holding AG)
+[2026-04-15 06:30:32] ✓ CH0129442221: 810 trades downloaded
+[2026-04-15 06:30:33] Processing: CH0001337200 (Ersparniskasse Affoltern)
+[2026-04-15 06:30:33] ✓ CH0001337200: 231 trades downloaded
+[2026-04-15 06:30:34] Processing: CH0001704680 (Eskimo Textil AG, Turbenthal)
+[2026-04-15 06:30:34] ✓ CH0001704680: 35 trades downloaded
+[2026-04-15 06:30:35] Processing: CH0002557400 (Espace Real Estate Hldg N)
+[2026-04-15 06:30:36] ✓ CH0002557400: 3259 trades downloaded
+[2026-04-15 06:30:37] Processing: CH0001239398 (EW Brig-Naters EWBN)
+[2026-04-15 06:30:37] ✓ CH0001239398: 147 trades downloaded
+[2026-04-15 06:30:38] Processing: CH0001690533 (EW Jona-Rapperswil, Jona)
+[2026-04-15 06:30:38] ✓ CH0001690533: 1510 trades downloaded
+[2026-04-15 06:30:39] Processing: CH0001691614 (EW Uznach AG)
+[2026-04-15 06:30:39] ✓ CH0001691614: 227 trades downloaded
+[2026-04-15 06:30:40] Processing: CH0001413704 (Flughafen Bern AG N)
+[2026-04-15 06:30:40] ✓ CH0001413704: 500 trades downloaded
+[2026-04-15 06:30:41] Processing: CH1106247997 (Funi Locarno-Madonna N)
+[2026-04-15 06:30:41] ✓ CH1106247997: 13 trades downloaded
+[2026-04-15 06:30:42] Processing: CH1104949586 (Funi Lugano-Paradiso N)
+[2026-04-15 06:30:43] ✓ CH1104949586: 19 trades downloaded
+[2026-04-15 06:30:44] Processing: CH0001602009 (Generale Beaulieu Holding SA)
+[2026-04-15 06:30:44] ✓ CH0001602009: 221 trades downloaded
+[2026-04-15 06:30:45] Processing: CH1405847034 (Geoterra Holding Rg)
+[2026-04-15 06:30:45] ✓ CH1405847034: 318 trades downloaded
+[2026-04-15 06:30:46] Processing: CH0006980079 (Gondelbahn Grindelwald N)
+[2026-04-15 06:30:46] ✓ CH0006980079: 543 trades downloaded
+[2026-04-15 06:30:47] Processing: CH0375446173 (Gondrand Hldg Vz N)
+[2026-04-15 06:30:47] ✓ CH0375446173: 84 trades downloaded
+[2026-04-15 06:30:48] Processing: CH0002221338 (Gotthard Raststätte A2 Uri AG)
+[2026-04-15 06:30:48] ✓ CH0002221338: 1046 trades downloaded
+[2026-04-15 06:30:49] Processing: CH0002541586 (Grand Resort Bad Ragaz, Bad Ragaz)
+[2026-04-15 06:30:50] ✓ CH0002541586: 1168 trades downloaded
+[2026-04-15 06:30:51] Processing: CH0006532565 (Griesser Holding AG, Aadorf)
+[2026-04-15 06:30:51] ✓ CH0006532565: 1286 trades downloaded
+[2026-04-15 06:30:52] Processing: CH0016523125 (Griston Holding AG)
+[2026-04-15 06:30:52] ✓ CH0016523125: 446 trades downloaded
+[2026-04-15 06:30:53] Processing: CH0005051021 (Gurtenbahn AG N)
+[2026-04-15 06:30:53] ✓ CH0005051021: 116 trades downloaded
+[2026-04-15 06:30:54] Processing: CH0023124214 (HBB Holding AG)
+[2026-04-15 06:30:54] ✓ CH0023124214: 441 trades downloaded
+[2026-04-15 06:30:55] Processing: CH0001865523 (Heim im Bergli AG, Luzern)
+[2026-04-15 06:30:55] ✓ CH0001865523: 60 trades downloaded
+[2026-04-15 06:30:56] Processing: CH0304280636 (Helvetic Star Holding)
+[2026-04-15 06:30:57] ✓ CH0304280636: 70 trades downloaded
+[2026-04-15 06:30:58] Processing: CH0000648680 (Hochalpines Institut Ftan AG)
+[2026-04-15 06:30:58] ✓ CH0000648680: 137 trades downloaded
+[2026-04-15 06:30:59] Processing: CH0016016849 (Hoch-Ybrig N)
+[2026-04-15 06:30:59] ✓ CH0016016849: 682 trades downloaded
+[2026-04-15 06:31:00] Processing: CH0001992681 (Hof Weissbad AG)
+[2026-04-15 06:31:00] ✓ CH0001992681: 1405 trades downloaded
+[2026-04-15 06:31:01] Processing: CH0010923875 (Hoher Kasten Drehrestaurant und Seilbahn AG)
+[2026-04-15 06:31:02] ✓ CH0010923875: 656 trades downloaded
+[2026-04-15 06:31:03] Processing: CH0020502743 (Holdinova N)
+[2026-04-15 06:31:04] ✓ CH0020502743: 5036 trades downloaded
+[2026-04-15 06:31:05] Processing: CH0001906848 (Imbrex Hldg N)
+[2026-04-15 06:31:05] ✓ CH0001906848: 323 trades downloaded
+[2026-04-15 06:31:06] Processing: CH0001910089 (Immges Viamala, Thusis)
+[2026-04-15 06:31:06] ✓ CH0001910089: 87 trades downloaded
+[2026-04-15 06:31:07] Processing: CH0324793667 (Immobiliare Pharmapark N)
+[2026-04-15 06:31:08] ✓ CH0324793667: 63 trades downloaded
+[2026-04-15 06:31:09] Processing: CH0001344685 (KB Nidwalden PS)
+[2026-04-15 06:31:09] ✓ CH0001344685: 103 trades downloaded
+[2026-04-15 06:31:10] Processing: CH0263939958 (Klosters-Madrisa N)
+[2026-04-15 06:31:10] ✓ CH0263939958: 168 trades downloaded
+[2026-04-15 06:31:11] Processing: CH0001514501 (Kongresshaus Zürich AG, Zürich)
+[2026-04-15 06:31:11] ✓ CH0001514501: 807 trades downloaded
+[2026-04-15 06:31:12] Processing: CH0115029545 (Konkordia AG N)
+[2026-04-15 06:31:12] ✓ CH0115029545: 233 trades downloaded
+[2026-04-15 06:31:13] Processing: CH0002052915 (Kronberg N)
+[2026-04-15 06:31:14] ✓ CH0002052915: 230 trades downloaded
+[2026-04-15 06:31:15] Processing: CH0001574604 (Kursaal-Casino AG, Luzern GS)
+[2026-04-15 06:31:15] ✓ CH0001574604: 211 trades downloaded
+[2026-04-15 06:31:16] Processing: CH0001574596 (Kursaal-Casino AG, Luzern N)
+[2026-04-15 06:31:16] ✓ CH0001574596: 1749 trades downloaded
+[2026-04-15 06:31:17] Processing: CH0001989513 (Kursaal Interlaken N)
+[2026-04-15 06:31:17] ✓ CH0001989513: 647 trades downloaded
+[2026-04-15 06:31:18] Processing: CH0304449611 (Lagerhäuser der Centralschweiz N)
+[2026-04-15 06:31:18] ✓ CH0304449611: 229 trades downloaded
+[2026-04-15 06:31:19] Processing: CH0002400585 (Landwirtschaft ZRA, Aarberg)
+[2026-04-15 06:31:20] ✓ CH0002400585: 229 trades downloaded
+[2026-04-15 06:31:21] Processing: CH0001343885 (Leihkasse Stammheim)
+[2026-04-15 06:31:21] ✓ CH0001343885: 121 trades downloaded
+[2026-04-15 06:31:22] Processing: CH0001788345 (Lenk Bergbahnen, Lenk)
+[2026-04-15 06:31:22] ✓ CH0001788345: 199 trades downloaded
+[2026-04-15 06:31:23] Processing: CH0023497271 (Lenzerheide Bergbahnen)
+[2026-04-15 06:31:23] ✓ CH0023497271: 1173 trades downloaded
+[2026-04-15 06:31:24] Processing: CH0001318374 (Lienhardt & Partner Privatbank Zürich AG, Zürich)
+[2026-04-15 06:31:24] ✓ CH0001318374: 477 trades downloaded
+[2026-04-15 06:31:25] Processing: CH0002045471 (Loeb Holding N -B-)
+[2026-04-15 06:31:25] ✓ CH0002045471: 239 trades downloaded
+[2026-04-15 06:31:26] Processing: CH0002045497 (Loeb Holding PS)
+[2026-04-15 06:31:27] ✓ CH0002045497: 2663 trades downloaded
+[2026-04-15 06:31:28] Processing: CH0105175175 (Lorze AG)
+[2026-04-15 06:31:28] ✓ CH0105175175: 292 trades downloaded
+[2026-04-15 06:31:29] Processing: CH0001542601 (Löwengarten AG)
+[2026-04-15 06:31:29] ✓ CH0001542601: 21 trades downloaded
+[2026-04-15 06:31:30] Processing: CH0563381901 (LSB Dallenwil-Wirzweli N)
+[2026-04-15 06:31:30] ✓ CH0563381901: 6 trades downloaded
+[2026-04-15 06:31:31] Processing: CH0002052782 (LSB Grindelwald-Pfingstegg AG)
+[2026-04-15 06:31:31] ✓ CH0002052782: 160 trades downloaded
+[2026-04-15 06:31:32] Processing: CH0342342653 (LSB Unterterzen-Flumserberg)
+[2026-04-15 06:31:33] ✓ CH0342342653: 87 trades downloaded
+[2026-04-15 06:31:34] Processing: CH0002055819 (LSB Wasserauen-Ebenalp AG)
+[2026-04-15 06:31:34] ✓ CH0002055819: 87 trades downloaded
+[2026-04-15 06:31:35] Processing: CH0002056031 (LSB Wengen-Männlichen AG)
+[2026-04-15 06:31:35] ✓ CH0002056031: 349 trades downloaded
+[2026-04-15 06:31:36] Processing: CH0002056957 (Lurag AG, Neuenkirch)
+[2026-04-15 06:31:36] ✓ CH0002056957: 770 trades downloaded
+[2026-04-15 06:31:37] Processing: CH0002057070 (Lyceum Alpinum Zuoz AG)
+[2026-04-15 06:31:37] ✓ CH0002057070: 134 trades downloaded
+[2026-04-15 06:31:38] Processing: CH0198963503 (Magazzini Generali N)
+[2026-04-15 06:31:39] ✓ CH0198963503: 21 trades downloaded
+[2026-04-15 06:31:40] Processing: CH0016376714 (Matterhorn Gotthard Verkehr AG)
+[2026-04-15 06:31:40] ✓ CH0016376714: 95 trades downloaded
+[2026-04-15 06:31:41] Processing: CH0014069212 (Menzi Muck Gruppe N)
+[2026-04-15 06:31:41] ✓ CH0014069212: 1339 trades downloaded
+[2026-04-15 06:31:42] Processing: CH0002092622 (Metall Zug AG Serie A)
+[2026-04-15 06:31:42] ✓ CH0002092622: 558 trades downloaded
+[2026-04-15 06:31:43] Processing: CH0107020692 (Montana Tech N)
+[2026-04-15 06:31:43] ✓ CH0107020692: 1681 trades downloaded
+[2026-04-15 06:31:44] Processing: CH0003798599 (Montreux-Berner Oberland Bahn)
+[2026-04-15 06:31:44] ✓ CH0003798599: 447 trades downloaded
+[2026-04-15 06:31:45] Processing: CH0126517975 (Neue Zürcher Zeitung, Zürich)
+[2026-04-15 06:31:46] ✓ CH0126517975: 3651 trades downloaded
+[2026-04-15 06:31:47] Processing: CH0187475709 (Nexus Gr Hold N)
+[2026-04-15 06:31:47] ✓ CH0187475709: 165 trades downloaded
+[2026-04-15 06:31:48] Processing: CH0572824867 (Niederhornbahn N)
+[2026-04-15 06:31:48] ✓ CH0572824867: 67 trades downloaded
+[2026-04-15 06:31:49] Processing: CH1104984104 (Niesenbahn N)
+[2026-04-15 06:31:49] ✓ CH1104984104: 132 trades downloaded
+[2026-04-15 06:31:50] Processing: CH0013592248 (NORINVEST HLDG N)
+[2026-04-15 06:31:50] ✓ CH0013592248: 158 trades downloaded
+[2026-04-15 06:31:51] Processing: CH0002160460 (Opernhaus Zürich N 300)
+[2026-04-15 06:31:52] ✓ CH0002160460: 28 trades downloaded
+[2026-04-15 06:31:53] Processing: CH0002160478 (Opernhaus Zürich N 900)
+[2026-04-15 06:31:53] ✓ CH0002160478: 358 trades downloaded
+[2026-04-15 06:31:54] Processing: CH0017915742 (OTC-X All Share)
+[2026-04-15 06:31:54] ✓ CH0017915742: 0 trades downloaded
+[2026-04-15 06:31:55] Processing: CH0017915718 (OTC-X Banken)
+[2026-04-15 06:31:55] ✓ CH0017915718: 0 trades downloaded
+[2026-04-15 06:31:56] Processing: CH0039576753 (OTC-X Bergbahnen)
+[2026-04-15 06:31:56] ✓ CH0039576753: 0 trades downloaded
+[2026-04-15 06:31:57] Processing: CH0039576787 (OTC-X Beteiligungsgesellschaften)
+[2026-04-15 06:31:58] ✓ CH0039576787: 0 trades downloaded
+[2026-04-15 06:31:59] Processing: CH0017915692 (OTC-X Energie)
+[2026-04-15 06:31:59] ✓ CH0017915692: 0 trades downloaded
+[2026-04-15 06:32:00] Processing: CH0039576837 (OTC-X Immobilien)
+[2026-04-15 06:32:00] ✓ CH0039576837: 0 trades downloaded
+[2026-04-15 06:32:01] Processing: CH0017915684 (OTC-X Industrie)
+[2026-04-15 06:32:01] ✓ CH0017915684: 0 trades downloaded
+[2026-04-15 06:32:02] Processing: CH0039576860 (OTC-X Liquidity)
+[2026-04-15 06:32:02] ✓ CH0039576860: 0 trades downloaded
+[2026-04-15 06:32:03] Processing: CH0017915668 (OTC-X Medien)
+[2026-04-15 06:32:03] ✓ CH0017915668: 0 trades downloaded
+[2026-04-15 06:32:04] Processing: CH0039576852 (OTC-X Nahrung und Getraenke)
+[2026-04-15 06:32:05] ✓ CH0039576852: 0 trades downloaded
+[2026-04-15 06:32:06] Processing: CH0213109793 (OTC-X Premium)
+[2026-04-15 06:32:06] ✓ CH0213109793: 0 trades downloaded
+[2026-04-15 06:32:07] Processing: CH0017915726 (OTC-X TOP50)
+[2026-04-15 06:32:07] ✓ CH0017915726: 0 trades downloaded
+[2026-04-15 06:32:08] Processing: CH0017915643 (OTC-X Tourismus/Freizeit/Sonstiges)
+[2026-04-15 06:32:08] ✓ CH0017915643: 0 trades downloaded
+[2026-04-15 06:32:09] Processing: CH0017915635 (OTC-X Transport/Verkehr/Logistik)
+[2026-04-15 06:32:09] ✓ CH0017915635: 0 trades downloaded
+[2026-04-15 06:32:10] Processing: CH0467707490 (Outdoor Switzerland N)
+[2026-04-15 06:32:11] ✓ CH0467707490: 76 trades downloaded
+[2026-04-15 06:32:12] Processing: CH0002174743 (Parking des Alpes N)
+[2026-04-15 06:32:12] ✓ CH0002174743: 9 trades downloaded
+[2026-04-15 06:32:13] Processing: CH0016049881 (Patiswiss AG)
+[2026-04-15 06:32:13] ✓ CH0016049881: 915 trades downloaded
+[2026-04-15 06:32:14] Processing: CH1350861261 (Perlen Industrieholding N)
+[2026-04-15 06:32:14] ✓ CH1350861261: 1486 trades downloaded
+[2026-04-15 06:32:15] Processing: CH0009005973 (Pilatus-Bahnen AG, Kriens)
+[2026-04-15 06:32:15] ✓ CH0009005973: 1788 trades downloaded
+[2026-04-15 06:32:16] Processing: CH0012457633 (Plaston Holding AG)
+[2026-04-15 06:32:17] ✓ CH0012457633: 1388 trades downloaded
+[2026-04-15 06:32:18] Processing: CH0284143929 (PLAZZA-B-N)
+[2026-04-15 06:32:18] ✓ CH0284143929: 111 trades downloaded
+[2026-04-15 06:32:19] Processing: CH0286266488 (Ports Francs et Entrepôts de Genève)
+[2026-04-15 06:32:19] ✓ CH0286266488: 0 trades downloaded
+[2026-04-15 06:32:20] Processing: CH0122303669 (Prayon Switzerland N)
+[2026-04-15 06:32:20] ✓ CH0122303669: 22 trades downloaded
+[2026-04-15 06:32:21] Processing: CH0013283368 (Precious Woods Hldg N)
+[2026-04-15 06:32:21] ✓ CH0013283368: 546 trades downloaded
+[2026-04-15 06:32:22] Processing: CH0002218664 (Railtour Suisse SA Nom 100)
+[2026-04-15 06:32:22] ✓ CH0002218664: 0 trades downloaded
+[2026-04-15 06:32:23] Processing: CH0002218698 (Railtour Suisse SA Nom 500)
+[2026-04-15 06:32:24] ✓ CH0002218698: 0 trades downloaded
+[2026-04-15 06:32:25] Processing: CH0030333360 (Rapid Holding N)
+[2026-04-15 06:32:25] ✓ CH0030333360: 1451 trades downloaded
+[2026-04-15 06:32:26] Processing: CH0027315818 (Raststätte Rheintal AG, Sevelen)
+[2026-04-15 06:32:26] ✓ CH0027315818: 206 trades downloaded
+[2026-04-15 06:32:27] Processing: CH0002221304 (Raststätte Thurau, St. Gallen)
+[2026-04-15 06:32:27] ✓ CH0002221304: 191 trades downloaded
+[2026-04-15 06:32:28] Processing: CH0018525532 (Raststätte Walensee AG)
+[2026-04-15 06:32:28] ✓ CH0018525532: 93 trades downloaded
+[2026-04-15 06:32:29] Processing: CH1387788180 (Raurica Wald N-B)
+[2026-04-15 06:32:29] ✓ CH1387788180: 18 trades downloaded
+[2026-04-15 06:32:30] Processing: CH0001340196 (Regiobank Männedorf)
+[2026-04-15 06:32:31] ✓ CH0001340196: 227 trades downloaded
+[2026-04-15 06:32:32] Processing: CH1112956201 (Regiobank Solothurn N)
+[2026-04-15 06:32:32] ✓ CH1112956201: 3022 trades downloaded
+[2026-04-15 06:32:33] Processing: CH0002227095 (Reishauer N)
+[2026-04-15 06:32:33] ✓ CH0002227095: 1030 trades downloaded
+[2026-04-15 06:32:34] Processing: CH0199383602 (Remontées Mécaniques de Grimentz)
+[2026-04-15 06:32:34] ✓ CH0199383602: 11 trades downloaded
+[2026-04-15 06:32:35] Processing: CH0320096990 (Repower N)
+[2026-04-15 06:32:35] ✓ CH0320096990: 4830 trades downloaded
+[2026-04-15 06:32:36] Processing: CH0002234398 (Rhätische Bahn RhB / Prior)
+[2026-04-15 06:32:37] ✓ CH0002234398: 253 trades downloaded
+[2026-04-15 06:32:38] Processing: CH0002234372 (Rhätische Bahn RhB / Stamm)
+[2026-04-15 06:32:38] ✓ CH0002234372: 209 trades downloaded
+[2026-04-15 06:32:39] Processing: CH0001378626 (Rhiienergie AG, Tamins)
+[2026-04-15 06:32:39] ✓ CH0001378626: 128 trades downloaded
+[2026-04-15 06:32:40] Processing: CH0016290014 (Rigi Bahnen AG, Goldau)
+[2026-04-15 06:32:40] ✓ CH0016290014: 2639 trades downloaded
+[2026-04-15 06:32:41] Processing: CH0114457390 (Rottal Auto AG, Ruswil)
+[2026-04-15 06:32:41] ✓ CH0114457390: 49 trades downloaded
+[2026-04-15 06:32:42] Processing: CH0000975372 (Säntis-Schwebebahn AG, Schwägalp)
+[2026-04-15 06:32:43] ✓ CH0000975372: 3098 trades downloaded
+[2026-04-15 06:32:44] Processing: CH0002353487 (SB Elm AG N)
+[2026-04-15 06:32:44] ✓ CH0002353487: 103 trades downloaded
+[2026-04-15 06:32:45] Processing: CH0001394607 (SB im Mythengebiet, Schwyz)
+[2026-04-15 06:32:45] ✓ CH0001394607: 50 trades downloaded
+[2026-04-15 06:32:46] Processing: CH0002353693 (SB Pischa, Davos)
+[2026-04-15 06:32:46] ✓ CH0002353693: 132 trades downloaded
+[2026-04-15 06:32:47] Processing: CH0001352928 (SB Saanen Bank)
+[2026-04-15 06:32:47] ✓ CH0001352928: 1346 trades downloaded
+[2026-04-15 06:32:48] Processing: CH0341320114 (Schifffahrtsges. Hallwilersee)
+[2026-04-15 06:32:49] ✓ CH0341320114: 121 trades downloaded
+[2026-04-15 06:32:50] Processing: CH0002276266 (Schilthornbahn AG Mürren)
+[2026-04-15 06:32:50] ✓ CH0002276266: 2778 trades downloaded
+[2026-04-15 06:32:51] Processing: CH0002283601 (Schützen Rheinfelden Immobilien N)
+[2026-04-15 06:32:51] ✓ CH0002283601: 266 trades downloaded
+[2026-04-15 06:32:52] Processing: CH0006234014 (Schweizer Zucker AG)
+[2026-04-15 06:32:52] ✓ CH0006234014: 2278 trades downloaded
+[2026-04-15 06:32:53] Processing: CH0002291802 (Schweiz. Schifffahrtsges. Untersee und Rhein N)
+[2026-04-15 06:32:53] ✓ CH0002291802: 133 trades downloaded
+[2026-04-15 06:32:54] Processing: CH0031151084 (SeeBeteiligungs AG)
+[2026-04-15 06:32:55] ✓ CH0031151084: 852 trades downloaded
+[2026-04-15 06:32:56] Processing: CH0030693185 (Seilbahn Weissenstein AG)
+[2026-04-15 06:32:56] ✓ CH0030693185: 1076 trades downloaded
+[2026-04-15 06:32:57] Processing: CH0421720779 (SGV Holding N)
+[2026-04-15 06:32:57] ✓ CH0421720779: 2424 trades downloaded
+[2026-04-15 06:32:58] Processing: CH0547027570 (SIA-Haus Vz N)
+[2026-04-15 06:32:58] ✓ CH0547027570: 159 trades downloaded
+[2026-04-15 06:32:59] Processing: CH0009219186 (sitEX Properties Hldg N)
+[2026-04-15 06:32:59] ✓ CH0009219186: 348 trades downloaded
+[2026-04-15 06:33:00] Processing: CH0305002096 (Skilifte Brunni-Haggenegg N)
+[2026-04-15 06:33:01] ✓ CH0305002096: 41 trades downloaded
+[2026-04-15 06:33:02] Processing: CH0001350328 (Spar + Leihkasse Gürbetal N)
+[2026-04-15 06:33:02] ✓ CH0001350328: 285 trades downloaded
+[2026-04-15 06:33:03] Processing: CH0001352720 (Spar+Leihkasse Riggisberg)
+[2026-04-15 06:33:04] ✓ CH0001352720: 498 trades downloaded
+[2026-04-15 06:33:05] Processing: CH0318681860 (Spar- und Leihkasse Bucheggberg N)
+[2026-04-15 06:33:05] ✓ CH0318681860: 905 trades downloaded
+[2026-04-15 06:33:06] Processing: CH0001350112 (Spar- und Leihkasse Frutigen)
+[2026-04-15 06:33:06] ✓ CH0001350112: 358 trades downloaded
+[2026-04-15 06:33:07] Processing: CH0001354296 (Spar- und Leihkasse Wynigen)
+[2026-04-15 06:33:07] ✓ CH0001354296: 106 trades downloaded
+[2026-04-15 06:33:08] Processing: CH0320093559 (Sportbahnen Atzmaennig N)
+[2026-04-15 06:33:08] ✓ CH0320093559: 72 trades downloaded
+[2026-04-15 06:33:09] Processing: CH0002513312 (SSE Holding N)
+[2026-04-15 06:33:10] ✓ CH0002513312: 3335 trades downloaded
+[2026-04-15 06:33:11] Processing: CH0009319721 (Stadtcasino Baden AG, Baden)
+[2026-04-15 06:33:11] ✓ CH0009319721: 2112 trades downloaded
+[2026-04-15 06:33:12] Processing: CH0586685981 (Stanserhorn-Bahn N -10-)
+[2026-04-15 06:33:12] ✓ CH0586685981: 23 trades downloaded
+[2026-04-15 06:33:13] Processing: CH0586455245 (Stanserhorn-Bahn N -250-)
+[2026-04-15 06:33:13] ✓ CH0586455245: 237 trades downloaded
+[2026-04-15 06:33:14] Processing: CH0487871656 (STI Hldg N)
+[2026-04-15 06:33:14] ✓ CH0487871656: 10 trades downloaded
+[2026-04-15 06:33:15] Processing: CH0005701708 (Stoosbahnen N)
+[2026-04-15 06:33:16] ✓ CH0005701708: 374 trades downloaded
+[2026-04-15 06:33:17] Processing: CH0197490847 (Sunstar-Holding N -A-)
+[2026-04-15 06:33:17] ✓ CH0197490847: 830 trades downloaded
+[2026-04-15 06:33:18] Processing: CH0341319801 (Sursee-Triengen Bahn N)
+[2026-04-15 06:33:18] ✓ CH0341319801: 18 trades downloaded
+[2026-04-15 06:33:19] Processing: CH0001395539 (Suvretta-Haus, St. Moritz)
+[2026-04-15 06:33:19] ✓ CH0001395539: 222 trades downloaded
+[2026-04-15 06:33:20] Processing: CH0002512801 (Swisstulle AG)
+[2026-04-15 06:33:20] ✓ CH0002512801: 153 trades downloaded
+[2026-04-15 06:33:21] Processing: CH0121640970 (SWS Medien N)
+[2026-04-15 06:33:21] ✓ CH0121640970: 128 trades downloaded
+[2026-04-15 06:33:22] Processing: CH0002538012 (Tersa AG)
+[2026-04-15 06:33:23] ✓ CH0002538012: 124 trades downloaded
+[2026-04-15 06:33:24] Processing: CH0596918380 (Thermalbad Zurzach N)
+[2026-04-15 06:33:24] ✓ CH0596918380: 608 trades downloaded
+[2026-04-15 06:33:25] Processing: CH0223260743 (Toggenburg Bergbahnen N)
+[2026-04-15 06:33:25] ✓ CH0223260743: 450 trades downloaded
+[2026-04-15 06:33:26] Processing: CH0001725255 (Tonwerk Lausen N)
+[2026-04-15 06:33:26] ✓ CH0001725255: 57 trades downloaded
+[2026-04-15 06:33:27] Processing: CH0002557616 (Treib-Seelisberg-Bahn AG)
+[2026-04-15 06:33:27] ✓ CH0002557616: 78 trades downloaded
+[2026-04-15 06:33:28] Processing: CH0002569694 (Tuwag Immobilien AG, Wädenswil)
+[2026-04-15 06:33:28] ✓ CH0002569694: 53 trades downloaded
+[2026-04-15 06:33:29] Processing: CH0326691679 (Unione Farmaceutica Distr N)
+[2026-04-15 06:33:30] ✓ CH0326691679: 24 trades downloaded
+[2026-04-15 06:33:31] Processing: CH0326380885 (Unipharma N)
+[2026-04-15 06:33:31] ✓ CH0326380885: 9 trades downloaded
+[2026-04-15 06:33:32] Processing: CH0306293272 (Usines Metallurgiques de Vallorbe N)
+[2026-04-15 06:33:32] ✓ CH0306293272: 65 trades downloaded
+[2026-04-15 06:33:33] Processing: CH0033136596 (Viamala Raststätte Thusis AG)
+[2026-04-15 06:33:33] ✓ CH0033136596: 2 trades downloaded
+[2026-04-15 06:33:34] Processing: CH0029910939 (VOe holding N)
+[2026-04-15 06:33:34] ✓ CH0029910939: 360 trades downloaded
+[2026-04-15 06:33:35] Processing: CH0212936964 (Weiss+Appetito N)
+[2026-04-15 06:33:35] ✓ CH0212936964: 1255 trades downloaded
+[2026-04-15 06:33:36] Processing: CH0000041795 (Weisse Arena AG, Laax)
+[2026-04-15 06:33:37] ✓ CH0000041795: 1392 trades downloaded
+[2026-04-15 06:33:38] Processing: CH0004960180 (Weleda N-PS)
+[2026-04-15 06:33:38] ✓ CH0004960180: 2595 trades downloaded
+[2026-04-15 06:33:39] Processing: CH0010173182 (Welinvest AG in Liquidation)
+[2026-04-15 06:33:39] ✓ CH0010173182: 1968 trades downloaded
+[2026-04-15 06:33:40] Processing: CH1204218437 (WIR Bank BS N)
+[2026-04-15 06:33:40] ✓ CH1204218437: 360 trades downloaded
+[2026-04-15 06:33:41] Processing: CH1102090151 (WWZ N)
+[2026-04-15 06:33:42] ✓ CH1102090151: 5046 trades downloaded
+[2026-04-15 06:33:43] Processing: CH0002056114 (Zermatt Bergbahnen N)
+[2026-04-15 06:33:43] ✓ CH0002056114: 574 trades downloaded
+[2026-04-15 06:33:44] Processing: CH0002370903 (ZLB Zürcher Landbank)
+[2026-04-15 06:33:44] ✓ CH0002370903: 253 trades downloaded
+[2026-04-15 06:33:45] Processing: CH0002655501 (Zoologischer Garten, Basel)
+[2026-04-15 06:33:45] ✓ CH0002655501: 88 trades downloaded
+[2026-04-15 06:33:46] Processing: CH0002654934 (ZT Medien N)
+[2026-04-15 06:33:46] ✓ CH0002654934: 183 trades downloaded
+[2026-04-15 06:33:47] Processing: CH0148052118 (Zug Estates N Serie A)
+[2026-04-15 06:33:47] ✓ CH0148052118: 229 trades downloaded
+[2026-04-15 06:33:48] Processing: CH0001671707 (Zürcher Oberland Medien AG, Wetzikon)
+[2026-04-15 06:33:49] ✓ CH0001671707: 511 trades downloaded
+[2026-04-15 06:33:50] Processing: CH0002658448 (Zürichsee-Fähre Horgen-Meilen AG)
+[2026-04-15 06:33:50] ✓ CH0002658448: 1000 trades downloaded
+[2026-04-15 06:33:51] Processing: CH0553343069 (Zürichsee-Schifffahrtsgesellschaft)
+[2026-04-15 06:33:51] ✓ CH0553343069: 421 trades downloaded
+[2026-04-15 06:33:52] ========== SUMMARY ==========
+[2026-04-15 06:33:52] Total ISINs processed: 242
+[2026-04-15 06:33:52] Successful downloads: 242
+[2026-04-15 06:33:52] Failed/Not Found: 0
+[2026-04-15 06:33:52] CSV files created: 242
+[2026-04-15 06:33:52] Time elapsed: 4m 49s
+[2026-04-15 06:33:52] Log saved: /home/runner/work/OTC-X/OTC-X/backend/logs/downloader_2026-04-15_062858.log
+[2026-04-15 06:33:55] ======================================================================
+[2026-04-15 06:33:55] OTC-X Liquidity Metrics Engine - Starting
+[2026-04-15 06:33:55] Timestamp: 2026-04-15 06:33:55
+[2026-04-15 06:33:55] ======================================================================
+[2026-04-15 06:33:55] [1/4] Loading input data...
+[2026-04-15 06:33:55]       Trades: /home/runner/work/OTC-X/OTC-X/backend/data/master_trades.parquet
+[2026-04-15 06:33:55]       -> 137,854 trades loaded (224 ISINs)
+[2026-04-15 06:33:55]       Securities: /home/runner/work/OTC-X/OTC-X/backend/data/securities.csv
+[2026-04-15 06:33:55]       -> 242 securities loaded (11 sectors)
+[2026-04-15 06:33:55] [2/4] Computing liquidity metrics...
+[2026-04-15 06:33:55]     Step 1/4: Daily aggregation...
+[2026-04-15 06:33:55]              75,693 daily observations
+[2026-04-15 06:33:55]     Step 2/4: Liquidity metrics...
+[2026-04-15 06:33:55]     Step 3/4: Rolling baselines (30 trading days)...
+[2026-04-15 06:33:56]     Step 4/4: Anomaly detection...
+[2026-04-15 06:33:56] [3/4] Enriching with security metadata...
+[2026-04-15 06:33:56]       [!] 1 ISINs have no metadata (Name/Sektor will be null)
+[2026-04-15 06:33:56]       -> Final shape: (75693, 26)
+[2026-04-15 06:33:56] [4/4] Saving output...
+[2026-04-15 06:33:56]       -> Written to: /home/runner/work/OTC-X/OTC-X/backend/data/daily_metrics.parquet
+[2026-04-15 06:33:56]       -> Size: 2.45 MB
+[2026-04-15 06:33:56] ======================================================================
+[2026-04-15 06:33:56] SUCCESS! Pipeline completed.
+[2026-04-15 06:33:56] ======================================================================
+[2026-04-15 06:33:56] Total rows:       75,693
+[2026-04-15 06:33:56] Unique ISINs:     224
+[2026-04-15 06:33:56] Unique Sectors:   11
+[2026-04-15 06:33:56] Date range:       2004-02-16 to 2026-04-15
+[2026-04-15 06:33:56] Elapsed time:     0.3 seconds
+[2026-04-15 06:33:56] Output Schema:
+[2026-04-15 06:33:56]   Isin                      String
+[2026-04-15 06:33:56]   Name                      String
+[2026-04-15 06:33:56]   Sektor                    String
+[2026-04-15 06:33:56]   Datum                     Date
+[2026-04-15 06:33:56]   trades_today              UInt32
+[2026-04-15 06:33:56]   volume_today_units        Float64
+[2026-04-15 06:33:56]   volume_today_chf          Float64
+[2026-04-15 06:33:56]   price_min                 Float64
+[2026-04-15 06:33:56]   price_max                 Float64
+[2026-04-15 06:33:56]   price_first               Float64
+[2026-04-15 06:33:56]   price_last                Float64
+[2026-04-15 06:33:56]   price_change_pct          Float64
+[2026-04-15 06:33:56]   log_returns               Float64
+[2026-04-15 06:33:56]   volatility_daily          Float64
+[2026-04-15 06:33:56]   amihud_daily              Float64
+[2026-04-15 06:33:56]   spread_log_hl             Float64
+[2026-04-15 06:33:56]   trade_duration_min        Float64
+[2026-04-15 06:33:56]   off_book_pct              Float64
+[2026-04-15 06:33:56]   trades_30d_median         Float64
+[2026-04-15 06:33:56]   volume_30d_median         Float64
+[2026-04-15 06:33:56]   volatility_30d_median     Float64
+[2026-04-15 06:33:56]   amihud_30d_median         Float64
+[2026-04-15 06:33:56]   volume_spike              Boolean
+[2026-04-15 06:33:56]   activity_spike            Boolean
+[2026-04-15 06:33:56]   price_gap                 Boolean
+[2026-04-15 06:33:56]   anomaly_score             UInt8
+[2026-04-15 06:33:56] High-anomaly observations (score >= 5): 14,280 total
+[2026-04-15 06:33:56]   2026-04-14 | CH0002227095 | Score: 5 | Price Change: 1.85%
+[2026-04-15 06:33:56]   2026-04-14 | CH0004960180 | Score: 5 | Price Change: 0.00%
+[2026-04-15 06:33:56]   2026-04-14 | CH0025889160 | Score: 5 | Price Change: 0.00%
+[2026-04-15 06:33:56]   2026-04-14 | CH0030333360 | Score: 5 | Price Change: -3.85%
+[2026-04-15 06:33:56]   2026-04-14 | CH0031151084 | Score: 5 | Price Change: 0.43%
