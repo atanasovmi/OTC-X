@@ -236,13 +236,13 @@ class TestDataLoaderParquetIntegration:
 class TestChartsDataIntegration:
     """Verify chart functions produce valid Plotly figures from loaded data."""
 
-    def test_volume_by_sector_chart_has_data(self, loaded_data):
+    def test_trades_by_sector_chart_has_data(self, loaded_data):
         """Arrange: real data. Act: generate chart. Assert: figure has traces."""
         import plotly.graph_objects as go
-        from frontend.operations.charts import chart_volume_by_sector
+        from frontend.operations.charts import chart_trades_by_sector
 
         _, latest = loaded_data
-        fig = chart_volume_by_sector(latest)
+        fig = chart_trades_by_sector(latest)
         assert isinstance(fig, go.Figure)
         assert len(fig.data) > 0
 

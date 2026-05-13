@@ -200,7 +200,7 @@ def chart_sector_treemap(latest: pd.DataFrame) -> go.Figure:
         custom_data=["n", "avg_chg", "vol"],
     )
     fig.update_traces(
-        texttemplate="<b>%{label}</b><br>%{customdata[2]:,.0f} CHF<br>%{customdata[0]} sec.",
+        texttemplate="<b>%{label}</b><br>%{customdata[2]:,.0f} CHF<br>%{customdata[0]} ISINs",
         textfont=dict(family="Inter", size=11),
         marker_line_width=2,
         marker_line_color="white",
@@ -266,22 +266,30 @@ def chart_top_movers(latest: pd.DataFrame, n: int = 14) -> go.Figure:
     return fig
 
 
-def chart_volume_by_sector(latest: pd.DataFrame) -> go.Figure:
-    """Horizontal bar chart of total CHF volume aggregated by sector.
+def chart_trades_by_sector(panel: pd.DataFrame) -> go.Figure:
+    """Horizontal bar chart of total trade count aggregated by sector.
+
+    Counts individual trades (``trades_today``) rather than CHF volume,
+    so the chart measures *activity frequency* per sector — a different
+    liquidity signal than capital flow. The caller decides the time
+    window by passing a pre-filtered panel (e.g. YTD slice of
+    ``df_hist``); this function simply aggregates whatever rows it
+    receives.
 
     Parameters
     ----------
-    latest : pd.DataFrame
-        Latest-snapshot DataFrame with ``Sektor`` and
-        ``volume_today_chf``.
+    panel : pd.DataFrame
+        DataFrame with ``Sektor`` and ``trades_today``. Each row may
+        represent a single (security × date) observation; counts are
+        summed across all rows per sector.
 
     Returns
     -------
     go.Figure
-        Sorted horizontal bar chart with volumes labelled in CHF.
+        Sorted horizontal bar chart with integer trade counts.
     """
     s = (
-        latest.groupby("Sektor")["volume_today_chf"]
+        panel.groupby("Sektor")["trades_today"]
         .sum()
         .sort_values()
     )
@@ -292,7 +300,7 @@ def chart_volume_by_sector(latest: pd.DataFrame) -> go.Figure:
             orientation="h",
             marker_color=BRAND_RED,
             marker_opacity=0.82,
-            text=[fmt_chf(v) for v in s.values],
+            text=[f"{int(v):,}" for v in s.values],
             textposition="outside",
             textfont=dict(family="IBM Plex Mono", size=10),
         )

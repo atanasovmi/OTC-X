@@ -34,7 +34,7 @@ class TestFrontendImports:
     def test_import_charts(self):
         from frontend.operations.charts import (
             chart_market_activity, chart_sector_treemap, chart_top_movers,
-            chart_volume_by_sector, chart_scatter_volume_price,
+            chart_trades_by_sector, chart_scatter_volume_price,
             chart_amihud_by_sector, chart_volatility_trend,
             chart_correlation_heatmap, chart_anomaly_severity_treemap,
             chart_security_history, chart_3d_explorer,

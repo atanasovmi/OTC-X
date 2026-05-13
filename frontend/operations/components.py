@@ -46,40 +46,47 @@ def render_header(latest_date: str) -> None:
     )
 
 
-def render_kpis(latest: pd.DataFrame) -> None:
+def render_kpis(today: pd.DataFrame, total_securities: int,
+                active_30d_count: int) -> None:
     """Render the five top-level KPI cards for the Overview tab.
 
-    Computes aggregate statistics (market volume, active securities,
-    average price change, volume spikes, and anomaly counts) from the
-    latest snapshot and displays them in a single row of branded KPI
-    cards.
+    Most tiles aggregate strictly today's slice; the "Active Securities"
+    tile uses a 30-calendar-day window so it answers "is this market
+    alive?" rather than just "what traded in the last session?", with
+    today's print kept in the sublabel for context.
 
     Parameters
     ----------
-    latest : pd.DataFrame
-        Latest per-ISIN snapshot with columns ``volume_today_chf``,
-        ``trades_today``, ``price_change_pct``, ``volume_spike``,
-        ``activity_spike``, and ``anomaly_score``.
+    today : pd.DataFrame
+        Rows from the most recent trading day across all ISINs (i.e.
+        ``df_hist[df_hist["Datum"] == df_hist["Datum"].max()]``). Only
+        securities that actually traded that day are present.
+    total_securities : int
+        Size of the full ISIN universe — used as the denominator for
+        the "Active Securities" tile so it reads ``N of total``.
+    active_30d_count : int
+        Unique ISINs that traded at least once in the last 30 calendar
+        days. Shown as the main number on the "Active Securities" tile.
     """
-    total_vol   = latest["volume_today_chf"].sum()
-    total_trades = int(latest["trades_today"].sum())
-    active       = int((latest["trades_today"] > 0).sum())
-    total_sec    = len(latest)
-    vol_spikes   = int(latest["volume_spike"].sum())
-    act_spikes   = int(latest["activity_spike"].sum())
-    critical     = int((latest["anomaly_score"] >= 3).sum())
-    alert_low    = int((latest["anomaly_score"].isin([1, 2])).sum())
-    df_chg       = latest[latest["price_change_pct"] != 0]
+    total_vol    = today["volume_today_chf"].sum()
+    total_trades = int(today["trades_today"].sum())
+    active_today = int((today["trades_today"] > 0).sum())
+    total_sec    = total_securities
+    vol_spikes   = int(today["volume_spike"].sum())
+    act_spikes   = int(today["activity_spike"].sum())
+    critical     = int((today["anomaly_score"] >= 3).sum())
+    alert_low    = int((today["anomaly_score"].isin([1, 2])).sum())
+    df_chg       = today[today["price_change_pct"] != 0]
     avg_chg      = df_chg["price_change_pct"].mean() if not df_chg.empty else 0.0
-    advancing    = int((latest["price_change_pct"] > 0).sum())
-    declining    = int((latest["price_change_pct"] < 0).sum())
+    advancing    = int((today["price_change_pct"] > 0).sum())
+    declining    = int((today["price_change_pct"] < 0).sum())
 
     c = st.columns(5)
     data = [
         ("Market Volume", fmt_chf(total_vol),
          f"{total_trades:,} trades today"),
-        ("Active Securities", str(active),
-         f"of {total_sec} listed"),
+        ("Active Securities", str(active_30d_count),
+         f"of {total_sec} listed · {active_today} today"),
         ("Avg Price Change",
          f"{'+' if avg_chg >= 0 else ''}{avg_chg:.2f}%",
          f'<span class="c-pos">▲{advancing}</span>&nbsp;adv · '
@@ -158,7 +165,7 @@ def render_market_table(df: pd.DataFrame, n: int = 50) -> None:
         "<th>Volume (Units)</th>"
         "<th>Trades</th>"
         "<th>Δ Price</th>"
-        "<th>Volatility σ</th>"
+        "<th>Volatility <span style='text-transform:none;'>σ</span></th>"
         "<th>Status</th>"
         "</tr></thead>"
         f"<tbody>{rows}</tbody>"
@@ -266,10 +273,10 @@ def render_native_dataframe(df: pd.DataFrame, n: int = 50) -> None:
         ("price_first",         "First",            "",     "",      _f_chf),
         ("price_min",           "Min",              "",     "",      _f_chf),
         ("price_max",           "Max",              "",     "",      _f_chf),
-        ("volatility_daily",    "σ Daily",          "",     "",      _f_d4),
-        ("volatility_30d_median", "σ 30d",          "",     "",      _f_d4),
-        ("amihud_daily",        "λ Daily",          "",     "",      _f_d6),
-        ("amihud_30d_median",   "λ 30d",            "",     "",      _f_d6),
+        ("volatility_daily",    "<span style='text-transform:none;'>σ</span> Daily",      "",     "",      _f_d4),
+        ("volatility_30d_median", "<span style='text-transform:none;'>σ</span> 30d",      "",     "",      _f_d4),
+        ("amihud_daily",        "<span style='text-transform:none;'>λ</span> Daily",      "",     "",      _f_d6),
+        ("amihud_30d_median",   "<span style='text-transform:none;'>λ</span> 30d",        "",     "",      _f_d6),
         ("spread_log_hl",       "Spread",           "",     "",      _f_d4),
         ("log_returns",         "Log Ret",          "",     "",      _f_d4),
         ("off_book_pct",        "Off-Book",         "",     "",      _f_pct_plain),

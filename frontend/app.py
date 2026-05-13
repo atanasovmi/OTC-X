@@ -28,7 +28,7 @@ from frontend.operations.charts import (
     chart_market_activity,
     chart_sector_treemap,
     chart_top_movers,
-    chart_volume_by_sector,
+    chart_trades_by_sector,
     chart_scatter_volume_price,
     chart_amihud_by_sector,
     chart_volatility_trend,
@@ -77,7 +77,56 @@ def main() -> None:
         st.error("No data available. Run `python -m backend.pipeline` to populate the data pipeline.")
         st.stop()
 
-    latest_date = df_hist["Datum"].max().strftime("%d.%m.%Y")
+    latest_market_date = df_hist["Datum"].max()
+    # Strict "today" slice: rows from the most recent trading day across
+    # all ISINs. Used by KPI cards.
+    today = df_hist[df_hist["Datum"] == latest_market_date]
+
+    # ── YTD slice (Jan 1 of current year → today) ─────────────────────
+    # Powers Top Movers, Sector Treemap, and Trades by Sector.
+    # `ytd_panel` is the full multi-row panel (one row per security per
+    # trading day in YTD); `ytd_per_isin` is one row per ISIN with
+    # `price_change_pct` overridden by YTD return and `volume_today_chf`
+    # overridden by YTD CHF sum — chart-compatible drop-in for `latest`.
+    year_start = pd.Timestamp(latest_market_date.year, 1, 1)
+    ytd_panel = df_hist[df_hist["Datum"] >= year_start]
+
+    if not ytd_panel.empty:
+        ytd_sorted = ytd_panel.sort_values("Datum")
+        first_per_isin = ytd_sorted.groupby("Isin", as_index=False).first()
+        last_per_isin = ytd_sorted.groupby("Isin", as_index=False).last()
+        base_price = first_per_isin.set_index("Isin")["price_first"]
+        final_price = last_per_isin.set_index("Isin")["price_last"]
+        ytd_perf = pd.Series(0.0, index=base_price.index)
+        valid = base_price > 0
+        ytd_perf[valid] = (final_price[valid] / base_price[valid] - 1) * 100
+        per_isin_ytd_vol = ytd_panel.groupby("Isin")["volume_today_chf"].sum()
+        ytd_per_isin = last_per_isin.copy()
+        ytd_per_isin["price_change_pct"] = ytd_per_isin["Isin"].map(ytd_perf)
+        ytd_per_isin["volume_today_chf"] = ytd_per_isin["Isin"].map(per_isin_ytd_vol)
+    else:
+        ytd_per_isin = pd.DataFrame(columns=df_hist.columns)
+
+    # ── 30-trading-day rolling window for Tab 4 anomaly views ─────────
+    # `risk_view` = latest flagged row per ISIN within the last 30
+    # trading days. Captures open active risk without dragging in
+    # decade-old stale flags.
+    unique_dates = sorted(df_hist["Datum"].unique())
+    window_dates = unique_dates[-30:] if len(unique_dates) >= 30 else unique_dates
+    min_window_date = window_dates[0] if window_dates else latest_market_date
+    window_30d = df_hist[df_hist["Datum"] >= min_window_date]
+    flagged_in_window = window_30d[window_30d["anomaly_score"] >= 1]
+    if not flagged_in_window.empty:
+        risk_view = (
+            flagged_in_window
+            .sort_values("Datum")
+            .groupby("Isin", as_index=False)
+            .last()
+        )
+    else:
+        risk_view = pd.DataFrame(columns=df_hist.columns)
+
+    latest_date = latest_market_date.strftime("%d.%m.%Y")
     render_header(latest_date)
 
     tab1, tab2, tab3, tab4 = st.tabs([
@@ -94,7 +143,14 @@ def main() -> None:
     # TAB 1 — Overview
     # ══════════════════════════════════════════
     with tab1:
-        render_kpis(latest)
+        # "Active Securities" KPI uses a 30-calendar-day breadth measure
+        # so a thin OTC day doesn't make the market look dead.
+        active_30d_count = (
+            df_hist[df_hist["Datum"] >= latest_market_date - pd.Timedelta(days=30)]
+            ["Isin"].nunique()
+        )
+        render_kpis(today, total_securities=len(latest),
+                    active_30d_count=active_30d_count)
         st.markdown("<br>", unsafe_allow_html=True)
 
         col_act, col_tree = st.columns([3, 2])
@@ -103,20 +159,20 @@ def main() -> None:
                         unsafe_allow_html=True)
             st.plotly_chart(chart_market_activity(df_hist), width="stretch", theme=None)
         with col_tree:
-            st.markdown('<div class="sec-hdr">Sector Allocation by Volume</div>',
+            st.markdown('<div class="sec-hdr">Sector Allocation — YTD</div>',
                         unsafe_allow_html=True)
-            st.plotly_chart(chart_sector_treemap(latest), width="stretch", theme=None)
+            st.plotly_chart(chart_sector_treemap(ytd_per_isin), width="stretch", theme=None)
 
         st.markdown("<br>", unsafe_allow_html=True)
         col_mov, col_vol = st.columns(2)
         with col_mov:
-            st.markdown('<div class="sec-hdr">Top Movers — Price Change %</div>',
+            st.markdown('<div class="sec-hdr">Top Movers — Performance YTD</div>',
                         unsafe_allow_html=True)
-            st.plotly_chart(chart_top_movers(latest), width="stretch", theme=None)
+            st.plotly_chart(chart_top_movers(ytd_per_isin), width="stretch", theme=None)
         with col_vol:
-            st.markdown('<div class="sec-hdr">Volume by Sector (CHF)</div>',
+            st.markdown('<div class="sec-hdr">Trades by Sector — YTD</div>',
                         unsafe_allow_html=True)
-            st.plotly_chart(chart_volume_by_sector(latest), width="stretch", theme=None)
+            st.plotly_chart(chart_trades_by_sector(ytd_panel), width="stretch", theme=None)
 
     # ══════════════════════════════════════════
     # TAB 2 — Market Data (Raw Data Explorer)
@@ -128,12 +184,71 @@ def main() -> None:
         )
         st.markdown(
             '<div style="font-size:0.78rem;color:#1A1A2E;margin-bottom:0.8rem;">'
-            'Browse, filter and download raw data straight from the metrics engine for offline analysis. '
+            'Browse, filter and download the full historical metrics panel — '
+            '<strong>one row per security per trading day</strong>. '
+            'Use the date range filter to scope your export. '
             'Click any <strong style="color:#B22222;">ISIN</strong> to view the security on '
             '<a href="https://www.otc-x.ch" target="_blank" style="color:#B22222;">otc-x.ch</a>.'
             '</div>',
             unsafe_allow_html=True,
         )
+
+        # ── Date-range filter ──
+        panel_max = df_hist["Datum"].max()
+        panel_min = df_hist["Datum"].min()
+        date_presets = ["Last 30 days", "Last 90 days", "Last 12 months",
+                        "Last 5 years", "All time", "Custom..."]
+        fd1, fd2 = st.columns([1, 2])
+        with fd1:
+            date_preset = st.selectbox(
+                "Date range", date_presets, index=2,  # default: Last 12 months
+                label_visibility="collapsed",
+                key="market_data_date_preset",
+            )
+
+        if date_preset == "Last 30 days":
+            date_from = panel_max - pd.Timedelta(days=30)
+            date_to = panel_max
+        elif date_preset == "Last 90 days":
+            date_from = panel_max - pd.Timedelta(days=90)
+            date_to = panel_max
+        elif date_preset == "Last 12 months":
+            date_from = panel_max - pd.DateOffset(months=12)
+            date_to = panel_max
+        elif date_preset == "Last 5 years":
+            date_from = panel_max - pd.DateOffset(years=5)
+            date_to = panel_max
+        elif date_preset == "All time":
+            date_from = panel_min
+            date_to = panel_max
+        else:  # Custom...
+            with fd2:
+                default_from = (panel_max - pd.DateOffset(months=12)).to_pydatetime().date()
+                default_to = panel_max.to_pydatetime().date()
+                custom_range = st.date_input(
+                    "Custom range",
+                    value=(default_from, default_to),
+                    min_value=panel_min.to_pydatetime().date(),
+                    max_value=panel_max.to_pydatetime().date(),
+                    label_visibility="collapsed",
+                    key="market_data_custom_range",
+                )
+                if isinstance(custom_range, tuple) and len(custom_range) == 2:
+                    date_from = pd.Timestamp(custom_range[0])
+                    date_to = pd.Timestamp(custom_range[1])
+                else:
+                    # User mid-selection — fall back to default
+                    date_from = pd.Timestamp(default_from)
+                    date_to = pd.Timestamp(default_to)
+
+        if date_preset != "Custom...":
+            with fd2:
+                st.markdown(
+                    f'<div style="font-size:0.72rem;color:#1A1A2E;padding-top:0.6rem;">'
+                    f'Range: <strong>{date_from.date()}</strong> → <strong>{date_to.date()}</strong>'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
 
         # ── Filter controls ──
         fc1, fc2, fc3, fc4 = st.columns(market_filter_cols)
@@ -147,19 +262,22 @@ def main() -> None:
         with fc3:
             sort_by = st.selectbox(
                 "Sort by",
-                ["Volume (CHF)", "Trades", "Price Change", "Anomaly Score",
-                         "Volatility", "Amihud λ", "Name"],
+                ["Date", "Volume (CHF)", "Trades", "Price Change", "Anomaly Score",
+                 "Volatility", "Amihud λ", "Name"],
                 label_visibility="collapsed",
             )
         with fc4:
             rows_to_show = st.selectbox(
                 "Rows",
-                [25, 50, 100, 200, "All"],
+                [25, 50, 100, 200, "Max 2,000"],
                 index=1,
                 label_visibility="collapsed",
             )
 
-        df_filt = latest.copy()
+        # Source is the full historical panel, scoped by date range.
+        df_filt = df_hist[
+            (df_hist["Datum"] >= date_from) & (df_hist["Datum"] <= date_to)
+        ].copy()
         if search:
             q = search.lower()
             df_filt = df_filt[
@@ -171,6 +289,7 @@ def main() -> None:
             df_filt = df_filt[df_filt["Sektor"] == sel_sector]
 
         sort_map = {
+            "Date": "Datum",
             "Volume (CHF)": "volume_today_chf",
             "Trades": "trades_today",
             "Price Change": "price_change_pct",
@@ -181,23 +300,48 @@ def main() -> None:
         }
         sort_col = sort_map[sort_by]
         sort_asc = sort_by == "Name"
-        df_filt = df_filt.sort_values(sort_col, ascending=sort_asc)
+        df_filt = df_filt.sort_values(sort_col, ascending=sort_asc, na_position="last")
 
-        n_display = len(df_filt) if rows_to_show == "All" else min(int(rows_to_show), len(df_filt))
+        # Render cap: hard limit on what the HTML table displays. The CSV
+        # download is unaffected — it always exports the full filtered set.
+        RENDER_CAP = 2000
+        if rows_to_show == "Max 2,000":
+            n_display = min(RENDER_CAP, len(df_filt))
+        else:
+            n_display = min(int(rows_to_show), len(df_filt))
 
         # ── Summary bar ──
-        sum_vol = df_filt["volume_today_chf"].sum()
-        sum_trades = int(df_filt["trades_today"].sum())
-        avg_vola = df_filt["volatility_daily"].mean() if not df_filt.empty else 0
-        avg_amihud = df_filt["amihud_daily"].mean() if not df_filt.empty else 0
+        n_securities = df_filt["Isin"].nunique() if not df_filt.empty else 0
+        n_observations = len(df_filt)
+        sum_vol = df_filt["volume_today_chf"].sum() if not df_filt.empty else 0
+        sum_trades = int(df_filt["trades_today"].sum()) if not df_filt.empty else 0
+        # σ and λ tiles report the *median of per-ISIN means* — robust to
+        # the long right tail of high-priced securities. A simple panel
+        # mean inflates wildly because a CHF 5000 stock with a CHF 50
+        # intraday range contributes σ=50 to every row it appears on,
+        # drowning out the typical sub-CHF-2 movement seen on most
+        # securities.
+        if not df_filt.empty:
+            _per_isin_vol = df_filt.groupby("Isin")["volatility_daily"].mean()
+            _per_isin_amh = df_filt.groupby("Isin")["amihud_daily"].mean()
+            med_vola   = float(_per_isin_vol.median()) if not _per_isin_vol.empty else 0.0
+            med_amihud = float(_per_isin_amh.median()) if not _per_isin_amh.empty else 0.0
+        else:
+            med_vola = med_amihud = 0.0
+
+        # Greek letters need a text-transform:none span override because
+        # the tile label applies CSS uppercase, which would convert
+        # σ → Σ (sum sign) and λ → Λ (triangle) — wrong glyphs.
+        _sigma = '<span style="text-transform:none;">σ</span>'
+        _lam   = '<span style="text-transform:none;">λ</span>'
 
         sm1, sm2, sm3, sm4, sm5 = st.columns(5)
         summary_items = [
-            ("Securities", str(len(df_filt))),
+            ("Securities", str(n_securities)),
             ("Total Volume", fmt_chf(sum_vol)),
             ("Total Trades", f"{sum_trades:,}"),
-            ("Avg σ", f"{avg_vola:.4f}"),
-            ("Avg λ", f"{avg_amihud:.6f}"),
+            (f"Median {_sigma}", f"{med_vola:.4f}"),
+            (f"Median {_lam}", f"{med_amihud:.6f}"),
         ]
         for col, (lbl, val) in zip([sm1, sm2, sm3, sm4, sm5], summary_items):
             with col:
@@ -224,20 +368,36 @@ def main() -> None:
         if "Datum" in csv_data.columns:
             csv_data["Datum"] = csv_data["Datum"].dt.strftime("%Y-%m-%d")
 
+        csv_filename = (
+            f"otcx_market_data_{date_from.strftime('%Y%m%d')}_"
+            f"{date_to.strftime('%Y%m%d')}.csv"
+        )
+
         dl1, dl2 = st.columns([1, 4])
         with dl1:
             st.download_button(
                 label="⬇ Download CSV",
                 data=csv_data.to_csv(index=False).encode("utf-8"),
-                file_name="otcx_market_data.csv",
+                file_name=csv_filename,
                 mime="text/csv",
                 width="stretch",
             )
         with dl2:
+            render_note = (
+                ""
+                if n_observations <= n_display
+                else (
+                    f' · <em>Table capped at {n_display:,} rows for performance; '
+                    f'CSV contains the full filtered set ({n_observations:,} rows).</em>'
+                )
+            )
             st.markdown(
                 f'<div style="font-size:0.72rem;color:#1A1A2E;padding-top:0.6rem;">'
-                f'Showing <strong>{n_display}</strong> of <strong>{len(df_filt)}</strong> '
-                f'securities · {len(csv_available)} columns available for export'
+                f'Showing <strong>{n_display:,}</strong> of '
+                f'<strong>{n_observations:,}</strong> observations across '
+                f'<strong>{n_securities}</strong> securities · '
+                f'{len(csv_available)} columns available for export'
+                f'{render_note}'
                 f'</div>',
                 unsafe_allow_html=True,
             )
@@ -257,7 +417,8 @@ def main() -> None:
             unsafe_allow_html=True,
         )
 
-        active_isins = df_filt[df_filt["trades_today"] > 0]["Isin"].tolist()
+        # df_filt now has many rows per ISIN — dedupe for the dropdown.
+        active_isins = sorted(df_filt["Isin"].unique().tolist())
         if active_isins:
             def _isin_label(x: str) -> str:
                 row = latest[latest["Isin"] == x]
@@ -286,6 +447,9 @@ def main() -> None:
                     unsafe_allow_html=True,
                 )
                 mc = st.columns(5)
+                # Greek letters wrapped to escape the kpi-label CSS uppercase
+                _sigma_kpi = '<span style="text-transform:none;">σ</span>'
+                _lam_kpi   = '<span style="text-transform:none;">λ</span>'
                 metric_items = [
                     ("Last Price", fmt_chf(r.get("price_last", 0)),
                      f"Range: {fmt_chf(r.get('price_min',0))} – {fmt_chf(r.get('price_max',0))}"),
@@ -293,9 +457,9 @@ def main() -> None:
                      f"{fmt_num(r.get('volume_today_units',0))} units"),
                     ("Trades", str(int(r.get("trades_today", 0))),
                      f"30d median: {r.get('trades_30d_median',0):.0f}"),
-                    ("Volatility σ", f"{r.get('volatility_daily',0):.4f}",
+                    (f"Volatility {_sigma_kpi}", f"{r.get('volatility_daily',0):.4f}",
                      f"30d median: {r.get('volatility_30d_median',0):.4f}"),
-                    ("Amihud λ", f"{r.get('amihud_daily',0):.6f}",
+                    (f"Amihud {_lam_kpi}", f"{r.get('amihud_daily',0):.6f}",
                      f"30d median: {r.get('amihud_30d_median',0):.6f}"),
                 ]
                 for col, (lbl, val, sub) in zip(mc, metric_items):
@@ -318,6 +482,8 @@ def main() -> None:
                     '</div>',
                     unsafe_allow_html=True,
                 )
+        else:
+            st.info("No securities match the current filter. Widen the date range or clear search/sector filters.")
 
     # ══════════════════════════════════════════
     # TAB 3 — Analytics
@@ -550,15 +716,22 @@ def main() -> None:
     # TAB 4 — Anomaly Monitor
     # ══════════════════════════════════════════
     with tab4:
+        # 30-day rolling window: flagged securities are taken from
+        # `risk_view`; Clean count is everything in the universe that did
+        # not generate a flag in that window.
         total = len(latest)
-        clean = int((latest["anomaly_score"] == 0).sum())
-        alert_n = int((latest["anomaly_score"].isin([1, 2])).sum())
-        critical_n = int(latest["anomaly_score"].isin([3, 4]).sum())
-        severe_n = int(latest["anomaly_score"].isin([5, 6]).sum())
-        extreme_n = int((latest["anomaly_score"] >= 7).sum())
+        flagged_count = len(risk_view)
+        clean = total - flagged_count
+        if not risk_view.empty:
+            alert_n = int(risk_view["anomaly_score"].isin([1, 2]).sum())
+            critical_n = int(risk_view["anomaly_score"].isin([3, 4]).sum())
+            severe_n = int(risk_view["anomaly_score"].isin([5, 6]).sum())
+            extreme_n = int((risk_view["anomaly_score"] >= 7).sum())
+        else:
+            alert_n = critical_n = severe_n = extreme_n = 0
 
         # ── Clickable Risk Summary cards ──
-        st.markdown('<div class="sec-hdr">Risk Summary — Click to Filter</div>',
+        st.markdown('<div class="sec-hdr">Risk Summary — Last 30 Trading Days · Click to Filter</div>',
                     unsafe_allow_html=True)
 
         risk_tiers = [
@@ -607,19 +780,30 @@ def main() -> None:
             '</div>',
             unsafe_allow_html=True,
         )
-        st.plotly_chart(chart_anomaly_severity_treemap(latest), width="stretch", theme=None)
+        st.plotly_chart(chart_anomaly_severity_treemap(risk_view), width="stretch", theme=None)
 
         st.markdown("<br>", unsafe_allow_html=True)
 
         # ── Filtered alerts table ──
         selected_tier = st.session_state.get("anomaly_tier", None)
-        if selected_tier and selected_tier in SEVERITY_TIERS:
+        if selected_tier == "Clean":
+            # Clean = ISINs not flagged in the 30d window. Show their
+            # latest-known state from `latest` (mixed date OK — these
+            # rows are not the subject of alerting).
+            flagged_isins = set(risk_view["Isin"]) if not risk_view.empty else set()
+            alerts = latest[~latest["Isin"].isin(flagged_isins)].copy()
+            hdr_text = f"Clean Securities — {len(alerts)} Securities (no flags in last 30 days)"
+        elif selected_tier and selected_tier in SEVERITY_TIERS:
             tier_scores = SEVERITY_TIERS[selected_tier]
-            alerts = latest[latest["anomaly_score"].isin(tier_scores)].copy()
+            alerts = (
+                risk_view[risk_view["anomaly_score"].isin(tier_scores)].copy()
+                if not risk_view.empty
+                else pd.DataFrame()
+            )
             hdr_text = f"{selected_tier} Alerts — {len(alerts)} Securities"
         else:
-            alerts = latest[latest["anomaly_score"] >= 1].copy()
-            hdr_text = f"All Active Alerts — {len(alerts)} Securities"
+            alerts = risk_view.copy() if not risk_view.empty else pd.DataFrame()
+            hdr_text = f"Active Alerts (Last 30 Days) — {len(alerts)} Securities"
 
         st.markdown(f'<div class="sec-hdr">{hdr_text}</div>', unsafe_allow_html=True)
 
@@ -682,7 +866,7 @@ def main() -> None:
                 "<th>Volume (CHF)</th>"
                 "<th>Trades</th>"
                 "<th>Δ Price</th>"
-                "<th>Volatility σ</th>"
+                "<th>Volatility <span style='text-transform:none;'>σ</span></th>"
                 "<th>Severity</th>"
                 "<th>Triggers</th>"
                 "</tr></thead>"

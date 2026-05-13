@@ -234,7 +234,7 @@ class TestEndToEndDataToCharts:
         import plotly.graph_objects as go
         from frontend.operations.charts import (
             chart_market_activity, chart_sector_treemap, chart_top_movers,
-            chart_volume_by_sector, chart_scatter_volume_price,
+            chart_trades_by_sector, chart_scatter_volume_price,
             chart_amihud_by_sector, chart_volatility_trend,
             chart_correlation_heatmap, chart_anomaly_severity_treemap,
             chart_security_history, chart_3d_explorer,
@@ -246,7 +246,7 @@ class TestEndToEndDataToCharts:
             ("market_activity", chart_market_activity(df_hist)),
             ("sector_treemap", chart_sector_treemap(latest)),
             ("top_movers", chart_top_movers(latest)),
-            ("volume_by_sector", chart_volume_by_sector(latest)),
+            ("trades_by_sector", chart_trades_by_sector(latest)),
             ("scatter_volume_price", chart_scatter_volume_price(latest)),
             ("amihud_by_sector", chart_amihud_by_sector(latest)),
             ("volatility_trend", chart_volatility_trend(df_hist)),
