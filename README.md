@@ -126,7 +126,7 @@ The **only live liquidity radar** for Swiss OTC equities: automated anomaly scor
 </tr>
 <tr>
 <td><b>Core</b></td>
-<td><a href="https://python.org"><img src="https://img.shields.io/badge/-Python_3.10+-3776AB?style=flat-square&logo=python&logoColor=white" height="22" align="center"/></a></td>
+<td><a href="https://python.org"><img src="https://img.shields.io/badge/-Python_3.12+-3776AB?style=flat-square&logo=python&logoColor=white" height="22" align="center"/></a></td>
 <td>Runtime environment</td>
 </tr>
 <tr>
@@ -440,11 +440,14 @@ OTC-X/
 
 ### For BEKB Authorized Personnel
 
-**Prerequisites:** Python 3.10+ · pip
+**Prerequisites:** Python 3.12+ · pip
 
 ```bash
-# 1 — Install dependencies
+# 1 — Install runtime dependencies (dashboard + pipeline)
 pip install -r requirements.txt
+
+# 1a — Install dev dependencies if you intend to run the test suite
+pip install -r requirements-dev.txt
 
 # 2 — Run the 4-stage data pipeline
 python -m backend.pipeline
@@ -454,6 +457,12 @@ streamlit run frontend/app.py
 
 # 4 — Run the test suite
 python -m pytest tests/ -v
+```
+
+Alternatively, pull the published container image:
+
+```bash
+docker run -p 8501:8501 ghcr.io/atanasovmi/otc-x:latest
 ```
 
 ### For Everyone Else

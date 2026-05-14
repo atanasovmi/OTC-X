@@ -1,0 +1,10 @@
+# Development and test dependencies.
+# Install with:  pip install -r requirements-dev.txt
+#
+# This also pulls in everything from requirements.txt (runtime deps),
+# so a single command sets up a full local development environment.
+
+-r requirements.txt
+
+# Tests
+pytest-bdd==8.1.0

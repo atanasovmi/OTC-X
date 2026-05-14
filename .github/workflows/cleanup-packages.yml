@@ -1,0 +1,30 @@
+name: Clean up container registry
+
+# Weekly housekeeping for the GHCR package. Deletes untagged image
+# versions — typically intermediate buildx layers and old multi-arch
+# manifests whose tags have been reassigned. Tagged versions
+# (e.g. v2026.05.14, latest) are kept untouched.
+#
+# Runs every Sunday at 04:00 UTC. Can also be triggered manually
+# from the Actions tab via `workflow_dispatch`.
+
+on:
+  schedule:
+    - cron: '0 4 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  delete-untagged:
+    name: Delete untagged container versions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remove untagged versions of ghcr.io/${{ github.repository }}
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: otc-x
+          package-type: container
+          delete-only-untagged-versions: true

@@ -25,6 +25,9 @@ venv/
 env/
 ENV/
 
+# Dev requirements file — runtime image only needs requirements.txt
+requirements-dev.txt
+
 # IDE / editor / OS
 .idea/
 .vscode/
@@ -66,6 +69,30 @@ backend/data/trades/
 README.md
 LICENSE.md
 SECURITY.md
+
+# Jupyter / notebooks
+*.ipynb
+.ipynb_checkpoints/
+
+# Secrets — anything that smells like a credential must never enter the build context
+.env
+.env.*
+.envrc
+*.pem
+*.key
+*.crt
+*.csr
+*.pfx
+*.p12
+id_rsa
+id_rsa.*
+id_ed25519
+id_ed25519.*
+id_ecdsa
+id_ecdsa.*
+*.token
+*credentials*
+*secret*
 
 # Misc
 *.png

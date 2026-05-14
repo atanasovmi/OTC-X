@@ -9,22 +9,41 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Optional image tag (e.g. v2026.05.14). Leave blank to publish latest only.'
+        description: 'Tag to checkout and publish (e.g. v2026.05.14). Leave blank to build from the current default branch.'
         required: false
         default: ''
+
+# Serialise concurrent publishes so two near-simultaneous releases cannot
+# race on the `latest` tag. Older runs queue rather than getting cancelled
+# (cancel-in-progress: false) to preserve every published version.
+concurrency:
+  group: docker-publish-${{ github.ref }}-${{ github.event.inputs.tag }}
+  cancel-in-progress: false
 
 permissions:
   contents: read
   packages: write
+  id-token: write     # required for cosign keyless signing via Sigstore OIDC
+  attestations: write # required for build-push-action provenance attestations
 
 jobs:
   build-and-push:
-    name: Build and publish to GHCR
+    name: Build, sign and publish to GHCR
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # When triggered manually with a tag input, check out exactly that
+          # tag so the image content matches the published version label.
+          # Without this override, workflow_dispatch would build whatever is
+          # currently on the default branch and publish it under the input
+          # tag — a tag-integrity gap a banking-grade reviewer would flag.
+          ref: ${{ github.event.inputs.tag != '' && github.event.inputs.tag || github.ref }}
+
+      - name: Set up QEMU for cross-architecture builds
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -35,6 +54,9 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
 
       - name: Derive image tags and labels
         id: meta
@@ -50,15 +72,33 @@ jobs:
             org.opencontainers.image.description=End-to-end intelligence for the Swiss OTC equity market
             org.opencontainers.image.url=https://otc-x-radar.streamlit.app
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.documentation=https://github.com/${{ github.repository }}#readme
+            org.opencontainers.image.vendor=Mihael Atanasov
             org.opencontainers.image.licenses=Proprietary
 
-      - name: Build and push Docker image
+      - name: Build and push Docker image (multi-arch, with SBOM and provenance)
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          platforms: linux/amd64
+          sbom: true
+          provenance: mode=max
+
+      - name: Sign image with cosign (keyless via Sigstore OIDC)
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+          TAGS: ${{ steps.meta.outputs.tags }}
+          COSIGN_EXPERIMENTAL: 'true'
+        run: |
+          # Sign each rendered tag's manifest digest; cosign uploads to
+          # the Sigstore transparency log automatically.
+          while IFS= read -r tag; do
+            [ -z "$tag" ] && continue
+            cosign sign --yes "${tag}@${DIGEST}"
+          done <<< "$TAGS"
