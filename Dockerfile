@@ -5,7 +5,7 @@
 # Run:    docker run -p 8501:8501 ghcr.io/atanasovmi/otc-x:dev
 #
 
-FROM python:3.10-slim AS runtime
+FROM python:3.12-slim AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
