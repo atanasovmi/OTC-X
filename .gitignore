@@ -5,7 +5,12 @@ __pycache__/
 
 # Local browser/Node tooling
 node_modules/
+package.json
+package-lock.json
 .playwright-mcp/
+
+# Local review/scratch directories
+full-project-review/
 
 # C extensions
 *.so
