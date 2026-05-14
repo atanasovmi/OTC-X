@@ -45,9 +45,12 @@ from frontend.operations.components import (
 )
 
 # Page Configuration
+# `page_icon` is intentionally omitted — emoji favicons read as
+# unprofessional in a banking context. Streamlit falls back to its
+# default neutral favicon, which is fine for now. A branded SVG/PNG
+# favicon could be added later via `page_icon="path/to/file.svg"`.
 st.set_page_config(
-    page_title="OTC-X Market Intelligence",
-    page_icon="📊",
+    page_title="OTC-X Market Intelligence — Swiss OTC Liquidity Radar",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
