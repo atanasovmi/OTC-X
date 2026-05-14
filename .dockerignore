@@ -1,0 +1,75 @@
+# Git / GitHub
+.git/
+.github/
+.gitignore
+.gitattributes
+
+# Python tooling
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# IDE / editor / OS
+.idea/
+.vscode/
+.claude/
+.DS_Store
+*.swp
+*.swo
+*.tmp
+*.bak
+*.orig
+
+# Local dev tooling
+node_modules/
+package.json
+package-lock.json
+.playwright-mcp/
+full-project-review/
+
+# Build / dist
+build/
+dist/
+*.egg
+*.spec
+
+# Logs
+*.log
+backend/logs/
+
+# Tests and docs — not needed at runtime
+tests/
+docs/
+
+# Raw per-ISIN trade CSVs (kept only for pipeline runs, ~250 files)
+# The consolidated parquet snapshots in backend/data/ are what the
+# dashboard actually reads, so the trades/ directory is excluded.
+backend/data/trades/
+
+# README / licence at root (not used by the running app)
+README.md
+LICENSE.md
+SECURITY.md
+
+# Misc
+*.png
+*.jpg
+*.pdf
+Dockerfile
+.dockerignore
