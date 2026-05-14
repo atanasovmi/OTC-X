@@ -230,28 +230,28 @@ KPI cards · 90-day market activity · Sector treemap · Top movers
 
 <!-- Replace the URL below with your own screenshot -->
 <div align="center">
-<img src="docs/screenshots/tab-overview.png" alt="Overview Tab" width="100%"/>
+<img src="docs/screenshots/tab1-overview.png" alt="Overview Tab" width="100%"/>
 </div>
 
 ### 🗂️ Market Data
 Full 26-column data explorer · Search & sort · CSV download · Security deep-dive
 
 <div align="center">
-<img src="docs/screenshots/tab-market-data.png" alt="Market Data Tab" width="100%"/>
+<img src="docs/screenshots/tab2-market-data.png" alt="Market Data Tab" width="100%"/>
 </div>
 
 ### 📊 Analytics
 Correlation matrix · Amihud boxplots · Rolling volatility · 3D market explorer
 
 <div align="center">
-<img src="docs/screenshots/tab-analytics.png" alt="Analytics Tab" width="100%"/>
+<img src="docs/screenshots/tab3-analytics.png" alt="Analytics Tab" width="100%"/>
 </div>
 
 ### 🚨 Anomaly Monitor
 Risk severity cards · Anomaly treemap · Active alerts table
 
 <div align="center">
-<img src="docs/screenshots/tab-anomaly.png" alt="Anomaly Monitor Tab" width="100%"/>
+<img src="docs/screenshots/tab4-anomaly-monitor.png" alt="Anomaly Monitor Tab" width="100%"/>
 </div>
 
 <details>

@@ -3,6 +3,10 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+# Local browser/Node tooling
+node_modules/
+.playwright-mcp/
+
 # C extensions
 *.so
 
