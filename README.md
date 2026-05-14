@@ -35,6 +35,10 @@
   <img src="https://img.shields.io/badge/▸_Visit_Live_Dashboard-B22222?style=for-the-badge&logoColor=white" alt="Visit Live Dashboard"/>
 </a>
 
+<br/><br/>
+
+<sub><b>6,032</b> LOC Python · <b>115+</b> tests · <b>26</b> metrics per security per day · <b>224</b> securities · <b>22 years</b> of history</sub>
+
 </div>
 
 <br/>
@@ -138,7 +142,7 @@ The **only live liquidity radar** for Swiss OTC equities: automated anomaly scor
 <tr>
 <td><b>Dashboard</b></td>
 <td><a href="https://streamlit.io"><img src="https://img.shields.io/badge/-Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white" height="22" align="center"/></a>  <a href="https://plotly.com/python/"><img src="https://img.shields.io/badge/-Plotly-3F4F75?style=flat-square&logo=plotly&logoColor=white" height="22" align="center"/></a><br/><br/><a href="https://developer.mozilla.org/en-US/docs/Web/CSS"><img src="https://img.shields.io/badge/-CSS3-1572B6?style=flat-square&logo=css3&logoColor=white" height="22" align="center"/></a>  <a href="https://developer.mozilla.org/en-US/docs/Web/HTML"><img src="https://img.shields.io/badge/-HTML5-E34F26?style=flat-square&logo=html5&logoColor=white" height="22" align="center"/></a></td>
-<td>Interactive web UI with 431-line Swiss-design CSS & 11 chart types</td>
+<td>Interactive web UI with 448-line Swiss-design CSS & 11 chart types</td>
 </tr>
 <tr>
 <td><b>Storage</b></td>
@@ -198,7 +202,7 @@ The **only live liquidity radar** for Swiss OTC equities: automated anomaly scor
 
 ### 🚨 Anomaly Detection
 - Weighted scoring: **Volume (3×)**, **Activity (2×)**, **Price Gap (2×)**
-- Six severity tiers: Clean → Watch → Alert → Critical → Severe → Extreme
+- Five severity tiers: Clean → Alert → Critical → Severe → Extreme
 - Context-aware: flags based on 30-day rolling medians
 - Clickable risk categories in the dashboard
 
@@ -260,9 +264,9 @@ Risk severity cards · Anomaly treemap · Active alerts table
 | # | Chart | Type | Description |
 |:---:|:---|:---:|:---|
 | 1 | Market Activity | Dual-axis | Volume bars + trade count line (90 days) |
-| 2 | Sector Treemap | Treemap | Allocation by volume, colored by avg price change |
-| 3 | Top Movers | Bar | Top gainers and losers by price change % |
-| 4 | Volume by Sector | Bar | Horizontal bars sorted by total CHF volume |
+| 2 | Sector Treemap | Treemap | YTD allocation by volume, colored by avg YTD return |
+| 3 | Top Movers | Bar | Top gainers and losers by YTD performance |
+| 4 | Trades by Sector | Bar | Horizontal bars sorted by YTD trade count |
 | 5 | Volume vs Price | Scatter | Log-scale volume × price change, per-sector colors |
 | 6 | Amihud by Sector | Box plot | Illiquidity distribution across sectors |
 | 7 | Volatility Trend | Line | Rolling volatility with SMA/EWMA smoothing |
@@ -367,11 +371,11 @@ OTC-X/
 │   │   ├── soft_crawl.py              # Stage 1: Valor extraction from API
 │   │   ├── fetcher.py                 # Stage 2: Trade data download + ISIN validation
 │   │   ├── build_master_parquet.py    # Stage 3: CSV → Parquet consolidation
-│   │   └── metrics.py                 # Stage 4: 26-metric liquidity engine (460 LOC)
+│   │   └── metrics.py                 # Stage 4: 26-metric liquidity engine (469 LOC)
 │   ├── 📂 data/                       # Pipeline output artifacts
 │   │   ├── securities.csv             #   → 243 securities metadata
 │   │   ├── master_trades.parquet      #   → Deduplicated trade master
-│   │   ├── daily_metrics.parquet      #   → 75K+ rows × 26 metrics
+│   │   ├── daily_metrics.parquet      #   → 76K+ rows × 26 metrics
 │   │   └── 📂 trades/                 #   → 243 individual trade CSVs
 │   └── 📂 logs/                       # Execution receipt logs
 │
@@ -383,7 +387,7 @@ OTC-X/
 │       ├── styles.py                  # Swiss-design CSS injection (448 LOC)
 │       ├── utils.py                   # CHF/pct/badge formatters
 │       ├── data_loader.py             # Cached Parquet → Pandas loader
-│       ├── charts.py                  # 11 Plotly chart builders (937 LOC)
+│       ├── charts.py                  # 11 Plotly chart builders (945 LOC)
 │       └── components.py              # Header, KPIs, table renderers
 │
 ├── 📂 tests/                          # ── Test Suite ─────────────────────
@@ -403,10 +407,10 @@ OTC-X/
 │   ├── OTC_X_Anforderungskatalog_Final.tex   # IREB requirements catalogue (LaTeX)
 │   ├── OTC_X_Anforderungskatalog_Final.pdf   # Compiled 53-page PDF
 │   └── 📂 screenshots/               # Dashboard tab captures
-│       ├── tab-overview.png
-│       ├── tab-market-data.png
-│       ├── tab-analytics.png
-│       └── tab-anomaly.png
+│       ├── tab1-overview.png
+│       ├── tab2-market-data.png
+│       ├── tab3-analytics.png
+│       └── tab4-anomaly-monitor.png
 │
 ├── 📂 .github/
 │   ├── 📂 workflows/
