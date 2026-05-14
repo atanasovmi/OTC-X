@@ -98,5 +98,5 @@ id_ecdsa.*
 *.png
 *.jpg
 *.pdf
-Dockerfile
-.dockerignore
+# NOTE: Dockerfile and .dockerignore themselves are intentionally not
+# excluded — modern buildkit needs them inside the build context.
