@@ -25,9 +25,18 @@ jobs:
           cache: 'pip'
 
       - name: Install dependencies
+        # The daily pipeline runs the test suite as a gate before the
+        # data refresh, so it needs the dev dependencies (pytest-bdd
+        # plus its transitive pytest). requirements-dev.txt itself
+        # pulls in requirements.txt via `-r`, so this single install
+        # covers both runtime and test dependencies.
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements-dev.txt ]; then
+            pip install -r requirements-dev.txt
+          elif [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
 
       - name: Run test suite
         run: pytest tests/ -x -q
