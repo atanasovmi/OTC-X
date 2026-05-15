@@ -5,7 +5,7 @@
 %  Technischer Implementierungsleitfaden  ·  Quantitative Methodik
 %  ─────────────────────────────────────────────────────────────────────────────
 %  Autor:   Mihael Atanasov
-%  Version: 2.0  ·  März 2026
+%  Version: 2.1  ·  Mai 2026
 %  Klassifikation: Proprietär & Vertraulich
 % ═══════════════════════════════════════════════════════════════════════════════
 
@@ -62,7 +62,7 @@
 \fancyhead[L]{\small\textcolor{SwissRed}{\textbf{OTC\,|\,X}}\;\textcolor{SlateGrey}{Liquidity Intelligence Radar}}
 \fancyhead[R]{\small\textcolor{SlateGrey}{\nouppercase{\leftmark}}}
 \fancyfoot[C]{\small\textcolor{DeepNavy}{\thepage}}
-\fancyfoot[R]{\tiny\textcolor{SlateGrey}{v2.0 · März 2026}}
+\fancyfoot[R]{\tiny\textcolor{SlateGrey}{v2.1 · Mai 2026}}
 
 % ── Mathematics ─────────────────────────────────────────────────────────────
 \usepackage{amsmath, amssymb, amsthm, mathtools}
@@ -291,8 +291,8 @@ nach IREB\;\textbullet\;Technischer Implementierungsleitfaden\;\textbullet\;Quan
   \textcolor{SwissRed}{\sffamily\textbf{Autor:}}           & \sffamily Mihael Atanasov\;\;{\footnotesize\textcolor{SlateGrey}{\href{mailto:mihaelatanasov22@gmail.com}{mihaelatanasov22@gmail.com}}} \\[5pt]
   \textcolor{SwissRed}{\sffamily\textbf{Auftraggeber:}}    & \sffamily BEKB Trading Desk, Berner Kantonalbank AG \\[5pt]
   \textcolor{SwissRed}{\sffamily\textbf{Domäne:}}          & \sffamily Schweizer OTC-Aktien\;\textemdash\;243 ausserbörsliche Titel \\[5pt]
-  \textcolor{SwissRed}{\sffamily\textbf{Version:}}         & \sffamily 2.0 \\[5pt]
-  \textcolor{SwissRed}{\sffamily\textbf{Datum:}}           & \sffamily März 2026 \\[5pt]
+  \textcolor{SwissRed}{\sffamily\textbf{Version:}}         & \sffamily 2.1 \\[5pt]
+  \textcolor{SwissRed}{\sffamily\textbf{Datum:}}           & \sffamily Mai 2026 \\[5pt]
   \textcolor{SwissRed}{\sffamily\textbf{Klassifikation:}}  & \sffamily \textcolor{SwissRed}{\textbf{Proprietär \& Vertraulich}} \\
 \end{tabular}
 
@@ -322,12 +322,12 @@ nach IREB\;\textbullet\;Technischer Implementierungsleitfaden\;\textbullet\;Quan
 \sffamily\small
 \begin{tabularx}{\textwidth}{>{\bfseries\sffamily\color{SwissRed}}l X}
   \toprule
-  Datenbasis        & 133\,000+ Trades über 20+ Jahre, 243 Wertpapiere, 10 Sektoren \\
+  Datenbasis        & 139\,474 Trades über 22+ Jahre, 243 Wertpapiere, 10 Sektoren \\
   Metriken-Engine   & 26 Kennzahlen pro ISIN pro Handelstag inkl.\ Amihud-Illiquiditätsratio \\
   Anomalie-Radar    & Gewichteter Composite Score (0--7) mit sechs Severity-Stufen \\
   Dashboard         & 4 Tabs, 11 interaktive Plotly-Charttypen, CSV-Export \\
   Automatisierung   & Vollautomatische Pipeline via GitHub Actions (05:00\,UTC, täglich) \\
-  Testabdeckung     & 58 automatisierte Tests (pytest + pytest-bdd) \\
+  Testabdeckung     & 115 automatisierte Tests (pytest + pytest-bdd) \\
   Live-Zugang       & \url{https://otc-x-radar.streamlit.app} (öffentlich, read-only) \\
   \bottomrule
 \end{tabularx}
@@ -346,6 +346,7 @@ nach IREB\;\textbullet\;Technischer Implementierungsleitfaden\;\textbullet\;Quan
   \midrule
   1.0 & März 2026 & M.\,Atanasov & Initiale Erstellung (zwei separate Dokumente) \\
   2.0 & März 2026 & M.\,Atanasov & Konsolidierung, IREB-Erweiterung, Use Cases, User Stories, Codebeispiele, TikZ-Architekturdiagramm \\
+  2.1 & Mai 2026  & M.\,Atanasov & Faktualisierung: Datenstände (Trades, Metrikzeilen, Handelshistorie), LOC-Zählung, Testabdeckung, CSS-Umfang, CI/CD-Listing auf aktuelle Pipeline-Konfiguration synchronisiert \\
   \bottomrule
 \end{tabularx}
 \end{table}
@@ -378,7 +379,7 @@ Der Markt zeichnet sich durch fünf zentrale Charakteristika aus, die konvention
   \item \textbf{Fragmentierung}\,---\,Handelsdaten verteilen sich auf einzelne Wertpapier-Endpunkte ohne einheitliche Gesamtsicht.
   \item \textbf{Illiquidität}\,---\,Zahlreiche Titel werden lediglich sporadisch gehandelt; gängige Börsenkennzahlen (VWAP, kontinuierliche Orderbücher) sind nicht anwendbar.
   \item \textbf{Opazität}\,---\,Weder öffentlich verfügbare Liquiditätsbewertungen noch automatisierte Anomalie-Warnsysteme existieren.
-  \item \textbf{Volumen}\,---\,243 Wertpapiere über einen Zeitraum von 20+ Jahren ergeben circa 133\,000 individuelle Transaktionsdatensätze.
+  \item \textbf{Volumen}\,---\,243 Wertpapiere über einen Zeitraum von 22+ Jahren ergeben circa 139\,000 individuelle Transaktionsdatensätze.
   \item \textbf{Heterogenität}\,---\,Die Sektoren reichen von Banken und Versicherungen über Industrie bis hin zu Immobilien, wobei jeder Sektor ein distinktives Liquiditätsprofil aufweist.
 \end{enumerate}
 
@@ -432,7 +433,7 @@ Die Projektziele wurden gemäss dem SMART-Rahmenwerk definiert -- \textbf{S}pezi
   Z-02 & Berechnung von 26 Liquiditätskennzahlen pro ISIN pro Handelstag, einschliesslich der Amihud-Illiquiditätsratio ($\lambda$) \\
   Z-03 & Automatisierte Anomalie"=Erkennung mit gewichtetem Scoring ($S \in \{0,2,3,4,5,7\}$) und sechs Severity-Stufen \\
   Z-04 & Bereitstellung eines interaktiven Dashboards mit 4~Tabs und 11~Charttypen, Ladezeit $\leq 5$\,Sekunden \\
-  Z-05 & Testabdeckung von $\geq 50$ automatisierten Tests (aktuell: 58~Tests, pytest + pytest-bdd) \\
+  Z-05 & Testabdeckung von $\geq 50$ automatisierten Tests (aktuell: 115~Tests, pytest + pytest-bdd) \\
   Z-06 & Vollständige Dokumentation nach IREB-Standard mit Traceability Matrix und Akzeptanzkriterien \\
   \bottomrule
 \end{tabularx}
@@ -453,14 +454,14 @@ Die Projektziele wurden gemäss dem SMART-Rahmenwerk definiert -- \textbf{S}pezi
   \midrule
   Wertpapier-Universum        & 243 ausserbörslich kotierte Schweizer Titel \\
   Sektorale Abdeckung         & 10 Wirtschaftssektoren (Banken, Versicherungen, Industrie, Immobilien, \ldots) \\
-  Historische Tiefe            & 20+ Jahre Handelshistorie \\
-  Transaktionsdatensätze       & 133\,000+ bereinigte Trades \\
-  Tägliche Metriken            & 26 Kennzahlen $\times$ ISIN $\times$ Handelstag = 75\,000+ Zeilen \\
+  Historische Tiefe            & 22+ Jahre Handelshistorie (2004--2026) \\
+  Transaktionsdatensätze       & 139\,474 bereinigte Trades \\
+  Tägliche Metriken            & 26 Kennzahlen $\times$ ISIN $\times$ Handelstag = 76\,357 Zeilen \\
   Anomalie-Score-Bereich       & $S \in [0,\,7]$, 6 Severity-Stufen (Clean $\to$ Extreme) \\
   Dashboard-Charttypen         & 11 interaktive Plotly-Visualisierungen \\
   Automatisierungszyklus       & Täglich 05:00\,UTC via GitHub Actions (zero-touch) \\
   Speichereffizienz            & Parquet mit Zstandard-Kompression ($\approx$67\,\% kleiner als CSV) \\
-  Produktionscode              & 5\,865 Zeilen Python (3\,109 Backend + 1\,970 Frontend + 786 Tests) \\
+  Produktionscode              & 6\,035 Zeilen Python (1\,571 Backend + 2\,868 Frontend + 1\,596 Tests) \\
   \bottomrule
 \end{tabularx}
 \end{table}
@@ -471,7 +472,7 @@ Die Konzeption und Implementierung des OTC-X"=Radars hat drei Einsichten von bes
 
 \begin{enumerate}[label=\textcolor{MetricBlue}{\textbf{(\roman*)}}]
   \item \textbf{Domänenwissen geht technischer Eleganz voraus.}\;Das Verständnis der Mikrostruktur von OTC-Märkten -- weshalb die Amihud-Ratio bedeutsam ist, wie Off-Book-Trades Volumensignale verzerren, warum Kalendertage für Rolling Baselines irreführend sind -- bildet das Fundament, auf dem jede architektonische Entscheidung ruht.
-  \item \textbf{Schlichtheit ist die höchste Form der Verfeinerung.}\;Das vierstufige Pipeline-Design entstammt nicht einem Streben nach Minimalismus, sondern der Erkenntnis, dass jede Transformationsstufe unabhängig testbar, wiederherstellbar und erklärbar sein muss. 58~Tests validieren nicht nur Korrektheit, sondern auch die \emph{Intention} hinter jeder Berechnung.
+  \item \textbf{Schlichtheit ist die höchste Form der Verfeinerung.}\;Das vierstufige Pipeline-Design entstammt nicht einem Streben nach Minimalismus, sondern der Erkenntnis, dass jede Transformationsstufe unabhängig testbar, wiederherstellbar und erklärbar sein muss. 115~Tests validieren nicht nur Korrektheit, sondern auch die \emph{Intention} hinter jeder Berechnung.
   \item \textbf{Visualisierung ist keine Dekoration, sondern Argumentation.}\;Die elf Charttypen im Dashboard sind nicht ornamental. Jeder beantwortet eine spezifische analytische Fragestellung -- vom 3D-Explorer, der verborgene Cluster offenbart, bis zur Anomalie-Treemap, die numerische Scores in räumliche Intuition überführt.
 \end{enumerate}
 
@@ -551,7 +552,7 @@ Das Requirements Engineering für \term{OTC-X} folgt dem \textbf{IREB CPRE Found
   26-Metriken-Engine mit Anomalie-Scoring                     & Prädiktive Modelle (ARIMA, GARCH) \\
   4-Tab-Dashboard mit 11 Charttypen                           & Automatisierter Handel / Order Execution \\
   CI/CD-Pipeline via GitHub Actions                           & Multi-Mandanten-Fähigkeit \\
-  58 automatisierte Tests                                      & Integration mit Bloomberg / Reuters \\
+  115 automatisierte Tests                                     & Integration mit Bloomberg / Reuters \\
   CSV-Export für Compliance                                    & Native Mobile-Applikation \\
   \bottomrule
 \end{tabularx}
@@ -746,7 +747,7 @@ Sämtliche Daten \textbf{müssen} bis zur formellen Übergabe in der Hoheit des 
 
 \begin{reqbox}[NFA-040 · Testabdeckung]
 \textbf{Priorität:}\;Muss \\[4pt]
-Die Testsuite \textbf{muss} $\geq 50$ automatisierte Tests umfassen (aktuell: 58~Tests, pytest + pytest-bdd). Testabdeckung erstreckt sich über Pfadauflösung, Backend-Operationen, Frontend-Utilities und Chart-Rendering. \\[4pt]
+Die Testsuite \textbf{muss} $\geq 50$ automatisierte Tests umfassen (aktuell: 115~Tests, pytest + pytest-bdd). Testabdeckung erstreckt sich über Pfadauflösung, Backend-Operationen, Frontend-Utilities und Chart-Rendering. \\[4pt]
 \textbf{Trace:}\;\code{tests/test\_backend.py}, \code{tests/test\_frontend.py}, \code{tests/test\_paths.py}
 \end{reqbox}
 
@@ -842,7 +843,7 @@ Das Dashboard \textbf{muss} via Streamlit Community Cloud deploybar sein. Die Ba
   NFA-010 & Muss   & \code{pipeline.py}                & Receipt-Log-Zeitanalyse \\
   NFA-020 & Muss   & \code{pipeline.py}                & Fehlerinjektionstests \\
   NFA-030 & Muss   & Rechtsdokumentation               & Proprietary Notice (README) \\
-  NFA-040 & Muss   & \code{tests/}                     & pytest-Ausführung ($\geq 58$ bestanden) \\
+  NFA-040 & Muss   & \code{tests/}                     & pytest-Ausführung ($\geq 115$ bestanden) \\
   NFA-050 & Muss   & \code{build\_master\_parquet.py}   & Parquet-Schema-Validierung \\
   \midrule
   C-01    & ---    & Rechtsdokumentation               & Proprietary Notice \\
@@ -1032,7 +1033,7 @@ Die Architektur von OTC-X folgt dem Prinzip einer \textbf{vierstufigen \gls{etl}
   Dashboard        & Streamlit + Plotly   & Rapid Prototyping; 11 interaktive Charttypen; CSS-Injektion für Swiss-Design \\
   Persistenz       & Apache Parquet       & Komprimierte Spaltenformate (Zstandard/Snappy); $3\times$ kleiner als CSV \\
   CI/CD            & GitHub Actions       & Tägliche Cron-Ausführung (05:00\,UTC); zero-touch Automation \\
-  Testing          & pytest + pytest-bdd  & 58 Unit-, Integrations- und BDD-Akzeptanztests \\
+  Testing          & pytest + pytest-bdd  & 115 Unit-, Integrations- und BDD-Akzeptanztests \\
   Versionskontrolle & Git + GitHub        & Vollständiger Audit-Trail, Branch-Protection, automatisierte Commits \\
   \bottomrule
 \end{tabularx}
@@ -1048,13 +1049,13 @@ Die Wahl von \textbf{Polars} als zentrale \gls{etl}-Engine stellt eine bewusste 
   \item \textbf{Zero-Copy-Speichermodell:}\;Polars nutzt das Apache-Arrow-Columnar-Format, das spaltenweise Speicherung ohne Serialisierungsoverhead ermöglicht. Daten werden in zusammenhängenden Speicherblöcken abgelegt, was L1/L2-Cache-Nutzung maximiert.
   \item \textbf{Multithreaded Query Engine:}\;Im Gegensatz zu Pandas, das auf dem Python-GIL (Global Interpreter Lock) operiert und somit single-threaded ist, führt Polars Operationen parallel über alle verfügbaren CPU-Kerne aus --- ohne dass der Anwender explizites Threading implementieren muss.
   \item \textbf{Lazy Evaluation:}\;Polars unterstützt ein \textit{Lazy-API}, bei dem Abfragen zunächst als logischer Plan konstruiert und anschliessend durch einen Query Optimizer reorganisiert werden --- einschliesslich Predicate Pushdown, Projection Pushdown und Common Subexpression Elimination.
-  \item \textbf{SIMD-Vektorisierung:}\;Arithmetische Operationen werden auf Maschinenebene mittels SIMD-Instruktionen (Single Instruction, Multiple Data) beschleunigt, was insbesondere bei den 75\,000+ Zeilen der Metriken-Engine messbare Performanzgewinne erbringt.
+  \item \textbf{SIMD-Vektorisierung:}\;Arithmetische Operationen werden auf Maschinenebene mittels SIMD-Instruktionen (Single Instruction, Multiple Data) beschleunigt, was insbesondere bei den 76\,357 Zeilen der Metriken-Engine messbare Performanzgewinne erbringt.
 \end{itemize}
 \end{infobox}
 
-\textbf{Weshalb nicht Pandas?}\;Für die Metriken-Berechnung --- insbesondere die Rolling-Window-Operationen mit \code{.rolling\_median(window\_size=30).over("Isin")} über 75\,000+ Zeilen --- erreicht Polars einen Durchsatz, der Pandas um eine Grössenordnung ($\approx 10\times$) übertrifft. Die \code{.over()}-Semantik erlaubt partitionierte Fensterberechnungen in einer einzigen, deklarativen Expression, wohingegen Pandas ein explizites \code{groupby().apply()} erfordert, das die GIL-Limitation verschärft.
+\textbf{Weshalb nicht Pandas?}\;Für die Metriken-Berechnung --- insbesondere die Rolling-Window-Operationen mit \code{.rolling\_median(window\_size=30).over("Isin")} über 76\,357 Zeilen --- erreicht Polars einen Durchsatz, der Pandas um eine Grössenordnung ($\approx 10\times$) übertrifft. Die \code{.over()}-Semantik erlaubt partitionierte Fensterberechnungen in einer einzigen, deklarativen Expression, wohingegen Pandas ein explizites \code{groupby().apply()} erfordert, das die GIL-Limitation verschärft.
 
-\textbf{Weshalb nicht eine relationale Datenbank?}\;Das Datenvolumen von OTC-X (133\,000 Trades, 75\,000 Metrikzeilen) liegt im Sweet Spot für In-Memory-Analytik. Eine PostgreSQL- oder SQLite-Instanz würde unnötige Infrastrukturkomplexität einführen, ohne bei dieser Grössenordnung einen Vorteil in Abfragegeschwindigkeit zu bieten. Polars mit Parquet-Persistenz vereint die Flexibilität einer DataFrame-API mit der Effizienz spaltenorientierter Speicherung.
+\textbf{Weshalb nicht eine relationale Datenbank?}\;Das Datenvolumen von OTC-X (139\,474 Trades, 76\,357 Metrikzeilen) liegt im Sweet Spot für In-Memory-Analytik. Eine PostgreSQL- oder SQLite-Instanz würde unnötige Infrastrukturkomplexität einführen, ohne bei dieser Grössenordnung einen Vorteil in Abfragegeschwindigkeit zu bieten. Polars mit Parquet-Persistenz vereint die Flexibilität einer DataFrame-API mit der Effizienz spaltenorientierter Speicherung.
 
 \section{Streamlit und die CSS-Injektionsmethodik}
 \label{sec:streamlit}
@@ -1063,11 +1064,11 @@ Die Wahl von \textbf{Polars} als zentrale \gls{etl}-Engine stellt eine bewusste 
 
 \subsection{CSS-Injektion: Swiss Institutional Design}
 
-Die visuelle Identität des Dashboards wird durch eine \textbf{431 Zeilen umfassende CSS-Injektion} realisiert, die via \code{st.markdown()} mit \code{unsafe\_allow\_html=True} in den Streamlit-Rendering-Kontext eingebettet wird. Diese Methodik erlaubt die vollständige Übersteuerung der Streamlit-Standard-Widgets bei gleichzeitiger Wahrung der Framework-Integrität.
+Die visuelle Identität des Dashboards wird durch eine \textbf{448 Zeilen umfassende CSS-Injektion} realisiert, die via \code{st.markdown()} mit \code{unsafe\_allow\_html=True} in den Streamlit-Rendering-Kontext eingebettet wird. Diese Methodik erlaubt die vollständige Übersteuerung der Streamlit-Standard-Widgets bei gleichzeitiger Wahrung der Framework-Integrität.
 
 \begin{lstlisting}[language=Python, caption={CSS-Injektionsmuster (vereinfacht)}]
 def inject_css() -> None:
-    """Injiziert 431 Zeilen Swiss-Design-CSS in Streamlit."""
+    """Injiziert 448 Zeilen Swiss-Design-CSS in Streamlit."""
     st.markdown(f"<style>{CSS_CONTENT}</style>",
                 unsafe_allow_html=True)
 \end{lstlisting}
@@ -1122,7 +1123,7 @@ Die Konsolidierungsstufe vereint 243 individuelle Trade-CSVs zu einem einzigen, 
 \begin{enumerate}
   \item \textbf{Schema-Normalisierung}\;---\;Sämtliche Dateien mit \code{infer\_schema\_length=0} gelesen (alle Spalten als UTF8)
   \item \textbf{Typecasting}\;---\;Schweizer Zahlenformate (Apostroph als Tausendertrenner) in IEEE~754 Float64 konvertiert
-  \item \textbf{Deduplizierung}\;---\;Exakte Zeilenduplikate eliminiert; $\approx$133\,000 bereinigte Datensätze
+  \item \textbf{Deduplizierung}\;---\;Exakte Zeilenduplikate eliminiert; $\approx$139\,000 bereinigte Datensätze
   \item \textbf{Kompression}\;---\;Zstandard-Kompression reduziert die Dateigrösse um $\approx$67\,\%
 \end{enumerate}
 
@@ -1223,7 +1224,7 @@ Das Streamlit-Dashboard besteht aus sechs zweckgebundenen Modulen:
   \rowcolor{DeepNavy} \textcolor{white}{\textbf{Modul}} & \textcolor{white}{\textbf{Verantwortlichkeit}} \\
   \midrule
   config.py       & Markenkonstanten, Farbpaletten, Metrik-Anzeigenamen, Anomalie-Mappings \\
-  styles.py       & CSS-Injektion (431~Zeilen)\;---\;Swiss-Precision-Theming mit \code{\#B22222}-Akzent \\
+  styles.py       & CSS-Injektion (448~Zeilen)\;---\;Swiss-Precision-Theming mit \code{\#B22222}-Akzent \\
   utils.py        & CHF-Formatierung, Prozent-Einfärbung, Score-Badge-Rendering, NaN-Sicherheit \\
   data\_loader.py & Gecachter Parquet $\to$ Pandas Loader mit \code{@st.cache\_data(ttl=3600)} \\
   charts.py       & 11~Plotly-Chart-Factories (Treemaps, Heatmaps, 3D-Scatter, $\sigma$-Bänder) \\
@@ -1242,21 +1243,29 @@ name: OTC-X Daily Pipeline
 on:
   schedule:
     - cron: '0 5 * * *'
-  workflow_dispatch: ~
+  workflow_dispatch:
+
+permissions:
+  contents: write    # erforderlich fuer commit-back der Pipeline-Artefakte
 
 jobs:
   run-pipeline:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: '3.10', cache: 'pip' }
-      - run: pip install -r requirements.txt
-      - run: python -m backend.pipeline          # 4-Stufen-ETL
+        with: { python-version: '3.14', cache: 'pip' }
+      - run: pip install -r requirements-dev.txt    # incl. pytest-bdd
+      - run: pytest tests/ -x -q                     # Test-Gate vor Daten-Refresh
+      - run: python -m backend.pipeline              # 4-Stufen-ETL
       - run: |
+          git config --global user.name  'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add backend/data/ backend/logs/
-          git commit -m "Daily pipeline $(date +%F)"
-          git push origin main
+          git commit -m "Automated daily OTC-X data update" \
+            || echo "No changes to commit"
+          git push
 \end{lstlisting}
 
 
@@ -1728,28 +1737,28 @@ Die resultierende Serie $\sigma_t^{(3)}$ eliminiert kurzfristige Rauscheffekte u
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{screenshots/tab-overview.png}
+\includegraphics[width=\textwidth]{screenshots/tab1-overview.png}
 \caption{Tab 1: Overview\;---\;KPI-Karten, Marktaktivität, Sektor-Treemap}
 \label{fig:tab-overview}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{screenshots/tab-market-data.png}
+\includegraphics[width=\textwidth]{screenshots/tab2-market-data.png}
 \caption{Tab 2: Market Data\;---\;26-Spalten-Explorer mit Suche und Export}
 \label{fig:tab-market}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{screenshots/tab-analytics.png}
+\includegraphics[width=\textwidth]{screenshots/tab3-analytics.png}
 \caption{Tab 3: Analytics\;---\;Korrelations-Heatmap, Amihud-Boxplots, 3D-Explorer}
 \label{fig:tab-analytics}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{screenshots/tab-anomaly.png}
+\includegraphics[width=\textwidth]{screenshots/tab4-anomaly-monitor.png}
 \caption{Tab 4: Anomaly Monitor\;---\;Severity-Karten und Alert-Tabelle}
 \label{fig:tab-anomaly}
 \end{figure}
@@ -1765,7 +1774,7 @@ Die resultierende Serie $\sigma_t^{(3)}$ eliminiert kurzfristige Rauscheffekte u
 
 \section{Teststrategie}
 
-Die Codebasis wird durch \textbf{58 automatisierte Tests} in fünf Kategorien abgesichert:
+Die Codebasis wird durch \textbf{115 automatisierte Tests} in fünf Kategorien abgesichert:
 
 \begin{table}[H]
 \centering
