@@ -1,0 +1,2 @@
+# Keeps backend/data/trades/ present even if emptied, so the
+# test_trades_dir_exists CI gate and the fetcher output dir survive checkout.

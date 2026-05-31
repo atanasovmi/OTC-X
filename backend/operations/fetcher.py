@@ -12,8 +12,10 @@ Key behaviours
   algorithm before requesting the trade export endpoint.
 * Respects a configurable rate-limit delay (default 1 req/s) and
   performs a single automatic retry on HTTP 403 / 429 responses.
-* Existing CSV files are never overwritten — a timestamped filename is
-  used when the canonical path already exists.
+* The OTC-X export is cumulative (every download is the security's full
+  trade history), so the canonical ``{ISIN}.csv`` is overwritten in
+  place on each run.  An empty response body (delisted securities) is
+  skipped so a good file is never clobbered with nothing.
 * Duplicate Valor entries in the input CSV are silently deduplicated.
 """
 
@@ -141,12 +143,43 @@ def val_to_isin(valor: str | int | float) -> str | None:
     return isin_prefix + check_digit
 
 
+def _save_trades(isin: str, content: bytes) -> bool:
+    """Write the canonical per-ISIN CSV, overwriting any prior version.
+
+    The OTC-X export is cumulative — each download is the security's full
+    trade history — so the latest download always supersedes the previous
+    file and overwriting in place is safe.  An empty body (which the API
+    occasionally returns for delisted securities) is skipped so an
+    existing good file is never clobbered with nothing.
+
+    Parameters
+    ----------
+    isin : str
+        12-character ISIN; determines the output filename ``{isin}.csv``.
+    content : bytes
+        Raw CSV payload returned by the OTC-X export endpoint.
+
+    Returns
+    -------
+    bool
+        ``True`` if the file was written, ``False`` if the empty body was
+        skipped.
+    """
+    if not content:
+        logger.warning(f"{isin}: empty response body — keeping existing file")
+        return False
+
+    with open(OUTPUT_DIR / f"{isin}.csv", 'wb') as f:
+        f.write(content)
+    return True
+
+
 def download_trades(isin: str, session: requests.Session) -> str:
     """Download the trade-history CSV for a single ISIN.
 
     Fetches the CSV export from the OTC-X API.  On HTTP 403/429 the
-    request is retried once after a 5-second back-off.  Existing files
-    are preserved by appending a timestamp to the filename.
+    request is retried once after a 5-second back-off.  The canonical
+    ``{ISIN}.csv`` is overwritten in place (see :func:`_save_trades`).
 
     Parameters
     ----------
@@ -161,7 +194,6 @@ def download_trades(isin: str, session: requests.Session) -> str:
         Download outcome — one of ``'success'``, ``'not_found'``, or
         ``'error'``.
     """
-    output_file = OUTPUT_DIR / f"{isin}.csv"
     url = BASE_URL.format(isin)
     try:
         # First attempt — rate-limited 403/429 responses get one back-off retry below
@@ -169,28 +201,18 @@ def download_trades(isin: str, session: requests.Session) -> str:
 
         if response.status_code == 200:
             content = response.content
-            # The API occasionally returns 200 with an empty body for delisted securities
-            if not content:
-                logger.warning(f"{isin}: Empty response content")
-                
-            # Never overwrite existing data — append a timestamp suffix instead
-            save_path = output_file
-            if save_path.exists():
-                timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
-                save_path = OUTPUT_DIR / f"{isin}_{timestamp_str}.csv"
 
-            with open(save_path, 'wb') as f:
-                f.write(content)
+            # Overwrite the canonical file in place (empty bodies are skipped)
+            if _save_trades(isin, content):
+                # Log approximate trade count (lines minus header)
+                try:
+                    text_content = content.decode('utf-8', errors='ignore')
+                    line_count = len(text_content.strip().split('\n')) - 1 # Header
+                    line_count = max(0, line_count)
+                    logger.info(f"✓ {isin}: {line_count} trades downloaded")
+                except Exception:
+                    logger.info(f"✓ {isin}: downloaded (binary/unknown size)")
 
-            # Log approximate trade count (lines minus header)
-            try:
-                text_content = content.decode('utf-8', errors='ignore')
-                line_count = len(text_content.strip().split('\n')) - 1 # Header
-                line_count = max(0, line_count)
-                logger.info(f"✓ {isin}: {line_count} trades downloaded")
-            except Exception:
-                logger.info(f"✓ {isin}: downloaded (binary/unknown size)")
-                
             return 'success'
             
         elif response.status_code == 404:
@@ -204,14 +226,8 @@ def download_trades(isin: str, session: requests.Session) -> str:
             time.sleep(5)
             response = session.get(url, timeout=TIMEOUT)
             if response.status_code == 200:
-                # Same versioning logic as the happy path above
-                save_path = output_file
-                if save_path.exists():
-                    timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    save_path = OUTPUT_DIR / f"{isin}_{timestamp_str}.csv"
-                    
-                with open(save_path, 'wb') as f:
-                    f.write(response.content)
+                # Same overwrite-in-place logic as the happy path above
+                _save_trades(isin, response.content)
                 logger.info(f"✓ {isin}: downloaded after retry")
                 return 'success'
             else:
