@@ -407,6 +407,106 @@ def inject_css() -> None:
             color: #1A1A2E !important;
         }
 
+        /* ── Date-input field (closed control showing the selected range) ──
+           It carried no explicit colours, so in high-contrast / forced-colour
+           environments (e.g. Windows High Contrast) it fell back to a dark
+           system fill with white text. Pin it to the warm-sand surface used by
+           the other controls and opt out of colour forcing so it stays
+           readable. */
+        [data-testid="stDateInput"] [data-baseweb="input"] {
+            background-color: rgb(235, 226, 205) !important;
+            forced-color-adjust: none;
+        }
+        [data-testid="stDateInput"] [data-baseweb="input"] input {
+            background-color: transparent !important;
+            color: #1A1A2E !important;
+            -webkit-text-fill-color: #1A1A2E !important;
+            forced-color-adjust: none;
+        }
+
+        /* ── Date-input calendar (BaseWeb datepicker) ──
+           The broad dropdown-popover rules above only repaint the calendar's
+           container <div>s; they cannot reach BaseWeb's ::before/::after day
+           pseudo-elements, which carry every real state (selection, hover,
+           focus, range). Left alone they kept library defaults — a white 42px
+           square on empty cells (the stray "white box") and an oversized 42px
+           primary-colour circle on the selected day (the heavy red blob).
+           forced-color-adjust:none keeps the calendar's own palette (dark text
+           on the beige surface) in high-contrast / forced-colour environments,
+           where the month, nav arrows and day numbers would otherwise be
+           forced to unreadable system white on our beige surface. */
+        [data-baseweb="calendar"] {
+            forced-color-adjust: none;
+        }
+
+        /* Pin every calendar glyph to a readable dark tone (month/year, day
+           numbers solid; weekday headers and nav arrows slightly muted). */
+        [data-baseweb="calendar"] button[aria-haspopup="true"],
+        [data-baseweb="calendar"] [role="grid"] [role="gridcell"] > div {
+            color: #1A1A2E !important;
+        }
+        [data-baseweb="calendar"] [role="presentation"] > div {
+            color: #5F5F5F !important;
+        }
+        [data-baseweb="calendar"] button svg {
+            fill: #3A3A3A !important;
+        }
+        /* The popover's "Choose a date range" quick-select label sits beside
+           the calendar (not inside it), so it needs its own dark colour to
+           stay readable in forced-colour environments. */
+        [data-baseweb="popover"] label[data-baseweb="form-control-label"] {
+            color: #1A1A2E !important;
+            forced-color-adjust: none;
+        }
+
+        /* The beige background on each day number is our own artifact, not a
+           BaseWeb state — clear it so the ::after state shapes show through,
+           and keep the number above its (z-index:-1) shape. */
+        [data-baseweb="calendar"] [role="gridcell"] > div {
+            position: relative;
+            z-index: 1;
+            background-color: transparent !important;
+        }
+
+        /* Empty (no-date) cells: blank BaseWeb's default white ::after square
+           (the stray "white box") and its connector strip. */
+        [data-baseweb="calendar"] [role="gridcell"]:not([aria-label])::after,
+        [data-baseweb="calendar"] [role="gridcell"]:not([aria-label])::before {
+            background-color: transparent !important;
+        }
+
+        /* Selected start/end day → a tidy brand-red ring around a black
+           numeral (so every calendar number stays readable) instead of the
+           oversized solid blob; drop the grey connector strip. */
+        [data-baseweb="calendar"] [role="gridcell"][aria-label^="Selected"]::before {
+            background-color: transparent !important;
+        }
+        [data-baseweb="calendar"] [role="gridcell"][aria-label^="Selected"]::after {
+            background-color: transparent !important;
+            border: 2px solid #B22222 !important;
+            box-sizing: border-box !important;
+            width: 30px !important;
+            height: 30px !important;
+            inset: auto !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            border-radius: 50% !important;
+        }
+
+        /* Hover on an available day → small, soft red tint circle that matches
+           the selected geometry, rather than BaseWeb's full-size solid fill. */
+        [data-baseweb="calendar"] [role="gridcell"][aria-label^="Choose"]:hover::after {
+            background-color: rgba(178, 34, 34, 0.14) !important;
+            width: 30px !important;
+            height: 30px !important;
+            inset: auto !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            border-radius: 50% !important;
+        }
+
         /* ── Misc ── */
         #MainMenu, footer, header { visibility: hidden; }
         .block-container { padding-top: 1rem; padding-bottom: 2rem; }
