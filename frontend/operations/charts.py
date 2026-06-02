@@ -665,14 +665,23 @@ def chart_anomaly_severity_treemap(latest: pd.DataFrame) -> go.Figure:
     df["sev_order"] = df["severity"].map({s: i for i, s in enumerate(severity_order)}).fillna(99)
     df = df.sort_values(["sev_order", "anomaly_score"], ascending=[False, False])
 
-    # Discrete colours matching the KPI big-number text colours
+    # Lighter, airier palette: a warm pale ordinal ramp where red is a
+    # *scarce* accent reserved for the worst tier only. Saturation is
+    # multiplied by tile area in a treemap, so the two largest blocks
+    # (Severe, Critical) stay deliberately desaturated to let the map
+    # breathe; only Extreme carries a saturated red fill.
     # "(?)": Plotly's internal key for the root node in hierarchical treemaps
     tier_colors = {
-        "(?)":      "#F5F6F8",
-        "Alert":    "#7D3C00",
-        "Critical": "#721C24",
-        "Severe":   "#7D1128",
-        "Extreme":  "#4A0010",
+        "(?)":      "#FFFFFF",   # root: white canvas keeps the map airy
+        "Alert":    "#FBEBD2",   # pale warm amber
+        "Critical": "#F3D8CA",   # light peach
+        "Severe":   "#E6B8AA",   # muted clay rose — present, not shouting
+        "Extreme":  "#B3261E",   # scarce saturated red (the only bold fill)
+    }
+    # Dark ink on the pale tiers; white only where the fill is saturated.
+    tier_text = {
+        "Alert": "#3A2A28", "Critical": "#3A2A28",
+        "Severe": "#3A2A28", "Extreme": "#FFFFFF",
     }
 
     fig = px.treemap(
@@ -684,9 +693,14 @@ def chart_anomaly_severity_treemap(latest: pd.DataFrame) -> go.Figure:
         custom_data=["Isin", "Sektor", "anomaly_score", "volume_today_chf",
                       "price_change_pct", "volatility_daily"],
     )
+    # Per-tile text colour: derive each node's tier from its hierarchy id
+    # ("Severe/Foo AG" -> "Severe", "Extreme" -> "Extreme") so labels stay
+    # legible on both the pale fills and the saturated Extreme tiles.
+    text_colors = [tier_text.get(str(_id).split("/")[0], "#3A2A28")
+                   for _id in fig.data[0].ids]
     fig.update_traces(
         texttemplate="<b>%{label}</b>",
-        textfont=dict(family="Inter", size=10, color="white"),
+        textfont=dict(family="Inter", size=10, color=text_colors),
         hovertemplate=(
             "<b>%{customdata[0]}</b><br>"
             "Sector: %{customdata[1]}<br>"
@@ -695,11 +709,12 @@ def chart_anomaly_severity_treemap(latest: pd.DataFrame) -> go.Figure:
             "Δ Price: %{customdata[4]:+.2f}%<br>"
             "Volatility: %{customdata[5]:.4f}<extra></extra>"
         ),
-        marker_line_width=1.5,
+        marker_line_width=2,
         marker_line_color="white",
+        root_color="#FFFFFF",
     )
     fig.update_layout(
-        **_base_layout(height=380),
+        **_base_layout(height=380, margin=dict(l=6, r=6, t=12, b=6)),
         showlegend=False,
     )
     return fig
