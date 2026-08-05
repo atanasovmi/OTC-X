@@ -1,0 +1,141 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                            OTC-X PIPELINE RECEIPT                            ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+  Run Date:     2026-08-05
+  Start Time:   05:55:31
+  End Time:     06:00:22
+  Duration:     0:04:51.092271
+  Status:       ALL STAGES PASSED
+
+────────────────────────────────────────────────────────────────────────────────
+  STAGE EXECUTION SUMMARY
+────────────────────────────────────────────────────────────────────────────────
+  Stage 1: Valor Extraction
+    Status:   ✓ SUCCESS
+    Duration: 4.2s
+
+  Stage 2: Trade Data Retrieval
+    Status:   ✓ SUCCESS
+    Duration: 286.3s
+
+  Stage 3: Data Consolidation (Parquet)
+    Status:   ✓ SUCCESS
+    Duration: 0.3s
+
+  Stage 4: Liquidity Metrics Engine
+    Status:   ✓ SUCCESS
+    Duration: 0.2s
+
+────────────────────────────────────────────────────────────────────────────────
+  DATA PRODUCTS
+────────────────────────────────────────────────────────────────────────────────
+  Date Range:        2004-02-16 → 2026-08-04
+  Securities CSV:    239 securities
+  Trade CSVs:        245 files in data/trades/
+  Master Parquet:    143,307 rows, 227 ISINs (1.05 MB)
+  Daily Metrics:     78,050 rows, 227 ISINs, 10 sectors
+
+────────────────────────────────────────────────────────────────────────────────
+  ANOMALY SNAPSHOT (latest day per ISIN)
+────────────────────────────────────────────────────────────────────────────────
+  Total ISINs:       227
+  Clean (score 0):   139
+  Flagged (score>0): 88
+
+  Score  Count
+  ─────  ─────
+      2      11
+      3      35
+      4       3
+      5      34
+      7       5
+
+────────────────────────────────────────────────────────────────────────────────
+  STAGE DETAIL LOGS
+────────────────────────────────────────────────────────────────────────────────
+  ┌─ Stage 1: Valor Extraction
+  │ Fetching securities dynamically from OTC-X API...
+  │ Fertig! 239 Valoren extrahiert.
+  │ Gespeichert in: /home/runner/work/OTC-X/OTC-X/backend/data/securities.csv
+  └─ OK (4.2s)
+
+  ┌─ Stage 2: Trade Data Retrieval
+  └─ OK (286.3s)
+
+  ┌─ Stage 3: Data Consolidation (Parquet)
+  │ ============================================================
+  │ OTC-X Data Ingestion Pipeline
+  │ ============================================================
+  │ Scanning: /home/runner/work/OTC-X/OTC-X/backend/data/trades
+  │   [SKIP] CH0039576837.csv (empty/header-only)
+  │   [SKIP] CH0039576860.csv (empty/header-only)
+  │   [SKIP] CH0017915684.csv (empty/header-only)
+  │   [SKIP] CH0039576852.csv (empty/header-only)
+  │   [SKIP] CH0039576753.csv (empty/header-only)
+  │   [SKIP] CH0039576787.csv (empty/header-only)
+  │   [SKIP] CH0017915726.csv (empty/header-only)
+  │   [SKIP] CH0017915718.csv (empty/header-only)
+  │   [SKIP] CH0017915643.csv (empty/header-only)
+  │   [SKIP] CH0017915668.csv (empty/header-only)
+  │   [SKIP] CH0580517032.csv (empty/header-only)
+  │   [SKIP] CH0017915635.csv (empty/header-only)
+  │   [SKIP] CH0017915692.csv (empty/header-only)
+  │   [SKIP] CH0286266488.csv (empty/header-only)
+  │   [SKIP] CH0002218698.csv (empty/header-only)
+  │   [SKIP] CH0017915742.csv (empty/header-only)
+  │   [SKIP] CH0002218664.csv (empty/header-only)
+  │   [SKIP] CH0213109793.csv (empty/header-only)
+  │ 
+  │ Found 245 files total.
+  │ Processing 227 valid files...
+  │ Skipped 18 empty/header-only files.
+  │ 
+  │ Raw rows ingested: 145,384
+  │ 
+  │ Applying data cleaning transformations...
+  │ Data Quality: 143307/143307 records have valid Price/Volume data (100.0%)
+  │ Rows after deduplication: 143,307
+  │ 
+  │ Writing output files...
+  │   [OK] Parquet: master_trades.parquet (1070.3 KB)
+  │   -> Formatting data for CSV output...
+  │   [OK] CSV: master_trades_cleaned.csv (7959.4 KB)
+  │ 
+  │ ============================================================
+  │ AUDIT SUMMARY
+  │ ============================================================
+  │ Processed 227 files, Skipped 18 empty files.
+  │ Total rows: 143,307
+  │ 
+  │ Schema:
+  │   Isin            String
+  │   Datum           Date
+  │   Zeit            String
+  │   Kurs            Float64
+  │   Volumen         Float64
+  │   Off Book        Boolean
+  │ 
+  │ Sample Data (first 5 rows):
+  │ shape: (5, 6)
+  │ ┌──────────────┬────────────┬───────┬─────────┬─────────┬──────────┐
+  │ │ Isin         ┆ Datum      ┆ Zeit  ┆ Kurs    ┆ Volumen ┆ Off Book │
+  │ │ ---          ┆ ---        ┆ ---   ┆ ---     ┆ ---     ┆ ---      │
+  │ │ str          ┆ date       ┆ str   ┆ f64     ┆ f64     ┆ bool     │
+  │ ╞══════════════╪════════════╪═══════╪═════════╪═════════╪══════════╡
+  │ │ CH0020502743 ┆ 2024-06-25 ┆ 09:41 ┆ 139.0   ┆ 80.0    ┆ false    │
+  │ │ CH0030693185 ┆ 2020-03-30 ┆ 08:31 ┆ 100.0   ┆ 16.0    ┆ false    │
+  │ │ CH0320096990 ┆ 2026-05-21 ┆ 14:37 ┆ 149.9   ┆ 48.0    ┆ false    │
+  │ │ CH0002654934 ┆ 2023-01-31 ┆ 08:55 ┆ 11200.0 ┆ 1.0     ┆ false    │
+  │ │ CH0002221338 ┆ 2018-02-26 ┆ 08:35 ┆ 212.0   ┆ 5.0     ┆ false    │
+  │ └──────────────┴────────────┴───────┴─────────┴─────────┴──────────┘
+  │ ============================================================
+  │ Pipeline complete! [SUCCESS]
+  └─ OK (0.3s)
+
+  ┌─ Stage 4: Liquidity Metrics Engine
+  └─ OK (0.2s)
+
+════════════════════════════════════════════════════════════════════════════════
+  End of receipt — 2026-08-05 06:00:22
+════════════════════════════════════════════════════════════════════════════════
