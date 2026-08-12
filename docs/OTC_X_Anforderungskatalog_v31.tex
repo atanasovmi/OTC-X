@@ -5,7 +5,7 @@
 %  Requirements Engineering Katalog nach IREB (CPRE-FL)  ·  Quantitative Methodik
 %  ─────────────────────────────────────────────────────────────────────────────
 %  Autor:           Mihael Atanasov
-%  Version:         3.0  ·  Mai 2026  (Market-Intelligence Edition)
+%  Version:         3.1  ·  August 2026  (Market-Intelligence Edition · Projektkontext richtiggestellt)
 %  Klassifikation:  Proprietär & Vertraulich
 %  Build engine:    LuaLaTeX  +  fontspec  +  unicode-math
 % ═══════════════════════════════════════════════════════════════════════════════
@@ -128,7 +128,7 @@
 \fancyhead[R]{\small\sffamily\textcolor{N700}{\nouppercase{\leftmark}}}
 \fancyfoot[C]{\small\sffamily\textcolor{DeepNavy}{\thepage}}
 \fancyfoot[L]{\tiny\datafont\textcolor{N600}{build~37b425e}}
-\fancyfoot[R]{\tiny\sffamily\textcolor{N700}{v3.0 · Mai 2026}}
+\fancyfoot[R]{\tiny\sffamily\textcolor{N700}{v3.1 · August 2026}}
 
 % ── Mathematics — classical ams stack (Latin Modern Math) ────────────────
 \usepackage{amsmath, amssymb, amsthm, mathtools}
@@ -284,8 +284,8 @@
   bookmarks=true,
   bookmarksopen=true,
   pdfauthor={Mihael Atanasov},
-  pdftitle={OTC-X Market-Intelligence Dossier · v3.0},
-  pdfsubject={Requirements Engineering nach IREB · Operational Evidence · BEKB OTC-X},
+  pdftitle={OTC-X Market-Intelligence Dossier · v3.1},
+  pdfsubject={Requirements Engineering nach IREB · Operational Evidence · Schweizer OTC-Markt (OTC-X)},
 ]{hyperref}
 \usepackage{bookmark}
 
@@ -353,7 +353,7 @@
 \noindent\textcolor{N700}{\sffamily\fontsize{7.5}{9}\selectfont\bfseries
 PROPRIETÄR \& VERTRAULICH \quad\textcolor{SwissRed}{\rule[0.5ex]{8pt}{1pt}}\quad
 MARKET-INTELLIGENCE DOSSIER \quad\textcolor{SwissRed}{\rule[0.5ex]{8pt}{1pt}}\quad
-v3.0\,/\,MAI 2026}
+v3.1\,/\,AUGUST 2026}
 \vspace{3mm}
 \noindent\textcolor{N300}{\rule{\textwidth}{0.4pt}}
 
@@ -368,7 +368,7 @@ v3.0\,/\,MAI 2026}
 % Zone C — Title block (70mm)
 \noindent{\sffamily\fontsize{38}{44}\selectfont\bfseries\color{DeepNavy}Anforderungskatalog}\\[4mm]
 \noindent{\sffamily\fontsize{13}{16}\selectfont\itshape\color{N700}IREB-konforme Spezifikation, quantitative Methodik\\
-und operationelle Evidenz für die OTC-X-Plattform der \gls{bekb}.}
+und operationelle Evidenz\,---\,ein unabhängiges Projekt zum \mbox{OTC-X}-Markt.}
 
 \vspace{14mm}
 
@@ -393,9 +393,9 @@ und operationelle Evidenz für die OTC-X-Plattform der \gls{bekb}.}
 \noindent\textcolor{DeepNavy}{\rule{30mm}{2pt}}\\[3mm]
 \noindent\begin{tabular}{@{}p{32mm}@{\hskip 6pt}p{0.7\textwidth}@{}}
 {\sffamily\fontsize{7.5}{10}\selectfont\bfseries\color{N700}\MakeUppercase{Autor}} & {\sffamily\small Mihael Atanasov \quad \textcolor{N600}{\datafont\footnotesize\href{mailto:mihaelatanasov22@gmail.com}{mihaelatanasov22@gmail.com}}} \\
-{\sffamily\fontsize{7.5}{10}\selectfont\bfseries\color{N700}\MakeUppercase{Auftraggeber}} & {\sffamily\small BEKB Trading Desk, Berner Kantonalbank AG \quad \textcolor{N600}{\sffamily\footnotesize Schwarzenburgstrasse 160, 3001 Bern}} \\
+{\sffamily\fontsize{7.5}{10}\selectfont\bfseries\color{N700}\MakeUppercase{Projektkontext}} & {\sffamily\small Unabhängiges Eigenprojekt\,---\,kein Auftragsverhältnis \quad \textcolor{N600}{\sffamily\footnotesize Berner Kantonalbank AG als potenzielle Empfängerin bzw.\ Interessentin}} \\
 {\sffamily\fontsize{7.5}{10}\selectfont\bfseries\color{N700}\MakeUppercase{Domäne}} & {\sffamily\small Schweizer OTC-Aktien — 243 ausserbörsliche Titel, 224 mit aktiver Handelshistorie} \\
-{\sffamily\fontsize{7.5}{10}\selectfont\bfseries\color{N700}\MakeUppercase{Version}} & {\datafont\small v3.0 \quad \textcolor{N600}{\sffamily\footnotesize Market-Intelligence Edition}} \\
+{\sffamily\fontsize{7.5}{10}\selectfont\bfseries\color{N700}\MakeUppercase{Version}} & {\datafont\small v3.1 \quad \textcolor{N600}{\sffamily\footnotesize Market-Intelligence Edition}} \\
 {\sffamily\fontsize{7.5}{10}\selectfont\bfseries\color{N700}\MakeUppercase{Datenstand}} & {\datafont\small 2026-05-14 \quad \textcolor{N600}{\sffamily\footnotesize letzte automatisierte Pipeline}} \\
 {\sffamily\fontsize{7.5}{10}\selectfont\bfseries\color{N700}\MakeUppercase{Build}} & {\datafont\small commit~37b425e \quad \textcolor{N600}{\sffamily\footnotesize LuaLaTeX · fontspec · IBM Plex + Inter}} \\
 {\sffamily\fontsize{7.5}{10}\selectfont\bfseries\color{N700}\MakeUppercase{Klassifikation}} & {\sffamily\small\bfseries\color{SwissRed}Proprietär \& Vertraulich} \\
@@ -437,7 +437,8 @@ github.com/atanasovmi/OTC-X \quad·\quad otc-x-radar.streamlit.app \quad·\quad 
 
 \noindent\textbf{\sffamily\textcolor{SwissRed}{Validierung \& Status.}}
 \begin{itemize}[leftmargin=1.4em, itemsep=2pt, topsep=2pt]
-  \item \textbf{Institutionelle Autorisierung:}\;Explizite Datenverarbeitungs-Erlaubnis durch die \gls{bekb} (Schwarzenburgstrasse 160, 3001 Bern) für die Dauer der Entwicklung bis zur formellen Übergabe.
+  \item \textbf{Projektstatus:}\;Unabhängig konzipiert und umgesetzt\,---\,ohne Auftrag, Mandat oder Mitwirkung der \gls{bekb}. Die \gls{bekb} ist ausschliesslich als potenzielle Empfängerin bzw.\ Interessentin adressiert.
+  \item \textbf{Institutionelle Autorisierung:}\;Explizite Datenverarbeitungs-Erlaubnis durch die \gls{bekb} (Schwarzenburgstrasse 160, 3001 Bern) für die Dauer der Entwicklung.
   \item \textbf{Produktivbetrieb:}\;Tägliche zero-touch Pipeline-Läufe seit 29.\,März 2026; aktuell \textbf{54 konsekutive Erfolge} ohne manuellen Eingriff. Live-Demonstrations-Dashboard öffentlich zugänglich unter \href{https://otc-x-radar.streamlit.app}{otc-x-radar.streamlit.app} (kontrolliertes Read-Only-Layer ohne API- oder Daten-Export).
   \item \textbf{Banking-Grade Lieferkette:}\;Cosign-signierte Multi-Arch-Container-Images (linux/amd64 + linux/arm64) auf GHCR, mit SBOM und SLSA-Provenance-Attestationen\,---\,lückenlose Auditierbarkeit vom Container-Digest bis zum Source-Commit (vgl.~Abschnitt~\ref{sec:supplychain}).
   \item \textbf{Normative Konformität:}\;Vollständige Dokumentation nach IREB CPRE Foundation Level (Syllabus~v3.1.2) mit Traceability Matrix\,---\,siehe das vorliegende Werk.
@@ -492,6 +493,8 @@ Der OTC-X-Markt wird seit über zwei Jahrzehnten durch die Berner Kantonalbank b
   2.0 & März 2026 & M.\,Atanasov & Konsolidierung, IREB-Erweiterung, Use Cases, User Stories, Codebeispiele, TikZ-Architekturdiagramm \\
   2.1 & Mai 2026  & M.\,Atanasov & Faktualisierung: Datenstände (Trades, Metrikzeilen, Handelshistorie), LOC-Zählung, Testabdeckung, CSS-Umfang, CI/CD-Listing auf aktuelle Pipeline-Konfiguration synchronisiert \\
   2.2 & Mai 2026  & M.\,Atanasov & Investoren-Edition: Investoren-Briefing mit Trust Ribbon (Kennzahlen-Banner), neue Sektion Banking-Grade Lieferkette (cosign, SBOM, SLSA-Provenance), eigenständiges Kapitel mit quartalsgranularer Roadmap (Phase 1--3), Werttreiber-Layer zur Übersetzung technischer Rigorosität in geschäftliche Outcomes, Schärfung der IP-/Mandats-Sprache und Korrektur unbelegter Beispielzahlen \\
+  3.0 & Mai 2026  & M.\,Atanasov & Market-Intelligence Edition: typografischer Neusatz (LuaLaTeX, IBM Plex + Inter), überarbeitetes Cover- und Farbsystem, aktualisierte Kennzahlen und Roadmap \\
+  3.1 & August 2026 & M.\,Atanasov & Richtigstellung des Projektkontexts: Das Projekt wurde unabhängig und ohne Auftrag oder Mandat der BEKB umgesetzt; die BEKB ist ausschliesslich potenzielle Empfängerin bzw.\ Interessentin. Entsprechende Korrekturen auf Titelblatt, im Investoren-Briefing, in Stakeholder-Register, RE-Aktivitäten, Use Cases, Customer Journeys, Anforderungen, Roadmap und Kolophon \\
   \bottomrule
 \end{tabularx}
 \end{table}
@@ -655,7 +658,7 @@ Das Requirements Engineering für \term{OTC-X} folgt dem \textbf{IREB CPRE Found
 \begin{enumerate}[label=\textcolor{SwissRed}{\textbf{\arabic*.}}]
   \item \textbf{Ermittlung} (Elicitation)\;---\;Stakeholder-Interviews, Dokumentenanalyse, API-Exploration
   \item \textbf{Dokumentation} (Documentation)\;---\;Strukturierte Spezifikation mit eindeutigen IDs, Akzeptanzkriterien und Traceability
-  \item \textbf{Validierung} (Validation \& Negotiation)\;---\;Review-Zyklen mit dem BEKB Trading Desk
+  \item \textbf{Validierung} (Validation \& Negotiation)\;---\;autorenseitige Review-Zyklen gegen die IREB-Qualitätskriterien; fachliche Validierung durch künftige Endnutzer vorgesehen
   \item \textbf{Verwaltung} (Management)\;---\;Versionskontrolle via Git, Traceability durch Modulzuordnung
 \end{enumerate}
 
@@ -671,7 +674,7 @@ Das Requirements Engineering für \term{OTC-X} folgt dem \textbf{IREB CPRE Found
   \toprule
   \rowcolor{DeepNavy} \textcolor{white}{\textbf{Stakeholder}} & \textcolor{white}{\textbf{Rolle \& Interesse}} & \textcolor{white}{\textbf{Einfluss}} & \textcolor{white}{\textbf{Priorität}} \\
   \midrule
-  BEKB Trading Desk     & Primärer Endnutzer; benötigt tägliche Liquiditätsübersicht und Anomalie-Alerts für 243~Titel                       & Hoch   & Kritisch \\
+  BEKB Trading Desk     & Potenzieller Endnutzer (adressierte Zielgruppe, ohne Projektbeteiligung); tägliche Liquiditätsübersicht und Anomalie-Alerts für 243~Titel & Hoch   & Kritisch \\
   Compliance-Abteilung  & Regulatorische Transparenz; Auditierbarkeit der Anomalie-Flags und Datenherkunft                                   & Hoch   & Hoch \\
   Risikomanagement      & Portfolioweite Illiquiditätsbewertung; Frühwarnung bei Extremereignissen                                            & Mittel & Hoch \\
   Projektautor          & Architekturentscheide, Implementierung, wissenschaftliche Methodik, Qualitätssicherung                              & Hoch   & Kritisch \\
@@ -719,7 +722,7 @@ Das Requirements Engineering für \term{OTC-X} folgt dem \textbf{IREB CPRE Found
 Die nachfolgenden Use Cases beschreiben die zentralen Interaktionsszenarien zwischen Akteur und System, modelliert nach dem IREB-empfohlenen Textformat.
 
 \begin{reqbox}[UC-01 · Tägliches Markt-Briefing abrufen]
-\textbf{Akteur:}\;BEKB-Händler \qquad \textbf{Priorität:}\;Kritisch \\[4pt]
+\textbf{Akteur:}\;OTC-X-Händler \qquad \textbf{Priorität:}\;Kritisch \\[4pt]
 \textbf{Vorbedingung:}\;Pipeline-Lauf vom selben Tag erfolgreich abgeschlossen (05:00\,UTC). \\[4pt]
 \textbf{Standardablauf:}
 \begin{enumerate}[leftmargin=2em]
@@ -736,7 +739,7 @@ Die nachfolgenden Use Cases beschreiben die zentralen Interaktionsszenarien zwis
 \vspace{8pt}
 
 \begin{reqbox}[UC-02 · Sicherheitsspezifische Tiefenanalyse durchführen]
-\textbf{Akteur:}\;BEKB-Händler / Analyst \qquad \textbf{Priorität:}\;Hoch \\[4pt]
+\textbf{Akteur:}\;OTC-X-Händler / Analyst \qquad \textbf{Priorität:}\;Hoch \\[4pt]
 \textbf{Vorbedingung:}\;Mindestens eine ISIN wurde im Anomaly Monitor identifiziert. \\[4pt]
 \textbf{Standardablauf:}
 \begin{enumerate}[leftmargin=2em]
@@ -849,7 +852,7 @@ Ergänzend zu den Use Cases werden die Kernanforderungen als User Stories formul
 
 \begin{reqbox}[FA-070 · CSV-Datenexport]
 \textbf{Priorität:}\;Soll \quad \textbf{Quelle:}\;Customer Journey (Phase~6) \\[4pt]
-\textbf{Beschreibung:}\;Das Dashboard \textbf{soll} einen Download-Button bereitstellen, der die aktuelle Filteransicht als CSV-Datei exportiert, kompatibel mit Microsoft Excel und internen BEKB-Systemen. \\[4pt]
+\textbf{Beschreibung:}\;Das Dashboard \textbf{soll} einen Download-Button bereitstellen, der die aktuelle Filteransicht als CSV-Datei exportiert, kompatibel mit Microsoft Excel und gängigen institutionellen Analyseumgebungen. \\[4pt]
 \textbf{Akzeptanzkriterium:}\;Export-Datei enthält alle sichtbaren Spalten mit korrekter Formatierung. \\[4pt]
 \textbf{Trace:}\;\code{frontend/app.py} (Market-Data-Tab)
 \end{reqbox}
@@ -885,7 +888,7 @@ Jede Pipeline-Stufe \textbf{muss} unabhängig wiederherstellbar sein. Ein Fehler
 
 \begin{reqbox}[NFA-030 · Datensouveränität]
 \textbf{Priorität:}\;Muss \\[4pt]
-Sämtliche Daten \textbf{müssen} bis zur formellen Übergabe in der Hoheit des Autors verbleiben. Kein Dritter darf Datenströme replizieren oder abfangen. \\[4pt]
+Sämtliche Daten \textbf{müssen} bis zu einer allfälligen formellen Übergabe in der Hoheit des Autors verbleiben. Kein Dritter darf Datenströme replizieren oder abfangen. \\[4pt]
 \textbf{Trace:}\;Proprietary Notice (README)
 \end{reqbox}
 
@@ -927,7 +930,7 @@ Das Dashboard \textbf{soll} eine visuelle Identität im Schweizer Institutional-
 \label{sec:constraints}
 
 \begin{constraintbox}[C-01 · Datensouveränität und Autorisierung]
-Sämtliche Datenverarbeitung erfolgt im Rahmen der durch die \gls{bekb} (Schwarzenburgstrasse~160, 3001~Bern) erteilten Autorisierung. Die Datensouveränität verbleibt beim Projektautor bis zur formellen Übergabe. Keinerlei Datenexfiltration an Dritte gestattet.
+Sämtliche Datenverarbeitung erfolgt im Rahmen der durch die \gls{bekb} (Schwarzenburgstrasse~160, 3001~Bern) erteilten Autorisierung. Die Datensouveränität verbleibt beim Projektautor bis zu einer allfälligen formellen Übergabe. Keinerlei Datenexfiltration an Dritte gestattet.
 \end{constraintbox}
 
 \vspace{6pt}
@@ -1010,7 +1013,7 @@ Das Dashboard \textbf{muss} via Streamlit Community Cloud deploybar sein. Die Ba
 
 Die nachfolgenden Customer Journeys bilden die primären Interaktionspfade durch OTC-X ab, modelliert nach dem Fünf-Phasen-Rahmenwerk (Awareness $\to$ Consideration $\to$ Decision $\to$ Action $\to$ Retention), adaptiert aus ISO~9241-210 für menschzentriertes Design. Die folgenden Szenarien sind \emph{illustrativ} konstruiert; konkrete Werte (ISINs, Preisbewegungen, Severity-Scores) repräsentieren typische, nicht zwingend historische Beobachtungen.
 
-\section{Journey~1\;---\;Das Morgenbriefing (BEKB-Händler)}
+\section{Journey~1\;---\;Das Morgenbriefing (OTC-X-Händler)}
 
 \begin{table}[H]
 \centering
@@ -2182,7 +2185,7 @@ Die heutige Plattform stellt das tragende Fundament dar. Folgende Bausteine sind
 
 \section{Über die drei Säulen hinaus\;---\;Plattform-Expansion (ab 2028)}
 
-Nach formeller Übergabe an die BEKB öffnet sich der Möglichkeitsraum für eine breitere Plattform-Positionierung. Diese Optionen werden \emph{ohne} Festlegung skizziert\,---\,die Entscheidung obliegt dem Auftraggeber:
+Im Falle einer allfälligen formellen Übernahme durch einen institutionellen Träger öffnet sich der Möglichkeitsraum für eine breitere Plattform-Positionierung. Diese Optionen werden \emph{ohne} Festlegung skizziert\,---\,die Entscheidung obläge dem künftigen Träger:
 
 \begin{itemize}
   \item \textbf{Multi-Mandanten-Fähigkeit}\,---\,nach Lizenz-Klärung Lizenzierung an institutionelle Drittnutzer (Vermögensverwalter, Family Offices, Sektor-Analysten).
@@ -2326,49 +2329,7 @@ Die übergeordnete Ambition besteht darin, OTC-X nicht bloss als retrospektives 
 \vspace{0.3cm}
 {\small\sffamily\textcolor{SlateGrey}{Dieses Dokument ist Bestandteil des proprietären OTC-X Projekts.}}\\[3pt]
 {\small\sffamily\textcolor{SlateGrey}{\copyright{} 2026 Mihael Atanasov\;·\;\href{mailto:mihaelatanasov22@gmail.com}{mihaelatanasov22@gmail.com}\;·\;Alle Rechte vorbehalten.}}\\[3pt]
-{\small\sffamily\textcolor{SlateGrey}{Erstellt für die Berner Kantonalbank AG, Schwarzenburgstrasse 160, 3001 Bern.}}
-
-\vspace{0.3cm}
-{\footnotesize\sffamily\textcolor{SlateGrey}{Mit Präzision gefertigt\;\;$\bullet$\;\;für den Schweizer OTC-Markt}}
-
-\vspace{0.5cm}
-{\color{SwissRed}\rule{0.5\textwidth}{1pt}}
-\end{center}
-
-\end{document}
-]
-{\small\sffamily\textcolor{SlateGrey}{Erstellt für die Berner Kantonalbank AG, Schwarzenburgstrasse 160, 3001 Bern.}}
-
-\vspace{0.3cm}
-{\footnotesize\sffamily\textcolor{SlateGrey}{Mit Präzision gefertigt\;\;$\bullet$\;\;für den Schweizer OTC-Markt}}
-
-\vspace{0.5cm}
-{\color{SwissRed}\rule{0.5\textwidth}{1pt}}
-\end{center}
-
-\end{document}
-onalbank AG, Schwarzenburgstrasse 160, 3001 Bern.}}
-
-\vspace{0.3cm}
-{\footnotesize\sffamily\textcolor{SlateGrey}{Mit Präzision gefertigt\;\;$\bullet$\;\;für den Schweizer OTC-Markt}}
-
-\vspace{0.5cm}
-{\color{SwissRed}\rule{0.5\textwidth}{1pt}}
-\end{center}
-
-\end{document}
-]
-{\small\sffamily\textcolor{SlateGrey}{Erstellt für die Berner Kantonalbank AG, Schwarzenburgstrasse 160, 3001 Bern.}}
-
-\vspace{0.3cm}
-{\footnotesize\sffamily\textcolor{SlateGrey}{Mit Präzision gefertigt\;\;$\bullet$\;\;für den Schweizer OTC-Markt}}
-
-\vspace{0.5cm}
-{\color{SwissRed}\rule{0.5\textwidth}{1pt}}
-\end{center}
-
-\end{document}
-olor{SlateGrey}{Erstellt für die Berner Kantonalbank AG, Schwarzenburgstrasse 160, 3001 Bern.}}
+{\small\sffamily\textcolor{SlateGrey}{Unabhängig erstellt; der Berner Kantonalbank AG unverbindlich zur Kenntnisnahme überreicht.}}
 
 \vspace{0.3cm}
 {\footnotesize\sffamily\textcolor{SlateGrey}{Mit Präzision gefertigt\;\;$\bullet$\;\;für den Schweizer OTC-Markt}}
