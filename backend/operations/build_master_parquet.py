@@ -1,225 +1,117 @@
-"""OTC-X Data Ingestion Pipeline.
+"""Strict trade ingestion that refuses corrupt exports before replacing data."""
 
-Consolidates and cleans 244+ per-security Swiss trade CSVs (downloaded
-by ``fetcher.py``) into two master datasets:
-
-* ``master_trades.parquet`` — Zstandard-compressed columnar file for
-  high-performance analytics in Polars.
-* ``master_trades_cleaned.csv`` — Human-readable CSV with the original
-  OTC-X formatting conventions (comma-space separator, ``DD.MM.YYYY``
-  dates, ``X`` for off-book flag).
-
-Processing stages
------------------
-1. **Discovery & Filtering** — locate CSVs, skip empty / header-only files.
-2. **Ingestion** — read all files as strings (schema-safe) and concatenate.
-3. **Scrubbing & Casting** — normalise headers, parse dates, cast numerics,
-   convert the off-book flag to boolean.
-4. **Deduplication** — remove exact-duplicate rows.
-5. **Dual Output** — write Parquet and formatted CSV.
-6. **Audit Summary** — print schema, quality stats, and sample rows.
-"""
+from pathlib import Path
+import sys
+import csv
+from datetime import datetime
+import io
+import math
+import re
 
 import polars as pl
-from pathlib import Path
+
+if not __package__:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from backend.operations.security_registry import DATA_DIR, atomic_write_bytes, is_valid_isin
+
+TRADE_COLUMNS = ["Isin", "Datum", "Zeit", "Kurs", "Volumen", "Off Book"]
+TRADE_SCHEMA = {
+    "Isin": pl.String, "Datum": pl.Date, "Zeit": pl.String,
+    "Kurs": pl.Float64, "Volumen": pl.Float64, "Off Book": pl.Boolean,
+}
+_TIME = re.compile(r"(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?")
 
 
-def build_master_parquet() -> None:
-    """Consolidate per-security trade CSVs into master Parquet and CSV.
+def parse_trade_csv(content: bytes, *, expected_isin: str | None = None) -> pl.DataFrame:
+    """Validate CSV shape, identity, date/time and finite trade fields.
 
-    Reads every ``*.csv`` file in ``backend/data/trades/``, applies
-    type-safe cleaning transformations, deduplicates, and writes the
-    results to ``backend/data/master_trades.parquet`` and
-    ``backend/data/master_trades_cleaned.csv``.
-
-    Returns
-    -------
-    None
-        Outputs are written to disk; nothing is returned.
-
-    Notes
-    -----
-    Files smaller than 100 bytes are treated as empty / header-only and
-    are silently skipped.  All CSVs are initially read with
-    ``infer_schema_length=0`` (every column as ``Utf8``) to avoid
-    schema-mismatch errors across heterogeneous source files.
+    A genuinely empty body or a valid header-only CSV represents no trades.
+    Malformed/HTML payloads, missing fields and nonmatching identities fail.
     """
-    # Define paths (relative to operations/)
-    script_dir = Path(__file__).resolve().parent
-    raw_data_dir = script_dir.parent / "data" / "trades"
-    output_parquet = script_dir.parent / "data" / "master_trades.parquet"
-    output_csv = script_dir.parent / "data" / "master_trades_cleaned.csv"
-
-    print("=" * 60)
-    print("OTC-X Data Ingestion Pipeline")
-    print("=" * 60)
-    print(f"Scanning: {raw_data_dir.resolve()}")
-
-    # 1. Discovery & Filtering
-    all_files = list(raw_data_dir.glob("*.csv"))
-    valid_files: list[Path] = []
-    skipped_count: int = 0
-
-    for file_path in all_files:
-        if file_path.stat().st_size < 100:
-            skipped_count += 1
-            print(f"  [SKIP] {file_path.name} (empty/header-only)")
-        else:
-            valid_files.append(file_path)
-
-    print(f"\nFound {len(all_files)} files total.")
-    print(f"Processing {len(valid_files)} valid files...")
-    print(f"Skipped {skipped_count} empty/header-only files.\n")
-
-    if not valid_files:
-        print("ERROR: No valid files to process.")
-        return
-
-    # 2. Ingestion
-    dfs: list[pl.DataFrame] = []
-    for f in valid_files:
-        try:
-            # Read CSV with all columns as String (safest for dirty data)
-            df_temp = pl.read_csv(
-                f,
-                separator=",",
-                has_header=True,
-                infer_schema_length=0,  # Force all String types
-                ignore_errors=True
-            )
-            
-            # Normalize headers (strip whitespace: " Datum" -> "Datum")
-            df_temp.columns = [c.strip() for c in df_temp.columns]
-            
-            if not df_temp.is_empty():
-                dfs.append(df_temp)
-                
-        except Exception as e:
-            print(f"  [ERROR] Failed to read {f.name}: {e}")
-
-    if not dfs:
-        print("ERROR: No valid data found after reading files.")
-        return
-
-    # Concatenate all dataframes
-    df_raw = pl.concat(dfs)
-    print(f"Raw rows ingested: {len(df_raw):,}")
-
-    # 3. Scrubbing & Casting
-    print("\nApplying data cleaning transformations...")
-
-
-    df_clean = df_raw.with_columns([
-        # Isin: Trim whitespace
-        pl.col("Isin").str.strip_chars().alias("Isin"),
-        
-        # Datum: Parse DD.MM.YYYY to Date
-        pl.col("Datum").str.strip_chars().str.strptime(pl.Date, "%d.%m.%Y", strict=False),
-        
-        # Zeit: Keep as-is (string time)
-        pl.col("Zeit").str.strip_chars(),
-        
-        # Kurs: Clean whitespace -> Remove ' -> Replace , -> Cast
-        pl.col("Kurs")
-          .str.strip_chars()            # Critical fix: remove leading/trailing spaces
-          .str.replace_all("'", "")     # Remove thousands separator
-          .str.replace(",", ".")         # Replace comma with dot
-          .cast(pl.Float64, strict=False),
-        
-        # Volumen: Clean whitespace -> Remove ' -> Replace , -> Cast
-        pl.col("Volumen")
-          .str.strip_chars()            # Critical fix
-          .str.replace_all("'", "")
-          .str.replace(",", ".")
-          .cast(pl.Float64, strict=False),
-        
-        # Off Book: Boolean conversion (X = True, else False)
-        (pl.col("Off Book").str.strip_chars() == "X")
-          .fill_null(False)
-          .alias("Off Book")
-    ])
-
-    # 4. Deduplication
-    df_final = df_clean.unique()
-    
-    
-    # Validation: Quality Check
-    n_total = len(df_final)
-    n_valid_kurs = df_final.filter(pl.col("Kurs").is_not_null()).height
-    print(f"Data Quality: {n_valid_kurs}/{n_total} records have valid Price/Volume data ({n_valid_kurs/n_total:.1%})")
-    
-    print(f"Rows after deduplication: {len(df_final):,}")
-
-    # 5. Dual Output
-    print("\nWriting output files...")
-    
-    # Parquet (binary, compressed) - Keep native types for analytics
-    df_final.write_parquet(output_parquet, compression="zstd")
-    print(f"  [OK] Parquet: {output_parquet.name} ({output_parquet.stat().st_size / 1024:.1f} KB)")
-    
-    # CSV (Formatted for "Original" look)
-    # We create a display-specific version
-    print("  -> Formatting data for CSV output...")
-    
-    df_display = df_final.with_columns([
-        # Datum -> String DD.MM.YYYY
-        pl.col("Datum").dt.strftime("%d.%m.%Y"),
-        
-        # Kurs/Volumen -> String .6f
-        pl.col("Kurs").map_elements(lambda x: f"{x:.6f}", return_dtype=pl.String),
-        pl.col("Volumen").map_elements(lambda x: f"{x:.6f}", return_dtype=pl.String),
-        
-        # Off Book -> Map True to "X", False to ""
-        pl.when(pl.col("Off Book")).then(pl.lit("X")).otherwise(pl.lit("")).alias("Off Book")
-    ])
-    
-    # Write manually to enforce ", " separator (comma + space)
-    with open(output_csv, "w", encoding="utf-8") as f:
-        # Write Header with spaces
-        header = ["Isin", "Datum", "Zeit", "Kurs", "Volumen", "Off Book"]
-        f.write(", ".join(header) + "\n")
-        
-        # Write rows
-        # Vectorised string concatenation for CSV output
-        csv_lines = df_display.select(
-            pl.concat_str(
-                [
-                    pl.col("Isin"),
-                    pl.col("Datum"),
-                    pl.col("Zeit"),
-                    pl.col("Kurs"),
-                    pl.col("Volumen"),
-                    pl.col("Off Book")
-                ],
-                separator=", "
-            ).alias("line")
-        )
-        
-        # Write efficiently
-        f.write("\n".join(csv_lines["line"].to_list()))
-        f.write("\n") # standard EOF newline
-
-    print(f"  [OK] CSV: {output_csv.name} ({output_csv.stat().st_size / 1024:.1f} KB)")
-
-    # 6. Audit Summary
-    print("\n" + "=" * 60)
-    print("AUDIT SUMMARY")
-    print("=" * 60)
-    print(f"Processed {len(valid_files)} files, Skipped {skipped_count} empty files.")
-    print(f"Total rows: {len(df_final):,}")
-    print("\nSchema:")
-    for col, dtype in df_final.schema.items():
-        print(f"  {col:15} {dtype}")
-    
-    print("\nSample Data (first 5 rows):")
+    if not content.strip():
+        return pl.DataFrame(schema=TRADE_SCHEMA)
     try:
-        print(df_final.head(5))
-    except UnicodeEncodeError:
-        print("  [Note: Sample display skipped due to console encoding limitations]")
-        print(f"  -> View full data in: {output_csv.name}")
-    
-    print("=" * 60)
-    print("Pipeline complete! [SUCCESS]")
+        text = content.decode("utf-8-sig")
+        reader = csv.reader(io.StringIO(text), skipinitialspace=True, strict=True)
+        header = [value.strip() for value in next(reader)]
+        if header != TRADE_COLUMNS:
+            raise ValueError(f"Unexpected trade CSV header: {header!r}")
+        rows = []
+        for line_number, fields in enumerate(reader, start=2):
+            if not fields or all(not field.strip() for field in fields):
+                continue
+            if len(fields) != len(TRADE_COLUMNS):
+                raise ValueError(f"Trade CSV line {line_number} has {len(fields)} fields")
+            isin, date_text, time_text, price_text, volume_text, off_book = [field.strip() for field in fields]
+            if not is_valid_isin(isin) or (expected_isin is not None and isin != expected_isin):
+                raise ValueError(f"Invalid or mismatched trade ISIN at line {line_number}: {isin!r}")
+            try:
+                date = datetime.strptime(date_text, "%d.%m.%Y").date()
+                if not _TIME.fullmatch(time_text):
+                    raise ValueError("invalid trade time")
+                price = float(price_text.replace("'", "").replace(",", "."))
+                volume = float(volume_text.replace("'", "").replace(",", "."))
+                if not math.isfinite(price) or not math.isfinite(volume) or price <= 0 or volume < 0:
+                    raise ValueError("price must be positive and volume nonnegative; both must be finite")
+                if off_book not in ("", "X"):
+                    raise ValueError("invalid Off Book flag")
+            except ValueError as exc:
+                raise ValueError(f"Invalid critical trade field at line {line_number}: {exc}") from exc
+            rows.append((isin, date, time_text, price, volume, off_book == "X"))
+        return pl.DataFrame(rows, schema=TRADE_SCHEMA, orient="row")
+    except (UnicodeDecodeError, csv.Error, StopIteration) as exc:
+        raise ValueError(f"Malformed trade CSV: {exc}") from exc
+
+
+def format_trade_csv(frame: pl.DataFrame) -> bytes:
+    """Keep the established comma-space CSV and six-decimal numeric format."""
+    lines = [", ".join(TRADE_COLUMNS)]
+    for row in frame.iter_rows(named=True):
+        lines.append(", ".join([
+            row["Isin"], row["Datum"].strftime("%d.%m.%Y"), row["Zeit"],
+            f'{row["Kurs"]:.6f}', f'{row["Volumen"]:.6f}', "X" if row["Off Book"] else "",
+        ]))
+    return ("\n".join(lines) + "\n").encode("utf-8")
+
+
+def build_master_parquet(data_dir: Path | None = None) -> None:
+    """Consolidate every historic ISIN; fail instead of skipping corrupt files."""
+    data_dir = Path(data_dir) if data_dir is not None else DATA_DIR
+    files = sorted((data_dir / "trades").glob("*.csv"))
+    frames = []
+    empty_count = 0
+    for path in files:
+        try:
+            frame = parse_trade_csv(path.read_bytes(), expected_isin=path.stem)
+        except ValueError as exc:
+            raise ValueError(f"Invalid trade file {path.name}: {exc}") from exc
+        if frame.is_empty():
+            empty_count += 1
+        else:
+            frames.append(frame)
+    if not frames:
+        raise ValueError("No valid trade records to consolidate; keeping previous master data")
+    final = pl.concat(frames).unique(maintain_order=True)
+    prior_path = data_dir / "master_trades.parquet"
+    if prior_path.exists():
+        prior = pl.read_parquet(prior_path)
+        if prior.schema != TRADE_SCHEMA:
+            raise ValueError("Previous master trade schema is invalid; refusing replacement")
+        if prior.join(final, on=TRADE_COLUMNS, how="anti").height:
+            raise ValueError("Raw trade files remove or change previously published history")
+        additions = final.join(prior, on=TRADE_COLUMNS, how="anti", maintain_order="left")
+        # Legacy exports have minute-resolution timestamps. Their row order
+        # determines first/last price when times tie. Preserve the published
+        # order so an infrastructure fix cannot rewrite historical signals.
+        final = pl.concat([prior, additions])
+    parquet = io.BytesIO()
+    final.write_parquet(parquet, compression="zstd")
+    csv_content = format_trade_csv(final)
+    atomic_write_bytes(data_dir / "master_trades.parquet", parquet.getvalue())
+    atomic_write_bytes(data_dir / "master_trades_cleaned.csv", csv_content)
+    print(f"Consolidated {len(final):,} trades from {len(frames)} files; {empty_count} empty/header-only files.")
+    print(f"Schema: {final.schema}")
 
 
 if __name__ == "__main__":

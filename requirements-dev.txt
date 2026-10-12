@@ -1,10 +1,18 @@
-# Development and test dependencies.
-# Install with:  pip install -r requirements-dev.txt
-#
-# This also pulls in everything from requirements.txt (runtime deps),
-# so a single command sets up a full local development environment.
+# Test lock from the same successful pipeline as requirements.txt.
+# Install in an isolated environment: python -m pip install -r requirements-dev.txt
+# Runtime deployments install requirements.txt only.
 
 -r requirements.txt
 
-# Tests
+# Direct test dependencies
+pytest==9.1.1
 pytest-bdd==8.1.0
+
+# Complete transitive test-only closure
+gherkin-official==29.0.0
+iniconfig==2.3.1
+mako==1.4.3
+parse==1.22.2
+parse-type==0.6.6
+pluggy==1.6.0
+pygments==2.21.0

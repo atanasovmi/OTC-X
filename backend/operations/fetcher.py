@@ -1,350 +1,155 @@
-"""OTC-X Trade Data Fetcher.
+"""Download validated cumulative trade exports using source ISIN identities.
 
-Downloads per-security trade CSV exports from the OTC-X API for every
-security listed in ``backend/data/securities.csv``.  This is **Stage 2**
-of the OTC-X data pipeline, executed after the securities crawl
-(``soft_crawl.py``) and before data consolidation
-(``build_master_parquet.py``).
-
-Key behaviours
---------------
-* Converts Swiss Valor numbers to ISINs via the Luhn check-digit
-  algorithm before requesting the trade export endpoint.
-* Respects a configurable rate-limit delay (default 1 req/s) and
-  performs a single automatic retry on HTTP 403 / 429 responses.
-* The OTC-X export is cumulative (every download is the security's full
-  trade history), so the canonical ``{ISIN}.csv`` is overwritten in
-  place on each run.  An empty response body (delisted securities) is
-  skipped so a good file is never clobbered with nothing.
-* Duplicate Valor entries in the input CSV are silently deduplicated.
+Missing/empty exports preserve history. Malformed responses, failed requests,
+and incomplete cumulative histories fail the stage rather than reporting success.
 """
+
+from pathlib import Path
+import sys
+import logging
+import math
+import time
+from datetime import datetime
 
 import pandas as pd
 import requests
-import os
-from pathlib import Path
-import time
-import logging
-from datetime import datetime
 
-# --- Configuration ---
-SCRIPT_DIR: Path = Path(__file__).resolve().parent
-INPUT_FILE: Path = SCRIPT_DIR.parent / "data" / "securities.csv"
-OUTPUT_DIR: Path = SCRIPT_DIR.parent / "data" / "trades"
-LOG_DIR: Path = SCRIPT_DIR.parent / "logs"
-BASE_URL: str = "https://www.otc-x.ch/api/market/trades/{}/export"
-TIMEOUT: int = 10
-RATE_LIMIT_DELAY: float = 1.0  # Seconds between requests
+if not __package__:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from backend.operations.build_master_parquet import parse_trade_csv
+from backend.operations.security_registry import DATA_DIR, atomic_write_bytes, validate_universe
 
-# --- Setup Logging ---
-def setup_logging() -> logging.Logger:
-    """Configure dual-output logging (file + console).
-
-    Creates a timestamped log file under ``backend/logs/`` and
-    attaches both a file handler and a stream handler to the root
-    logger.
-
-    Returns
-    -------
-    logging.Logger
-        Configured root logger instance.
-    """
-    LOG_DIR.mkdir(parents=True, exist_ok=True)
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
-    log_file = LOG_DIR / f"downloader_{timestamp}.log"
-    
-    logging.basicConfig(
-        level=logging.INFO,
-        format="[%(asctime)s] %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-        handlers=[
-            logging.FileHandler(log_file, encoding='utf-8'),
-            logging.StreamHandler()
-        ]
-    )
-    return logging.getLogger()
+SCRIPT_DIR = Path(__file__).resolve().parent
+INPUT_FILE = DATA_DIR / "securities.csv"
+OUTPUT_DIR = DATA_DIR / "trades"
+LOG_DIR = SCRIPT_DIR.parent / "logs"
+BASE_URL = "https://www.otc-x.ch/api/market/trades/{}/export"
+TIMEOUT = 10
+RATE_LIMIT_DELAY = 1.0
+logger = logging.getLogger(__name__)
 
 
-logger = setup_logging()
+def setup_logging(log_dir: Path | None = None) -> logging.Logger:
+    """Create logging only when running the stage; importing has no side effects."""
+    directory = LOG_DIR if log_dir is None else log_dir
+    directory.mkdir(parents=True, exist_ok=True)
+    log_file = directory / f"downloader_{datetime.now():%Y-%m-%d_%H%M%S}.log"
+    logger.setLevel(logging.INFO)
+    for handler in list(logger.handlers):
+        logger.removeHandler(handler)
+        handler.close()
+    formatter = logging.Formatter("[%(asctime)s] %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+    for handler in (logging.FileHandler(log_file, encoding="utf-8"), logging.StreamHandler()):
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+    return logger
 
-
-# --- Helper Functions ---
 
 def calculate_isin_check_digit(isin_without_check: str) -> str:
-    """Calculate the ISIN check digit using the Luhn algorithm.
-
-    Each letter in the ISIN prefix is expanded into two decimal digits
-    (A = 10 … Z = 35). The resulting digit sequence is then processed
-    right-to-left with alternating ×2 / ×1 weights, and the check
-    digit is ``(10 − (sum mod 10)) mod 10``.
-
-    Parameters
-    ----------
-    isin_without_check : str
-        The 11-character ISIN prefix **without** the final check digit
-        (e.g. ``"CH001629001"``).
-
-    Returns
-    -------
-    str
-        Single-character string containing the computed check digit
-        (``'0'`` – ``'9'``).
-    """
-    # Convert letters to numbers
-    digits: list[int] = []
+    """Calculate the compatible Swiss Valor conversion's Luhn check digit."""
+    digits = []
     for char in isin_without_check:
-        if char.isdigit():
-            digits.append(int(char))
-        else:
-            # A=10, ..., Z=35
-            val = ord(char.upper()) - 55
-            digits.extend([int(d) for d in str(val)])
-    
-    # Luhn double-add-double: weight alternates ×2, ×1 from the rightmost digit
-    total_sum: int = 0
-    for i, digit in enumerate(reversed(digits)):
-        weight = 2 if i % 2 == 0 else 1
-        product = digit * weight
-        total_sum += (product // 10) + (product % 10)
-        
-    check_digit = (10 - (total_sum % 10)) % 10
-    return str(check_digit)
+        digits.extend(int(digit) for digit in (char if char.isdigit() else str(ord(char.upper()) - 55)))
+    total = 0
+    for index, digit in enumerate(reversed(digits)):
+        product = digit * (2 if index % 2 == 0 else 1)
+        total += product // 10 + product % 10
+    return str((10 - total % 10) % 10)
 
 
 def val_to_isin(valor: str | int | float) -> str | None:
-    """Convert a Swiss Valor number to a fully-qualified ISIN.
-
-    Pads the numeric Valor to 9 digits, prepends the ``CH`` country
-    code, and appends a Luhn check digit.
-
-    Parameters
-    ----------
-    valor : str | int | float
-        Valor number.  Accepts floats (e.g. ``123.0`` as read by
-        pandas) and stringified floats (``"123.0"``).
-
-    Returns
-    -------
-    str | None
-        12-character ISIN string (e.g. ``"CH0016290012"``), or
-        ``None`` if the input cannot be parsed as a numeric Valor.
-    """
+    """Retain Valor conversion for callers; downloads use the API's actual ISIN."""
     try:
-        # Handle cases where pandas reads as float (e.g., 123.0) or string '123.0'
-        clean_valor = str(int(float(valor)))
-    except (ValueError, TypeError):
+        number = float(valor)
+        if not math.isfinite(number) or not number.is_integer() or not 0 < number < 1_000_000_000:
+            return None
+        clean = str(int(number)).zfill(9)
+    except (ValueError, TypeError, OverflowError):
         return None
-        
-    # Pad to 9 digits
-    padded_valor = clean_valor.zfill(9)
-    isin_prefix = "CH" + padded_valor
-    check_digit = calculate_isin_check_digit(isin_prefix)
-    return isin_prefix + check_digit
+    prefix = "CH" + clean
+    return prefix + calculate_isin_check_digit(prefix)
 
 
-def _save_trades(isin: str, content: bytes) -> bool:
-    """Write the canonical per-ISIN CSV, overwriting any prior version.
-
-    The OTC-X export is cumulative — each download is the security's full
-    trade history — so the latest download always supersedes the previous
-    file and overwriting in place is safe.  An empty body (which the API
-    occasionally returns for delisted securities) is skipped so an
-    existing good file is never clobbered with nothing.
-
-    Parameters
-    ----------
-    isin : str
-        12-character ISIN; determines the output filename ``{isin}.csv``.
-    content : bytes
-        Raw CSV payload returned by the OTC-X export endpoint.
-
-    Returns
-    -------
-    bool
-        ``True`` if the file was written, ``False`` if the empty body was
-        skipped.
-    """
-    if not content:
-        logger.warning(f"{isin}: empty response body — keeping existing file")
+def _save_trades(isin: str, content: bytes, output_dir: Path | None = None) -> bool:
+    """Validate before atomic replacement, preserving history for empty exports."""
+    directory = OUTPUT_DIR if output_dir is None else Path(output_dir)
+    incoming = parse_trade_csv(content, expected_isin=isin)
+    if incoming.is_empty():
+        logger.info("%s: empty/header-only export; retained existing history", isin)
         return False
-
-    with open(OUTPUT_DIR / f"{isin}.csv", 'wb') as f:
-        f.write(content)
+    path = directory / f"{isin}.csv"
+    if path.exists():
+        stored = parse_trade_csv(path.read_bytes(), expected_isin=isin)
+        # Full-history export is the source contract. Refuse truncation/corrections
+        # until investigated instead of silently deleting or double-counting trades.
+        if not set(stored.iter_rows()).issubset(set(incoming.iter_rows())):
+            raise ValueError(f"{isin}: cumulative export removes or changes stored trades; retained previous file")
+    atomic_write_bytes(path, content)
+    logger.info("%s: %d validated trades", isin, len(incoming))
     return True
 
 
-def download_trades(isin: str, session: requests.Session) -> str:
-    """Download the trade-history CSV for a single ISIN.
-
-    Fetches the CSV export from the OTC-X API.  On HTTP 403/429 the
-    request is retried once after a 5-second back-off.  The canonical
-    ``{ISIN}.csv`` is overwritten in place (see :func:`_save_trades`).
-
-    Parameters
-    ----------
-    isin : str
-        12-character ISIN identifying the security.
-    session : requests.Session
-        Pre-configured ``requests`` session with default headers.
-
-    Returns
-    -------
-    str
-        Download outcome — one of ``'success'``, ``'not_found'``, or
-        ``'error'``.
-    """
+def download_trades(isin: str, session: requests.Session, output_dir: Path | None = None) -> str:
+    """Return success/not_found/empty; genuine HTTP/network/CSV errors raise."""
     url = BASE_URL.format(isin)
-    try:
-        # First attempt — rate-limited 403/429 responses get one back-off retry below
+    response = session.get(url, timeout=TIMEOUT)
+    if response.status_code in (403, 429):
+        logger.warning("%s: HTTP %d; retrying once", isin, response.status_code)
+        time.sleep(5)
         response = session.get(url, timeout=TIMEOUT)
-
-        if response.status_code == 200:
-            content = response.content
-
-            # Overwrite the canonical file in place (empty bodies are skipped)
-            if _save_trades(isin, content):
-                # Log approximate trade count (lines minus header)
-                try:
-                    text_content = content.decode('utf-8', errors='ignore')
-                    line_count = len(text_content.strip().split('\n')) - 1 # Header
-                    line_count = max(0, line_count)
-                    logger.info(f"✓ {isin}: {line_count} trades downloaded")
-                except Exception:
-                    logger.info(f"✓ {isin}: downloaded (binary/unknown size)")
-
-            return 'success'
-            
-        elif response.status_code == 404:
-            logger.warning(f"✗ {isin}: HTTP 404 (no trades available)")
-            return 'not_found'
-            
-        elif response.status_code in [403, 429]:
-            # OTC-X occasionally rate-limits at ~1 req/s; a single 5s back-off
-            # is enough to recover in practice
-            logger.warning(f"⚠ {isin}: Rate limit/Forbidden ({response.status_code}). Retrying once...")
-            time.sleep(5)
-            response = session.get(url, timeout=TIMEOUT)
-            if response.status_code == 200:
-                # Same overwrite-in-place logic as the happy path above
-                _save_trades(isin, response.content)
-                logger.info(f"✓ {isin}: downloaded after retry")
-                return 'success'
-            else:
-                logger.error(f"✗ {isin}: Failed after retry ({response.status_code})")
-                return 'error'
-        else:
-            logger.error(f"✗ {isin}: HTTP {response.status_code}")
-            return 'error'
-            
-    except requests.RequestException as e:
-        logger.error(f"✗ {isin}: Network error: {e}")
-        return 'error'
+    if response.status_code == 404:
+        logger.info("%s: no trades available (HTTP 404)", isin)
+        return "not_found"
+    if response.status_code != 200:
+        raise requests.HTTPError(f"{isin}: trade export failed with HTTP {response.status_code}", response=response)
+    return "success" if _save_trades(isin, response.content, output_dir) else "empty"
 
 
-# --- Main Logic ---
-def main() -> None:
-    """Run the full trade-download pipeline.
-
-    Reads the securities CSV produced by ``soft_crawl.py``, converts
-    each Valor to an ISIN, downloads the trade CSV export from the
-    OTC-X API, and writes per-ISIN CSV files to ``backend/data/trades/``.
-
-    The function logs a summary of successful / failed downloads and
-    total elapsed time upon completion.
-
-    Returns
-    -------
-    None
-    """
-    logger.info("OTC-X Trade Downloader started")
-    start_time = time.time()
-    
-    # 1. Setup
-    if not INPUT_FILE.exists():
-        logger.critical(f"Missing input file: {INPUT_FILE}")
-        return
-        
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    
-    # 2. Load Data
+def main(data_dir: Path | None = None, *, log_dir: Path | None = None) -> dict[str, int]:
+    """Fetch active source ISINs and flush stage logs on every exit path."""
+    directory = (LOG_DIR if data_dir is None else Path(data_dir).parent / "logs") if log_dir is None else Path(log_dir)
+    setup_logging(directory)
     try:
-        df = pd.read_csv(INPUT_FILE)
-        logger.info(f"Loaded {len(df)} rows from {INPUT_FILE}")
-    except Exception as e:
-        logger.critical(f"Failed to read CSV: {e}")
-        return
-        
-    if 'VALOR' not in df.columns:
-        logger.critical("Input CSV missing 'VALOR' column.")
-        return
-        
-    # 3. Process
-    stats: dict[str, int] = {
-        'total': 0,
-        'success': 0,
-        'failed': 0,
-        'skipped': 0,
-        'created_files': 0
-    }
-    
-    # Reuse a single session for connection pooling across 243 requests
-    session = requests.Session()
-    session.headers.update({
-        'User-Agent': 'OTC-X-Radar-DataCollector/1.0 (Educational Project)',
-        'Accept': 'text/csv,application/json'
-    })
+        return _run_downloads(data_dir)
+    finally:
+        # In particular, Windows cannot clean staged directories with open logs.
+        for handler in list(logger.handlers):
+            logger.removeHandler(handler)
+            handler.close()
 
-    # Track processed ISINs to skip duplicates in the input CSV
-    unique_processed: set[str] = set()
-    
-    for index, row in df.iterrows():
-        name = row.get('NAME', 'Unknown')
-        valor = row.get('VALOR')
-        
-        if pd.isna(valor):
-            logger.warning(f"Row {index}: Missing VALOR, skipping.")
-            stats['failed'] += 1
-            continue
-            
-        isin = val_to_isin(str(valor))
-        
-        if not isin:
-             logger.warning(f"Row {index}: Invalid VALOR {valor}, skipping.")
-             stats['failed'] += 1
-             continue
-             
-        if isin in unique_processed:
-            continue
-        unique_processed.add(isin)
-        
-        stats['total'] += 1
-        logger.info(f"Processing: {isin} ({name})")
-        
-        result = download_trades(isin, session)
-        
-        if result == 'success':
-            stats['success'] += 1
-            stats['created_files'] += 1
-        elif result == 'not_found':
-            stats['failed'] += 1
-        else:
-            stats['failed'] += 1
-            
-        # Rate limit
-        time.sleep(RATE_LIMIT_DELAY)
-        
-    # 4. Summary
-    elapsed_time = time.time() - start_time
-    m, s = divmod(elapsed_time, 60)
-    
-    logger.info("========== SUMMARY ==========")
-    logger.info(f"Total ISINs processed: {stats['total']}")
-    logger.info(f"Successful downloads: {stats['success']}")
-    logger.info(f"Failed/Not Found: {stats['failed']}")
-    logger.info(f"CSV files created: {stats['created_files']}")
-    logger.info(f"Time elapsed: {int(m)}m {int(s)}s")
-    logger.info(f"Log saved: {logger.handlers[0].baseFilename}")
+
+def _run_downloads(data_dir: Path | None = None) -> dict[str, int]:
+    """Fetch all active source ISINs; fail on real errors or zero valid downloads."""
+    input_file = INPUT_FILE if data_dir is None else Path(data_dir) / "securities.csv"
+    output_dir = OUTPUT_DIR if data_dir is None else Path(data_dir) / "trades"
+    start = time.monotonic()
+    frame = validate_universe(pd.read_csv(input_file, dtype=str, keep_default_na=False))
+    stats = {"total": len(frame), "success": 0, "not_found": 0, "empty": 0, "failed": 0, "created_files": 0}
+    errors = []
+    with requests.Session() as session:
+        session.headers.update({
+            "User-Agent": "OTC-X-Radar-DataCollector/1.0",
+            "Accept": "text/csv",
+        })
+        for row in frame.to_dict("records"):
+            isin = row["ISIN"]
+            try:
+                result = download_trades(isin, session, output_dir)
+                stats[result] += 1
+                if result == "success":
+                    stats["created_files"] += 1
+            except (requests.RequestException, ValueError, OSError) as exc:
+                stats["failed"] += 1
+                errors.append(f"{isin}: {exc}")
+                logger.error("%s: %s", isin, exc)
+            time.sleep(RATE_LIMIT_DELAY)
+    print(f"Trade download outcomes: {stats}; elapsed {time.monotonic() - start:.1f}s")
+    if errors:
+        raise RuntimeError(f"Trade stage failed for {len(errors)} securities: {'; '.join(errors[:5])}")
+    if stats["success"] == 0:
+        raise RuntimeError("No valid nonempty trade exports downloaded; refusing an unverified refresh")
+    return stats
 
 
 if __name__ == "__main__":
