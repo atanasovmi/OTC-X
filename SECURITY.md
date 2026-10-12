@@ -42,7 +42,7 @@
 
 ## ✅ Supported Versions
 
-OTC-X follows a **rolling-release model** on the `main` branch. There are no discrete version releases — the latest commit on `main` is the only supported version.
+OTC-X's current development source is `main`; tagged container releases also exist. A running deployment may use an older revision or baked data snapshot. Record its source revision and image digest before applying security or reliability updates; see the [operating guide](docs/OPERATIONS.md).
 
 | Branch / Deployment  | Status | Security Updates |
 |:---|:---:|:---:|
@@ -51,7 +51,7 @@ OTC-X follows a **rolling-release model** on the `main` branch. There are no dis
 | Streamlit Cloud (live dashboard) | ✅ Active | ✅ Supported |
 | Archived commits / forks | ❌ Unsupported | ❌ Not covered |
 
-> **Policy:** Security patches are applied exclusively to the `main` branch and deployed immediately. Users running forked or archived copies do so entirely at their own risk and in potential violation of the [Proprietary Notice](LICENSE.md).
+> **Policy:** Security patches target `main` after validation and a reviewed rollout. Partner containers require explicit deployment of the patched image; a Git merge alone does not update them. Use of forked or archived copies remains subject to the [Proprietary Notice](LICENSE.md).
 
 <br/>
 
@@ -151,9 +151,9 @@ The automated daily pipeline (`automation_pipeline.yml`) follows these security 
 Principle                         Implementation
 ─────────────────────────────     ─────────────────────────────────────────────
 Least-privilege permissions       contents: write — only what's needed to commit data
-No secret exfiltration            Pipeline uses no API keys, tokens, or credentials
+Credential scope                 OTC-X fetches need no API keys; Git writes use GITHUB_TOKEN
 Immutable runners                 ubuntu-latest — fresh VM per execution
-Dependency pinning                actions/checkout@v4, actions/setup-python@v5
+Dependency pinning                Complete Python version pins; actions use reviewed commit SHAs
 Isolated execution                Each run is self-contained, no persistent state on runner
 ```
 
@@ -170,7 +170,7 @@ Isolated execution                Each run is self-contained, no persistent stat
 
 | Measure | Implementation |
 |:---|:---|
-| Branch protection | `main` branch is the single source of truth |
+| Branch protection | Not enabled at the 2026-10-12 inspection; test workflows do not themselves enforce merge policy. Future rules must accommodate scoped daily bot updates. |
 | `.gitignore` hardening | Environment files (`.env`, `.venv`), credentials, and IDE configs excluded |
 | No hardcoded secrets | Paths resolved dynamically via `Path(__file__).resolve().parent` — no absolute paths or credentials in source |
 | Bot-only CI commits | Pipeline commits are made exclusively by `github-actions[bot]` with limited scope (`backend/data/`, `backend/logs/`) |
@@ -238,10 +238,11 @@ The project includes explicit prohibitions ([LICENSE.md — Art. 3](LICENSE.md))
 
 ### Dependency Security Practices
 
-- **Minimal footprint** — Only 8 direct dependencies; reduced attack surface
+- **Complete dependency pins** — Runtime and test dependencies include their transitive closure. Reviewed upgrades run `pip check`, chart/lifecycle tests and the Python matrix.
 - **No credential-bearing packages** — No database drivers, auth libraries, or cloud SDKs
 - **Rust-backed core** — Polars leverages Rust's memory safety guarantees for the ETL pipeline
-- **Pip-cached CI** — Dependencies are cached in GitHub Actions to reduce supply-chain exposure during installation
+- **Pip-cached CI** — Caching reduces installation time; it is not a package authenticity guarantee.
+- **Recorded releases** — Reviewed base/action pins and source/image digest receipts support reproducibility and rollback. Pins need monthly review and prompt review for relevant security fixes.
 - **Monitoring** — Maintainer monitors [GitHub Dependabot alerts](https://github.com/atanasovmi/OTC-X/security/dependabot) and [PyPI advisories](https://pypi.org/security/) for known vulnerabilities
 
 ### Reporting a Dependency Vulnerability
@@ -348,7 +349,7 @@ If your contribution is accepted for review, ensure:
 ### Dependency Security
 
 - [ ] **Minimal dependencies** — Justify any new package addition; prefer stdlib solutions
-- [ ] **Pin major versions** — When adding dependencies, specify version constraints in `requirements.txt`
+- [ ] **Pin the full dependency closure** — Update exact runtime/test versions together and run the compatibility/regression gates before rollout
 - [ ] **Audit before merge** — Review dependency license compatibility and known CVEs
 
 <br/>
