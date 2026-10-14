@@ -104,7 +104,7 @@ A fully automated **end-to-end data pipeline**: from raw OTC-X API data through 
 ### ⭐ Wert & Einzigartigkeit (Value & Uniqueness)
 Liquidity analytics for Swiss OTC equities: automated anomaly scoring, rolling 30-day risk baselines, and daily refreshes via GitHub Actions. The dashboard reports successful refresh time separately from the latest trade date, including overdue or unverified freshness.
 
-Maintenance records: [change log](CHANGELOG.md), [operating and recovery guide](docs/OPERATIONS.md), and [October 2026 pipeline incident](docs/incidents/2026-10-12-pipeline-recovery.md). These records distinguish tested local changes from completed production rollout.
+Maintenance records: [change log](CHANGELOG.md), [operating and recovery guide](docs/OPERATIONS.md), and [GitHub recovery review](https://github.com/atanasovmi/OTC-X/pulls). The review records impact, cause, test evidence and rollout status; partner-facing release notes follow verified deployment.
 
 </td>
 </tr>

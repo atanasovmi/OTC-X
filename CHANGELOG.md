@@ -12,4 +12,4 @@ Changes affecting partners or operations are recorded here, with evidence and fo
 - Show the successful refresh time separately from the latest trade date, invalidate changed-file caches, and warn when the refresh is overdue or unverified.
 - Gate container releases with tests, retain source/digest receipts, and suspend unsafe package deletion that can break multiarchitecture rollback images.
 
-**Status:** local implementation and verification; GitHub, hosted applications, and partner deployments have not been changed. See the [incident record](docs/incidents/2026-10-12-pipeline-recovery.md) for evidence and open rollout checks, and the [operating guide](docs/OPERATIONS.md) for recovery and maintenance.
+**Status:** prepared for review; production rollout pending. See the [GitHub recovery review](https://github.com/atanasovmi/OTC-X/pulls) for cause, evidence, owner and outstanding rollout checks, and the [operating guide](docs/OPERATIONS.md) for recovery and maintenance.

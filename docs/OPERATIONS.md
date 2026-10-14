@@ -24,7 +24,7 @@ The workflow order is locked install / `pip check` → preflight tests → publi
 
 1. Read the failing stage and download the Actions **refresh-receipts** artifact (30-day retention), including install/test/validation logs. Successful runs also commit the pipeline receipt under `backend/logs/`.
 2. Check the app's successful refresh time and trade date separately. A weekend may have a recent refresh and an older trade date. Missing/invalid timestamps show unverified freshness; over 36 hours shows overdue freshness.
-3. Reproduce in a disposable checkout with the committed pins. Fix the underlying dependency/source/schema issue, then rerun the same gates. Preserve receipts needed longer than 30 days in the incident record or retained internal archive.
+3. Reproduce in a disposable checkout with the committed pins. Fix the underlying dependency/source/schema issue, then rerun the same gates. Link receipts in the recovery pull request; preserve evidence needed longer than 30 days in a retained internal archive.
 
 GitHub schedules are best effort; `05:00 UTC` is a requested start time, not a service-level guarantee. The freshness warning requires someone to view the app; it is not an independent notification service. Operators should check failed Actions notifications and the two scheduled runs after each recovery.
 
@@ -47,7 +47,7 @@ Before rollout, record the current deployed source revision, hosted Python versi
 
 1. Publish the reviewed patch branch and inspect Python 3.12/3.13/3.14 CI results. Branch protection is a separate repository setting; new checks alone do not enforce it. Any future rule must accommodate the scoped daily bot writes.
 2. Merge only after checks pass, then dispatch the daily workflow on the production branch and verify the resulting data/status commit.
-3. Inspect all four hosted tabs, history/export access, inactive/new-listing states, and refresh clocks. Observe two consecutive scheduled refreshes and record their links in the incident record.
+3. Inspect all four hosted tabs, history/export access, inactive/new-listing states, and refresh clocks. Observe two consecutive scheduled refreshes and record their links in the recovery pull request.
 4. For container partners, build/sign the tested release, record source SHA plus image digest and retained `sha-<12-character-source-SHA>` tag, then roll out separately. Daily Git commits do not update existing containers.
 
 Roll back a failed application release using a reviewed revert on top of current data, or the recorded known-good container **digest**. For bad data, restore the complete previously validated `backend/data/` snapshot together; do not mix old metrics with new registry/raw files. Preserve any new raw history from the failed candidate before a deliberate data restoration. Never restore floating dependency ranges as a recovery step. Revalidate and keep the failure receipt.
@@ -60,7 +60,7 @@ Use recorded digests for partner upgrades: an older/manual release can move `lat
 
 The maintainer reviews dependencies, action SHA pins and the container base monthly, and sooner for relevant security fixes. Update the complete dependency closure in a separate review; run `pip check`, the Python matrix, chart/lifecycle tests and snapshot validation. Verify both container architectures and retain the previous digest. Python pins and a base digest prevent accidental drift; apt packages still follow the base distribution's repository during a new build.
 
-Keep this record small: **CHANGELOG** for user-visible behavior, **incident record** for cause/evidence/open follow-up, **operating guide** for repeatable procedures. Add exact workflow/source/digest links when a rollout happens; mark unresolved checks pending rather than claiming production recovery from local tests.
+Keep the record small: **GitHub recovery PR** for impact, cause, owner, review, test evidence and rollout checklist; **CHANGELOG** for user-visible behavior; **operating guide** for repeatable procedures. Publish concise partner-facing **GitHub Release notes** after verification, with exact source/data versions and the signed image digest. Track Prepared → Monitoring → Resolved in the PR; merging alone is not recovery. Add exact workflow/source/digest links as rollout happens and keep unresolved checks pending.
 
 The local Windows deletion error was separate: the abandoned outer checkout had a deny ACL for the sandbox identity, while the user's account retained FullControl. Its Git status represented local missing files, not remote deletion. The active patch is in the inner `OTC-X` checkout. Do not commit the outer deletions, change ownership broadly, or use folder deletion to repair CI.
 
