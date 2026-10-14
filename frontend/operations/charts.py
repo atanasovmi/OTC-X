@@ -31,6 +31,7 @@ from frontend.operations.config import (
     MUTED, PLOTLY_TPL, SECTOR_PALETTE, SEVERITY_TIERS,
 )
 from frontend.operations.utils import _hex_to_rgba, fmt_chf, fmt_pct
+from frontend.operations.data_loader import normalize_display_labels
 
 
 def _deep_merge(base: dict, override: dict) -> dict:
@@ -181,6 +182,9 @@ def chart_sector_treemap(latest: pd.DataFrame) -> go.Figure:
     go.Figure
         Plotly treemap figure.
     """
+    if latest.empty:
+        return go.Figure()
+    latest = normalize_display_labels(latest)
     g = (
         latest.groupby("Sektor", as_index=False)
         .agg(
@@ -190,6 +194,10 @@ def chart_sector_treemap(latest: pd.DataFrame) -> go.Figure:
         )
         .sort_values("vol", ascending=False)
     )
+    # A zero-volume universe has no allocation to display.
+    g = g[g["vol"] > 0]
+    if g.empty:
+        return go.Figure()
     fig = px.treemap(
         g,
         path=["Sektor"],
@@ -646,7 +654,7 @@ def chart_anomaly_severity_treemap(latest: pd.DataFrame) -> go.Figure:
         Hierarchical treemap figure, or an empty figure if no
         anomalies exist.
     """
-    df = latest[latest["anomaly_score"] >= 1].copy()
+    df = normalize_display_labels(latest[latest["anomaly_score"] >= 1])
     if df.empty:
         return go.Figure()
 
@@ -686,15 +694,19 @@ def chart_anomaly_severity_treemap(latest: pd.DataFrame) -> go.Figure:
 
     fig = px.treemap(
         df,
-        path=["severity", "label"],
+        path=["severity", "Isin"],
         values="score_size",
         color="severity",
         color_discrete_map=tier_colors,
         custom_data=["Isin", "Sektor", "anomaly_score", "volume_today_chf",
                       "price_change_pct", "volatility_daily"],
     )
+    # Keep ISIN leaf identities even when names repeat or truncate alike.
+    # Only presentation labels use the familiar company names.
+    leaf_labels = dict(zip(df["Isin"], df["label"]))
+    fig.data[0].labels = [leaf_labels.get(str(label), label) for label in fig.data[0].labels]
     # Per-tile text colour: derive each node's tier from its hierarchy id
-    # ("Severe/Foo AG" -> "Severe", "Extreme" -> "Extreme") so labels stay
+    # ("Severe/CH..." -> "Severe", "Extreme" -> "Extreme") so labels stay
     # legible on both the pale fills and the saturated Extreme tiles.
     text_colors = [tier_text.get(str(_id).split("/")[0], "#3A2A28")
                    for _id in fig.data[0].ids]

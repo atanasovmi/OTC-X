@@ -23,7 +23,10 @@ from html import escape as _esc
 from frontend.operations.config import SEVERITY_TIERS
 from frontend.operations.styles import inject_css
 from frontend.operations.utils import fmt_chf, fmt_num, fmt_pct, pct_cls, score_badge
-from frontend.operations.data_loader import load_data
+from frontend.operations.data_loader import (
+    load_data, load_security_registry, load_refresh_status, refresh_freshness,
+    security_universe, security_choices, filter_active, risk_assessment,
+)
 from frontend.operations.charts import (
     chart_market_activity,
     chart_sector_treemap,
@@ -75,15 +78,23 @@ def main() -> None:
     inject_css()
 
     df_hist, latest = load_data()
+    universe = security_universe(load_security_registry(), latest)
+    freshness = refresh_freshness(load_refresh_status())
+    current_universe = universe[universe["is_active"]]
+    current_latest = filter_active(latest, universe) if not latest.empty else latest
+    no_trade_listings = current_universe[~current_universe["has_trading_data"]]
 
     if df_hist.empty:
-        st.error("No data available. Run `python -m backend.pipeline` to populate the data pipeline.")
+        render_header("No trading data", freshness)
+        st.info("No trading data is available in this snapshot.")
+        if not universe.empty:
+            st.dataframe(universe[["Isin", "Name", "Sektor", "Listing status", "Trading data"]], hide_index=True)
         st.stop()
 
     latest_market_date = df_hist["Datum"].max()
     # Strict "today" slice: rows from the most recent trading day across
     # all ISINs. Used by KPI cards.
-    today = df_hist[df_hist["Datum"] == latest_market_date]
+    today = filter_active(df_hist[df_hist["Datum"] == latest_market_date], universe)
 
     # ── YTD slice (Jan 1 of current year → today) ─────────────────────
     # Powers Top Movers, Sector Treemap, and Trades by Sector.
@@ -107,6 +118,7 @@ def main() -> None:
         ytd_per_isin = last_per_isin.copy()
         ytd_per_isin["price_change_pct"] = ytd_per_isin["Isin"].map(ytd_perf)
         ytd_per_isin["volume_today_chf"] = ytd_per_isin["Isin"].map(per_isin_ytd_vol)
+        ytd_per_isin = filter_active(ytd_per_isin, universe)
     else:
         ytd_per_isin = pd.DataFrame(columns=df_hist.columns)
 
@@ -114,23 +126,17 @@ def main() -> None:
     # `risk_view` = latest flagged row per ISIN within the last 30
     # trading days. Captures open active risk without dragging in
     # decade-old stale flags.
-    unique_dates = sorted(df_hist["Datum"].unique())
-    window_dates = unique_dates[-30:] if len(unique_dates) >= 30 else unique_dates
-    min_window_date = window_dates[0] if window_dates else latest_market_date
-    window_30d = df_hist[df_hist["Datum"] >= min_window_date]
-    flagged_in_window = window_30d[window_30d["anomaly_score"] >= 1]
-    if not flagged_in_window.empty:
-        risk_view = (
-            flagged_in_window
-            .sort_values("Datum")
-            .groupby("Isin", as_index=False)
-            .last()
-        )
-    else:
-        risk_view = pd.DataFrame(columns=df_hist.columns)
+    risk_view, assessed_isins = risk_assessment(df_hist, universe)
+    unassessed_count = len(current_universe) - len(assessed_isins)
 
     latest_date = latest_market_date.strftime("%d.%m.%Y")
-    render_header(latest_date)
+    render_header(latest_date, freshness)
+    st.caption(
+        f"Universe: {len(current_universe)} active listings · "
+        f"Trading history: {len(current_latest)} active listings · "
+        f"No trading data: {len(no_trade_listings)} · "
+        f"Inactive listings retained: {int((~universe['is_active']).sum())}"
+    )
 
     tab1, tab2, tab3, tab4 = st.tabs([
         "  Overview  ",
@@ -149,10 +155,10 @@ def main() -> None:
         # "Active Securities" KPI uses a 30-calendar-day breadth measure
         # so a thin OTC day doesn't make the market look dead.
         active_30d_count = (
-            df_hist[df_hist["Datum"] >= latest_market_date - pd.Timedelta(days=30)]
+            filter_active(df_hist[df_hist["Datum"] >= latest_market_date - pd.Timedelta(days=30)], universe)
             ["Isin"].nunique()
         )
-        render_kpis(today, total_securities=len(latest),
+        render_kpis(today, total_securities=len(current_universe),
                     active_30d_count=active_30d_count)
         st.markdown("<br>", unsafe_allow_html=True)
 
@@ -160,22 +166,22 @@ def main() -> None:
         with col_act:
             st.markdown('<div class="sec-hdr">Market Activity — Last 90 Days</div>',
                         unsafe_allow_html=True)
-            st.plotly_chart(chart_market_activity(df_hist), width="stretch", theme=None)
+            st.plotly_chart(chart_market_activity(df_hist), width="stretch", theme=None, key="market_activity")
         with col_tree:
             st.markdown('<div class="sec-hdr">Sector Allocation — YTD</div>',
                         unsafe_allow_html=True)
-            st.plotly_chart(chart_sector_treemap(ytd_per_isin), width="stretch", theme=None)
+            st.plotly_chart(chart_sector_treemap(ytd_per_isin), width="stretch", theme=None, key="sector_allocation")
 
         st.markdown("<br>", unsafe_allow_html=True)
         col_mov, col_vol = st.columns(2)
         with col_mov:
             st.markdown('<div class="sec-hdr">Top Movers — Performance YTD</div>',
                         unsafe_allow_html=True)
-            st.plotly_chart(chart_top_movers(ytd_per_isin), width="stretch", theme=None)
+            st.plotly_chart(chart_top_movers(ytd_per_isin), width="stretch", theme=None, key="top_movers")
         with col_vol:
             st.markdown('<div class="sec-hdr">Trades by Sector — YTD</div>',
                         unsafe_allow_html=True)
-            st.plotly_chart(chart_trades_by_sector(ytd_panel), width="stretch", theme=None)
+            st.plotly_chart(chart_trades_by_sector(ytd_panel), width="stretch", theme=None, key="sector_trades")
 
     # ══════════════════════════════════════════
     # TAB 2 — Market Data (Raw Data Explorer)
@@ -260,7 +266,7 @@ def main() -> None:
                 "Search", placeholder="Name, ISIN or Sector…", label_visibility="collapsed"
             )
         with fc2:
-            sectors = ["All Sectors"] + sorted(latest["Sektor"].dropna().unique().tolist())
+            sectors = ["All Sectors"] + sorted(universe["Sektor"].unique().tolist())
             sel_sector = st.selectbox("Sector", sectors, label_visibility="collapsed")
         with fc3:
             sort_by = st.selectbox(
@@ -284,9 +290,9 @@ def main() -> None:
         if search:
             q = search.lower()
             df_filt = df_filt[
-                df_filt["Isin"].str.lower().str.contains(q, na=False)
-                | df_filt["Name"].str.lower().str.contains(q, na=False)
-                | df_filt["Sektor"].str.lower().str.contains(q, na=False)
+                df_filt["Isin"].str.lower().str.contains(q, regex=False, na=False)
+                | df_filt["Name"].str.lower().str.contains(q, regex=False, na=False)
+                | df_filt["Sektor"].str.lower().str.contains(q, regex=False, na=False)
             ]
         if sel_sector != "All Sectors":
             df_filt = df_filt[df_filt["Sektor"] == sel_sector]
@@ -408,6 +414,8 @@ def main() -> None:
         # ── Data table ──
         render_native_dataframe(df_filt, n=n_display)
 
+        matching_listings = security_choices(universe, search, sel_sector)
+
         st.markdown("<br>", unsafe_allow_html=True)
 
         # ── Security Detail View ──
@@ -420,17 +428,13 @@ def main() -> None:
             unsafe_allow_html=True,
         )
 
-        # df_filt now has many rows per ISIN — dedupe for the dropdown.
-        active_isins = sorted(df_filt["Isin"].unique().tolist())
+        # Listings are selectable even when they have no trades or only old
+        # history outside the export date range. Selection does not alter CSV.
+        active_isins = matching_listings["Isin"].tolist()
         if active_isins:
             def _isin_label(x: str) -> str:
-                row = latest[latest["Isin"] == x]
-                if row.empty:
-                    return x
-                name = row["Name"].values[0]
-                if name and pd.notna(name):
-                    return f"{x} — {name}"
-                return x
+                row = matching_listings[matching_listings["Isin"] == x].iloc[0]
+                return f"{x} — {row['Name']} · {row['Listing status']} · {row['Trading data']}"
 
             sel_isin = st.selectbox(
                 "Select security",
@@ -438,8 +442,13 @@ def main() -> None:
                 format_func=_isin_label,
                 label_visibility="collapsed",
             )
-            st.plotly_chart(chart_security_history(df_hist, sel_isin),
-                            width="stretch", theme=None)
+            listing = matching_listings[matching_listings["Isin"] == sel_isin].iloc[0]
+            st.caption(f"Listing status: {listing['Listing status']}")
+            if listing["has_trading_data"]:
+                st.plotly_chart(chart_security_history(df_hist, sel_isin),
+                                width="stretch", theme=None, key="security_history")
+            else:
+                st.info("No trading data. This listing will gain metrics after its first recorded trade.")
 
             # ── Security summary metrics with math notation ──
             sec_row = latest[latest["Isin"] == sel_isin]
@@ -498,7 +507,7 @@ def main() -> None:
         with ctrl1:
             hm_sectors = st.multiselect(
                 "Filter by Sector",
-                sorted(latest["Sektor"].dropna().unique().tolist()),
+                sorted(current_latest["Sektor"].unique().tolist()),
                 default=[],
                 help="Leave empty for all sectors",
                 key="analytics_sector_filter",
@@ -525,7 +534,7 @@ def main() -> None:
             )
 
         # Filter data
-        analytics_df = latest.copy()
+        analytics_df = current_latest.copy()
         if hm_sectors:
             analytics_df = analytics_df[analytics_df["Sektor"].isin(hm_sectors)]
 
@@ -544,7 +553,7 @@ def main() -> None:
         if len(hm_selected) >= 2:
             st.plotly_chart(
                 chart_correlation_heatmap(analytics_df, hm_selected),
-                width="stretch", theme=None,
+                width="stretch", theme=None, key="metric_correlations",
             )
         else:
             st.info("Select at least 2 metrics to display the correlation matrix.")
@@ -559,7 +568,7 @@ def main() -> None:
                 unsafe_allow_html=True,
             )
             st.plotly_chart(chart_scatter_volume_price(analytics_df),
-                            width="stretch", theme=None)
+                            width="stretch", theme=None, key="volume_price")
         with col_amh:
             st.markdown(
                 '<div class="sec-hdr">Amihud Illiquidity by Sector</div>',
@@ -575,7 +584,7 @@ def main() -> None:
             if hm_sectors:
                 hist_filtered = hist_filtered[hist_filtered["Sektor"].isin(hm_sectors)]
             st.plotly_chart(chart_amihud_by_sector(hist_filtered),
-                            width="stretch", theme=None)
+                            width="stretch", theme=None, key="sector_amihud")
 
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown(
@@ -623,7 +632,7 @@ def main() -> None:
             '</div>',
             unsafe_allow_html=True,
         )
-        vol_btn_cols = st.columns(len(top_vol_sectors))
+        vol_btn_cols = st.columns(max(1, len(top_vol_sectors)))
         for idx, sec_name in enumerate(top_vol_sectors):
             with vol_btn_cols[idx]:
                 is_active = selected_vol_sector == sec_name
@@ -642,7 +651,7 @@ def main() -> None:
                 show_raw_sma=show_raw_sma,
                 selected_sector=st.session_state.get("vol_selected_sector", None),
             ),
-            width="stretch", theme=None,
+            width="stretch", theme=None, key="sector_volatility",
         )
 
         st.markdown("<br>", unsafe_allow_html=True)
@@ -712,19 +721,23 @@ def main() -> None:
                 analytics_df, x_sel, y_sel, z_sel, color_sel, size_sel,
                 use_log=use_log, remove_outliers=rm_outliers,
             ),
-            width="stretch", theme=None,
+            width="stretch", theme=None, key="market_3d",
         )
 
     # ══════════════════════════════════════════
     # TAB 4 — Anomaly Monitor
     # ══════════════════════════════════════════
     with tab4:
-        # 30-day rolling window: flagged securities are taken from
-        # `risk_view`; Clean count is everything in the universe that did
-        # not generate a flag in that window.
-        total = len(latest)
+        # Only observed active listings can be assessed. New or unobserved
+        # listings are explicitly unassessed, never silently called Clean.
+        total = len(current_universe)
         flagged_count = len(risk_view)
-        clean = total - flagged_count
+        clean = len(assessed_isins) - flagged_count
+        st.caption(
+            f"Risk coverage: {len(assessed_isins)} of {total} active listings assessed · "
+            f"{unassessed_count} without trades in the current window · "
+            f"{len(no_trade_listings)} with no trading data"
+        )
         if not risk_view.empty:
             alert_n = int(risk_view["anomaly_score"].isin([1, 2]).sum())
             critical_n = int(risk_view["anomaly_score"].isin([3, 4]).sum())
@@ -783,7 +796,7 @@ def main() -> None:
             '</div>',
             unsafe_allow_html=True,
         )
-        st.plotly_chart(chart_anomaly_severity_treemap(risk_view), width="stretch", theme=None)
+        st.plotly_chart(chart_anomaly_severity_treemap(risk_view), width="stretch", theme=None, key="anomaly_severity")
 
         st.markdown("<br>", unsafe_allow_html=True)
 
@@ -794,7 +807,7 @@ def main() -> None:
             # latest-known state from `latest` (mixed date OK — these
             # rows are not the subject of alerting).
             flagged_isins = set(risk_view["Isin"]) if not risk_view.empty else set()
-            alerts = latest[~latest["Isin"].isin(flagged_isins)].copy()
+            alerts = current_latest[current_latest["Isin"].isin(assessed_isins) & ~current_latest["Isin"].isin(flagged_isins)].copy()
             hdr_text = f"Clean Securities — {len(alerts)} Securities (no flags in last 30 days)"
         elif selected_tier and selected_tier in SEVERITY_TIERS:
             tier_scores = SEVERITY_TIERS[selected_tier]
@@ -811,7 +824,10 @@ def main() -> None:
         st.markdown(f'<div class="sec-hdr">{hdr_text}</div>', unsafe_allow_html=True)
 
         if alerts.empty:
-            st.success("✓  No anomalies detected in this category.")
+            if not assessed_isins:
+                st.info("No current trading observations are available for risk assessment.")
+            else:
+                st.success("✓  No anomalies detected among assessed listings in this category.")
         else:
             alert_sort_map = {
                 "Severity": "anomaly_score",

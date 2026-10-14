@@ -16,7 +16,12 @@ of every stage.
 
 import sys
 import io
+from functools import partial
+import logging
+import shutil
+import tempfile
 import traceback as _tb
+from uuid import uuid4
 from pathlib import Path
 from datetime import datetime
 
@@ -33,6 +38,7 @@ from backend.operations.soft_crawl import run_crawl
 from backend.operations.fetcher import main as run_fetcher
 from backend.operations.build_master_parquet import build_master_parquet
 from backend.operations.metrics import main as run_metrics
+from backend.validation import validate_snapshot
 
 # Paths
 _BACKEND_DIR = Path(__file__).resolve().parent
@@ -179,7 +185,7 @@ def _run_stage(
         sys.stdout = tee
         func()
         success = True
-    except Exception as exc:
+    except (Exception, SystemExit) as exc:
         error_msg = f"{type(exc).__name__}: {exc}\n{_tb.format_exc()}"
         sys.stdout = old_stdout
         print(f"CRITICAL ERROR in {name}: {error_msg}")
@@ -322,14 +328,15 @@ def _build_receipt(
             anomaly_counts = latest.group_by("anomaly_score").len().sort("anomaly_score")
 
             lines.append("─" * 80)
-            lines.append("  ANOMALY SNAPSHOT (latest day per ISIN)")
+            lines.append("  HISTORICAL LATEST-SCORE SUMMARY (includes inactive ISINs)")
             lines.append("─" * 80)
 
             total_isins = len(latest)
             flagged = latest.filter(pl.col("anomaly_score") > 0)
             lines.append(f"  Total ISINs:       {total_isins}")
-            lines.append(f"  Clean (score 0):   {total_isins - len(flagged)}")
-            lines.append(f"  Flagged (score>0): {len(flagged)}")
+            lines.append(f"  Latest score 0:    {total_isins - len(flagged)}")
+            lines.append(f"  Latest score >0:   {len(flagged)}")
+            lines.append("  Current assessed risk and unassessed listings are shown in the dashboard.")
             if len(flagged) > 0:
                 lines.append("")
                 lines.append("  Score  Count")
@@ -362,7 +369,33 @@ def _build_receipt(
     return "\n".join(lines)
 
 
-def main() -> None:
+def _publish_snapshot(staged: Path, target: Path) -> None:
+    """Swap a validated directory into place, restoring the old one on failure.
+
+    A same-filesystem staging directory keeps the last good files untouched
+    during collection and analysis. GitHub publication remains one subsequent
+    commit after the workflow's chart/tests gate.
+    """
+    target = target.resolve()
+    backup = target.with_name(f".{target.name}-previous-{uuid4().hex}")
+    if backup.resolve().parent != target.parent or staged.resolve().anchor != target.anchor:
+        raise ValueError("Snapshot staging and backup must stay on the target filesystem")
+    target.rename(backup)
+    try:
+        staged.rename(target)
+    except BaseException:
+        backup.rename(target)
+        raise
+    # Only remove the exact backup directory created by this operation.
+    if backup.resolve().parent != target.parent:
+        raise ValueError("Unexpected snapshot backup path")
+    try:
+        shutil.rmtree(backup)
+    except OSError as exc:
+        logging.getLogger(__name__).warning("Validated snapshot installed; retained backup %s: %s", backup, exc)
+
+
+def main() -> int:
     """Run the full OTC-X data pipeline end-to-end.
 
     Executes four stages in sequence:
@@ -374,8 +407,9 @@ def main() -> None:
     4. **Liquidity Metrics Engine** — compute daily metrics and anomaly
        scores.
 
-    If any stage fails, subsequent stages are skipped and the receipt
-    is finalised immediately.
+    Work in an isolated copy, validate it, then install the complete snapshot.
+    If any stage fails, preserve the old data and finalise a failure receipt.
+    Return 0 on success or 1 on failure for the command-line publication gate.
     """
     start_total = datetime.now()
 
@@ -387,32 +421,24 @@ def main() -> None:
     receipt_stages = []
     stage_results = []
 
-    # Stage 1 – Scrape Valors
-    ok = _run_stage("Stage 1: Valor Extraction", run_crawl,
-                    receipt_stages, stage_results)
-    if not ok:
-        _finalise_receipt(start_total, receipt_stages, stage_results)
-        return
-
-    # Stage 2 – Fetch Trade Data
-    ok = _run_stage("Stage 2: Trade Data Retrieval", run_fetcher,
-                    receipt_stages, stage_results)
-    if not ok:
-        _finalise_receipt(start_total, receipt_stages, stage_results)
-        return
-
-    # Stage 3 – Consolidate Data
-    ok = _run_stage("Stage 3: Data Consolidation (Parquet)",
-                    build_master_parquet, receipt_stages, stage_results)
-    if not ok:
-        _finalise_receipt(start_total, receipt_stages, stage_results)
-        return
-
-    # Stage 4 – Compute Metrics
-    ok = _run_stage("Stage 4: Liquidity Metrics Engine", run_metrics,
-                    receipt_stages, stage_results)
-
+    with tempfile.TemporaryDirectory(prefix=".otc-x-run-", dir=_BACKEND_DIR) as workspace:
+        staged = Path(workspace) / "data"
+        stages = [
+            ("Published snapshot validation", partial(validate_snapshot, _DATA_DIR)),
+            ("Snapshot preparation", partial(shutil.copytree, _DATA_DIR, staged)),
+            ("Stage 1: Valor Extraction", partial(run_crawl, data_dir=staged)),
+            ("Stage 2: Trade Data Retrieval", partial(run_fetcher, data_dir=staged, log_dir=_LOG_DIR)),
+            ("Stage 3: Data Consolidation (Parquet)", partial(build_master_parquet, data_dir=staged)),
+            ("Stage 4: Liquidity Metrics Engine", partial(run_metrics, data_dir=staged, previous_data_dir=_DATA_DIR)),
+            ("Snapshot validation", partial(validate_snapshot, staged)),
+            ("Install validated snapshot", partial(_publish_snapshot, staged, _DATA_DIR)),
+        ]
+        for name, func in stages:
+            if not _run_stage(name, func, receipt_stages, stage_results):
+                _finalise_receipt(start_total, receipt_stages, stage_results)
+                return 1
     _finalise_receipt(start_total, receipt_stages, stage_results)
+    return 0
 
 
 def _finalise_receipt(
@@ -461,4 +487,4 @@ def _finalise_receipt(
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

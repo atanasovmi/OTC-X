@@ -8,7 +8,8 @@ suitable for institutional dashboards and anomaly detection.
 Input
 -----
 - ``data/master_trades.parquet`` — ≈133 k trades spanning 20+ years.
-- ``data/securities.csv`` — ISIN → Name / Sektor mapping.
+- ``data/security_registry.csv`` — durable active/historical ISIN metadata.
+- Previous validated master/metric snapshot — preserves untouched history.
 
 Output
 ------
@@ -30,7 +31,11 @@ Plus: 30-trading-day rolling medians and composite anomaly flags.
 import logging
 import polars as pl
 from pathlib import Path
+import sys
 from datetime import datetime
+
+if not __package__:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +46,12 @@ PRICE_GAP_PCT        = 5.0   # Minimum |price_change_pct| for a gap flag
 WEIGHT_VOLUME        = 3     # Anomaly score contribution: volume spike
 WEIGHT_ACTIVITY      = 2     # Anomaly score contribution: activity spike
 WEIGHT_PRICE_GAP     = 2     # Anomaly score contribution: price gap
+
+DAILY_AGGREGATE_COLUMNS = [
+    "Isin", "Datum", "trades_today", "volume_today_units", "volume_today_chf",
+    "price_min", "price_max", "price_first", "price_last", "volatility_daily",
+    "trade_duration_min", "off_book_pct",
+]
 
 
 def parse_time_to_minutes(zeit_col: pl.Expr) -> pl.Expr:
@@ -69,7 +80,7 @@ def parse_time_to_minutes(zeit_col: pl.Expr) -> pl.Expr:
     )
 
 
-def compute_daily_aggregates(df_trades: pl.DataFrame) -> pl.DataFrame:
+def compute_daily_aggregates(df_trades: pl.DataFrame, *, stable_ties: bool = False) -> pl.DataFrame:
     """Aggregate raw trades into daily metrics per security.
 
     Groups trades by ISIN and date, computing trade counts, volume
@@ -81,6 +92,9 @@ def compute_daily_aggregates(df_trades: pl.DataFrame) -> pl.DataFrame:
     df_trades : pl.DataFrame
         Raw trade-level DataFrame with columns: ``Isin``, ``Datum``,
         ``Zeit``, ``Kurs``, ``Volumen``, ``Off Book``.
+    stable_ties : bool
+        Retain source order for equal-minute trades in changed/new groups.
+        The default retains the legacy standalone computation contract.
 
     Returns
     -------
@@ -97,7 +111,9 @@ def compute_daily_aggregates(df_trades: pl.DataFrame) -> pl.DataFrame:
     )
     
     # Sort by time within each day to get proper first/last
-    df_sorted = df_with_minutes.sort(["Isin", "Datum", "time_minutes"])
+    # Keep the public legacy behavior. Staged refreshes use source-order ties
+    # for changed/new groups while retaining aggregates of unchanged history.
+    df_sorted = df_with_minutes.sort(["Isin", "Datum", "time_minutes"], maintain_order=stable_ties)
     
     # Daily aggregation
     df_daily = df_sorted.group_by(["Isin", "Datum"]).agg([
@@ -307,7 +323,12 @@ def compute_anomaly_flags(df_rolling: pl.DataFrame) -> pl.DataFrame:
     return df_anomaly
 
 
-def compute_daily_metrics(df_trades: pl.DataFrame) -> pl.DataFrame:
+def compute_daily_metrics(
+    df_trades: pl.DataFrame,
+    *,
+    previous_trades: pl.DataFrame | None = None,
+    previous_metrics: pl.DataFrame | None = None,
+) -> pl.DataFrame:
     """Run the full metrics pipeline on raw trade data.
 
     Orchestrates the four-step transformation:
@@ -324,6 +345,10 @@ def compute_daily_metrics(df_trades: pl.DataFrame) -> pl.DataFrame:
     df_trades : pl.DataFrame
         Raw trade-level DataFrame (output of
         ``build_master_parquet``).
+    previous_trades, previous_metrics : pl.DataFrame | None
+        Supply both validated previous products to retain unchanged daily
+        aggregates. Full rolling baselines are still recomputed, including
+        the effect of new backdated trades on subsequent trading days.
 
     Returns
     -------
@@ -332,7 +357,13 @@ def compute_daily_metrics(df_trades: pl.DataFrame) -> pl.DataFrame:
         ISIN per trading day.
     """
     logger.info("    Step 1/4: Daily aggregation...")
-    df_daily = compute_daily_aggregates(df_trades)
+    if (previous_trades is None) != (previous_metrics is None):
+        raise ValueError("Previous trades and metrics must be supplied together")
+    df_daily = (
+        compute_daily_aggregates(df_trades)
+        if previous_trades is None
+        else _daily_aggregates_with_history(df_trades, previous_trades, previous_metrics)
+    )
     logger.info("             %s daily observations", f"{len(df_daily):,}")
 
     logger.info("    Step 2/4: Liquidity metrics...")
@@ -347,121 +378,101 @@ def compute_daily_metrics(df_trades: pl.DataFrame) -> pl.DataFrame:
     return df_anomaly
 
 
-def main() -> None:
-    """Entry point for the metrics engine.
+def _daily_aggregates_with_history(
+    current: pl.DataFrame, previous: pl.DataFrame, previous_metrics: pl.DataFrame,
+) -> pl.DataFrame:
+    """Retain published aggregates iff their complete raw group is unchanged.
 
-    Loads the master trades Parquet and the securities metadata CSV,
-    runs the full metrics pipeline (:func:`compute_daily_metrics`),
-    enriches the output with security name and sector, and writes the
-    final ``daily_metrics.parquet`` to disk.
-
-    Raises
-    ------
-    FileNotFoundError
-        If ``master_trades.parquet`` or ``securities.csv`` is
-        missing from ``backend/data/``.
+    Minute-resolution times can tie. Re-sorting a larger table with an unstable
+    legacy sort can change unrelated historic first/last prices. Reusing proven
+    unchanged groups prevents that drift without changing any metric formula.
     """
-    start_time = datetime.now()
-    
-    logger.info("=" * 70)
-    logger.info("OTC-X Liquidity Metrics Engine - Starting")
-    logger.info("Timestamp: %s", start_time.strftime('%Y-%m-%d %H:%M:%S'))
-    logger.info("=" * 70)
-    
-    # Setup paths relative to script location
-    script_dir = Path(__file__).resolve().parent
-    trades_path = script_dir.parent / "data" / "master_trades.parquet"
-    securities_path = script_dir.parent / "data" / "securities.csv"
-    output_path = script_dir.parent / "data" / "daily_metrics.parquet"
-    
-    try:
-        # 1. Load Data
-        logger.info("[1/4] Loading input data...")
-        logger.info("      Trades: %s", trades_path.resolve())
-        df_trades = pl.read_parquet(trades_path)
-        logger.info("      -> %s trades loaded (%d ISINs)", f"{len(df_trades):,}", df_trades['Isin'].n_unique())
+    keys = ["Isin", "Datum"]
+    trade_columns = ["Isin", "Datum", "Zeit", "Kurs", "Volumen", "Off Book"]
+    if current.schema != previous.schema:
+        raise ValueError("Previous and current master trade schemas differ")
+    if current.is_duplicated().any() or previous.is_duplicated().any():
+        raise ValueError("Cannot reuse metrics: duplicate raw trade records")
+    if previous.join(current, on=trade_columns, how="anti").height:
+        raise ValueError("Cannot reuse metrics: previously published raw trades were removed or changed")
+    prior_daily = previous_metrics.select(DAILY_AGGREGATE_COLUMNS)
+    raw_counts = previous.group_by(keys).len().rename({"len": "trades_today"})
+    metric_counts = prior_daily.select(keys + ["trades_today"])
+    if (
+        prior_daily.select(keys).is_duplicated().any()
+        or raw_counts.join(metric_counts, on=keys + ["trades_today"], how="anti").height
+        or metric_counts.join(raw_counts, on=keys + ["trades_today"], how="anti").height
+    ):
+        raise ValueError("Cannot reuse metrics: previous raw/daily group coverage differs")
+    additions = current.join(previous, on=trade_columns, how="anti", maintain_order="left")
+    changed_keys = additions.select(keys).unique()
+    if changed_keys.is_empty():
+        return prior_daily
+    unchanged = prior_daily.join(changed_keys, on=keys, how="anti", maintain_order="left")
+    changed_raw = current.join(changed_keys, on=keys, how="inner", maintain_order="left")
+    changed = compute_daily_aggregates(changed_raw, stable_ties=True)
+    logger.info("             Retained %d unchanged daily groups; recomputed %d", len(unchanged), len(changed))
+    return pl.concat([unchanged, changed.select(DAILY_AGGREGATE_COLUMNS)])
 
-        logger.info("      Securities: %s", securities_path.resolve())
-        df_sec = pl.read_csv(
-            securities_path,
-            schema_overrides={"VALOR": pl.String},  # Avoid int parsing issues
-            truncate_ragged_lines=True  # Handle any ragged lines
-        )
-        logger.info("      -> %s securities loaded (%d sectors)", f"{len(df_sec):,}", df_sec['SEKTOR'].n_unique())
-        
-        # 2. Compute Metrics
-        logger.info("[2/4] Computing liquidity metrics...")
-        df_metrics = compute_daily_metrics(df_trades)
-        
-        # 3. Enrich with Metadata
-        logger.info("[3/4] Enriching with security metadata...")
-        df_final = df_metrics.join(
-            df_sec.select(["ISIN", "NAME", "SEKTOR"]),
-            left_on="Isin",
-            right_on="ISIN",
-            how="left"
-        )
-        
-        # Rename to consistent casing
-        df_final = df_final.rename({"NAME": "Name", "SEKTOR": "Sektor"})
-        
-        # Reorder columns for clarity
-        column_order = [
-            "Isin", "Name", "Sektor", "Datum",
-            "trades_today", "volume_today_units", "volume_today_chf",
-            "price_min", "price_max", "price_first", "price_last",
-            "price_change_pct", "log_returns", "volatility_daily",
-            "amihud_daily", "spread_log_hl", "trade_duration_min", "off_book_pct",
-            "trades_30d_median", "volume_30d_median", "volatility_30d_median", "amihud_30d_median",
-            "volume_spike", "activity_spike", "price_gap", "anomaly_score"
-        ]
-        df_final = df_final.select(column_order)
-        
-        # Handle missing metadata gracefully
-        missing_meta = df_final.filter(pl.col("Name").is_null()).select("Isin").unique()
-        if len(missing_meta) > 0:
-            logger.warning("      [!] %d ISINs have no metadata (Name/Sektor will be null)", len(missing_meta))
 
-        logger.info("      -> Final shape: %s", df_final.shape)
-        
-        # 4. Save Output
-        logger.info("[4/4] Saving output...")
-        df_final.write_parquet(output_path, compression="snappy")
-        output_size_mb = output_path.stat().st_size / (1024 * 1024)
-        logger.info("      -> Written to: %s", output_path.resolve())
-        logger.info("      -> Size: %.2f MB", output_size_mb)
-        
-        # Summary
-        elapsed = (datetime.now() - start_time).total_seconds()
-        logger.info("=" * 70)
-        logger.info("SUCCESS! Pipeline completed.")
-        logger.info("=" * 70)
-        logger.info("Total rows:       %s", f"{len(df_final):,}")
-        logger.info("Unique ISINs:     %d", df_final['Isin'].n_unique())
-        logger.info("Unique Sectors:   %d", df_final['Sektor'].n_unique())
-        logger.info("Date range:       %s to %s", df_final['Datum'].min(), df_final['Datum'].max())
-        logger.info("Elapsed time:     %.1f seconds", elapsed)
+def main(data_dir: Path | None = None, *, previous_data_dir: Path | None = None) -> None:
+    """Compute the existing 26-column metric contract with durable metadata.
 
-        # Schema printout
-        logger.info("Output Schema:")
-        for col, dtype in df_final.schema.items():
-            logger.info("  %-25s %s", col, dtype)
-        
-        # Sample anomalies
-        high_anomaly = df_final.filter(pl.col("anomaly_score") >= 5).sort("Datum", descending=True)
-        if len(high_anomaly) > 0:
-            logger.info("High-anomaly observations (score >= 5): %s total", f"{len(high_anomaly):,}")
-            for row in high_anomaly.head(5).iter_rows(named=True):
-                logger.info("  %s | %s | Score: %d | Price Change: %.2f%%",
-                            row['Datum'], row['Isin'], row['anomaly_score'], row['price_change_pct'])
-        
-    except FileNotFoundError as e:
-        logger.error("FILE NOT FOUND: %s", e)
-        logger.error("   Ensure master_trades.parquet and securities.csv exist in data/")
-        exit(1)
-    except Exception as e:
-        logger.error("CRITICAL ERROR: %s: %s", type(e).__name__, e)
-        exit(1)
+    Genuine stage errors propagate to the orchestrator. Removed securities
+    retain their history and last known labels through the security registry.
+    The staged pipeline supplies ``previous_data_dir`` as its validated
+    published baseline; standalone computation retains its legacy behavior.
+    """
+    from io import BytesIO
+    from backend.operations.security_registry import DATA_DIR, atomic_write_bytes, load_registry
+
+    data_dir = Path(data_dir) if data_dir is not None else DATA_DIR
+    trades_path = data_dir / "master_trades.parquet"
+    output_path = data_dir / "daily_metrics.parquet"
+    started = datetime.now()
+    df_trades = pl.read_parquet(trades_path)
+    if df_trades.is_empty():
+        raise ValueError("Cannot compute metrics from an empty trade snapshot")
+    registry = load_registry(data_dir)
+    known = set(registry["ISIN"])
+    missing = set(df_trades["Isin"].to_list()) - known
+    if missing:
+        raise ValueError(f"Security registry does not cover historical trades: {sorted(missing)[:5]}")
+    df_sec = pl.from_pandas(registry[["ISIN", "NAME", "SEKTOR"]])
+    previous_trades = previous_metrics = None
+    if previous_data_dir is not None:
+        baseline = Path(previous_data_dir)
+        old_trades, old_metrics = baseline / "master_trades.parquet", baseline / "daily_metrics.parquet"
+        if old_trades.exists() != old_metrics.exists():
+            raise ValueError("Incomplete previous raw/metric snapshot")
+        if old_trades.exists():
+            previous_trades = pl.read_parquet(old_trades)
+            previous_metrics = pl.read_parquet(old_metrics)
+    df_metrics = compute_daily_metrics(
+        df_trades, previous_trades=previous_trades, previous_metrics=previous_metrics,
+    )
+    df_final = df_metrics.join(
+        df_sec, left_on="Isin", right_on="ISIN", how="left",
+    ).rename({"NAME": "Name", "SEKTOR": "Sektor"})
+    column_order = [
+        "Isin", "Name", "Sektor", "Datum",
+        "trades_today", "volume_today_units", "volume_today_chf",
+        "price_min", "price_max", "price_first", "price_last",
+        "price_change_pct", "log_returns", "volatility_daily",
+        "amihud_daily", "spread_log_hl", "trade_duration_min", "off_book_pct",
+        "trades_30d_median", "volume_30d_median", "volatility_30d_median", "amihud_30d_median",
+        "volume_spike", "activity_spike", "price_gap", "anomaly_score",
+    ]
+    df_final = df_final.select(column_order)
+    output = BytesIO()
+    df_final.write_parquet(output, compression="snappy")
+    atomic_write_bytes(output_path, output.getvalue())
+    print(
+        f"Computed {len(df_final):,} daily metric rows for "
+        f"{df_final['Isin'].n_unique()} ISINs; "
+        f"{df_final['Datum'].min()} to {df_final['Datum'].max()}; "
+        f"{(datetime.now() - started).total_seconds():.1f}s."
+    )
 
 
 if __name__ == "__main__":

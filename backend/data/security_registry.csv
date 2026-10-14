@@ -1,0 +1,246 @@
+ISIN,VALOR,NAME,SEKTOR,is_active
+CH0000041795,4179,"Weisse Arena AG, Laax","Tourismus,Freizeit,Sonstiges",True
+CH0000648680,64868,Hochalpines Institut Ftan AG,"Tourismus,Freizeit,Sonstiges",True
+CH0000975372,97537,"Säntis-Schwebebahn AG, Schwägalp",Bergbahnen,True
+CH0001239398,123939,EW Brig-Naters EWBN,Energie,True
+CH0001314852,131485,Bank in Zuzwil,Banken,True
+CH0001318374,131837,"Lienhardt & Partner Privatbank Zürich AG, Zürich",Banken,True
+CH0001336319,133631,Clientis Bank Oberuzwil AG,Banken,True
+CH0001337200,133720,Ersparniskasse Affoltern,Banken,True
+CH0001340196,134019,Regiobank Männedorf,Banken,False
+CH0001343885,134388,Leihkasse Stammheim,Banken,True
+CH0001344685,134468,KB Nidwalden PS,Banken,True
+CH0001350112,135011,Spar- und Leihkasse Frutigen,Banken,True
+CH0001350328,135032,Spar + Leihkasse Gürbetal N,Banken,True
+CH0001351862,135186,Bank SLM N,Banken,True
+CH0001352720,135272,Spar+Leihkasse Riggisberg,Banken,True
+CH0001352928,135292,SB Saanen Bank,Banken,True
+CH0001354296,135429,Spar- und Leihkasse Wynigen,Banken,True
+CH0001357000,135700,Clientis Sparkasse Oftringen,Banken,True
+CH0001378626,137862,"Rhiienergie AG, Tamins",Energie,True
+CH0001394607,139460,"SB im Mythengebiet, Schwyz",Bergbahnen,True
+CH0001395539,139553,"Suvretta-Haus, St. Moritz","Tourismus,Freizeit,Sonstiges",True
+CH0001402418,140241,Agruna AG,Immobilien,True
+CH0001413704,141370,Flughafen Bern AG N,"Transport,Verkehr,Logistik",True
+CH0001418216,141821,Aluminium-Laufen AG Liesberg,Industrie,True
+CH0001430930,143093,"Arosa Bergbahnen AG, Arosa",Bergbahnen,True
+CH0001457826,145782,"Auto AG Schwyz, Schwyz","Transport,Verkehr,Logistik",True
+CH0001507406,150740,BB Piz Mundaun AG,Bergbahnen,True
+CH0001514501,151450,"Kongresshaus Zürich AG, Zürich","Tourismus,Freizeit,Sonstiges",True
+CH0001542601,154260,Löwengarten AG,Immobilien,True
+CH0001542635,154263,Brauerei Schützengarten AG N,Nahrungsmittel und Getraenke,True
+CH0001542643,154264,Brauerei Schützengarten AG PS,Nahrungsmittel und Getraenke,True
+CH0001570057,157005,"Caran d`Ache, Genève, Serie B",Industrie,True
+CH0001574596,157459,"Kursaal-Casino AG, Luzern N","Tourismus,Freizeit,Sonstiges",True
+CH0001574604,157460,"Kursaal-Casino AG, Luzern GS","Tourismus,Freizeit,Sonstiges",True
+CH0001579363,157936,CMSA Holding N,Industrie,True
+CH0001602009,160200,Generale Beaulieu Holding SA,"Tourismus,Freizeit,Sonstiges",True
+CH0001665147,166514,"Dolder Hotel AG, Zürich","Tourismus,Freizeit,Sonstiges",True
+CH0001669255,166925,Drahtseilbahn Marzili-Stadt Bern N,"Transport,Verkehr,Logistik",True
+CH0001671707,167170,"Zürcher Oberland Medien AG, Wetzikon",Medien,True
+CH0001690533,169053,"EW Jona-Rapperswil, Jona",Energie,True
+CH0001691614,169161,EW Uznach AG,Energie,True
+CH0001704680,170468,"Eskimo Textil AG, Turbenthal",Industrie,True
+CH0001725255,172525,Tonwerk Lausen N,Immobilien,True
+CH0001777876,177787,ebs Erdgas + Biogas,Energie,True
+CH0001788345,178834,"Lenk Bergbahnen, Lenk",Bergbahnen,True
+CH0001865523,186552,"Heim im Bergli AG, Luzern","Tourismus,Freizeit,Sonstiges",True
+CH0001906848,190684,Imbrex Hldg N,Immobilien,True
+CH0001910089,191008,"Immges Viamala, Thusis",Immobilien,True
+CH0001989513,198951,Kursaal Interlaken N,"Tourismus,Freizeit,Sonstiges",True
+CH0001992681,199268,Hof Weissbad AG,"Tourismus,Freizeit,Sonstiges",True
+CH0002045471,204547,Loeb Holding N -B-,"Tourismus,Freizeit,Sonstiges",True
+CH0002045497,204549,Loeb Holding PS,"Tourismus,Freizeit,Sonstiges",True
+CH0002052501,205250,Brunni-Bahnen N,Bergbahnen,True
+CH0002052782,205278,LSB Grindelwald-Pfingstegg AG,Bergbahnen,True
+CH0002052915,205291,Kronberg N,Bergbahnen,True
+CH0002055819,205581,LSB Wasserauen-Ebenalp AG,Bergbahnen,True
+CH0002056031,205603,LSB Wengen-Männlichen AG,Bergbahnen,True
+CH0002056114,205611,Zermatt Bergbahnen N,Bergbahnen,True
+CH0002056957,205695,"Lurag AG, Neuenkirch","Tourismus,Freizeit,Sonstiges",True
+CH0002057070,205707,Lyceum Alpinum Zuoz AG,"Tourismus,Freizeit,Sonstiges",True
+CH0002092622,209262,Metall Zug AG Serie A,Industrie,True
+CH0002160460,216046,Opernhaus Zürich N 300,"Tourismus,Freizeit,Sonstiges",True
+CH0002160478,216047,Opernhaus Zürich N 900,"Tourismus,Freizeit,Sonstiges",True
+CH0002174743,217474,Parking des Alpes N,"Tourismus,Freizeit,Sonstiges",True
+CH0002218664,221866,Railtour Suisse SA Nom 100,"Tourismus,Freizeit,Sonstiges",True
+CH0002218698,221869,Railtour Suisse SA Nom 500,"Tourismus,Freizeit,Sonstiges",True
+CH0002221304,222130,"Raststätte Thurau, St. Gallen","Tourismus,Freizeit,Sonstiges",True
+CH0002221338,222133,Gotthard Raststätte A2 Uri AG,"Tourismus,Freizeit,Sonstiges",True
+CH0002227095,222709,Reishauer N,Industrie,True
+CH0002234372,223437,Rhätische Bahn RhB / Stamm,"Transport,Verkehr,Logistik",True
+CH0002234398,223439,Rhätische Bahn RhB / Prior,"Transport,Verkehr,Logistik",True
+CH0002276266,227626,Schilthornbahn AG Mürren,Bergbahnen,True
+CH0002283601,228360,Schützen Rheinfelden Immobilien N,Immobilien,True
+CH0002291802,229180,Schweiz. Schifffahrtsges. Untersee und Rhein N,"Transport,Verkehr,Logistik",True
+CH0002332093,233209,Bergbahnen Brigels N,Bergbahnen,True
+CH0002353487,235348,SB Elm AG N,Bergbahnen,True
+CH0002353693,235369,"SB Pischa, Davos",Bergbahnen,True
+CH0002353867,235386,BB Soerenberg AG,Bergbahnen,True
+CH0002370903,237090,ZLB Zürcher Landbank,Banken,True
+CH0002400585,240058,"Landwirtschaft ZRA, Aarberg",Nahrungsmittel und Getraenke,True
+CH0002512801,251280,Swisstulle AG,Industrie,True
+CH0002513312,251331,SSE Holding N,Industrie,True
+CH0002538012,253801,Tersa AG,Immobilien,True
+CH0002541586,254158,"Grand Resort Bad Ragaz, Bad Ragaz","Tourismus,Freizeit,Sonstiges",True
+CH0002557400,255740,Espace Real Estate Hldg N,Immobilien,True
+CH0002557616,255761,Treib-Seelisberg-Bahn AG,Bergbahnen,True
+CH0002569694,256969,"Tuwag Immobilien AG, Wädenswil",Immobilien,True
+CH0002577705,257770,Reussegg Hldg N,Immobilien,False
+CH0002599352,259935,Aletsch Bahnen N,Bergbahnen,True
+CH0002654934,265493,ZT Medien N,Medien,True
+CH0002655501,265550,"Zoologischer Garten, Basel","Tourismus,Freizeit,Sonstiges",True
+CH0002657978,265797,Bystronic -B- N,Industrie,True
+CH0002658448,265844,Zürichsee-Fähre Horgen-Meilen AG,"Transport,Verkehr,Logistik",True
+CH0003798599,379859,Montreux-Berner Oberland Bahn,"Transport,Verkehr,Logistik",True
+CH0003857031,385703,"Bad Schinznach AG, Schinznach","Tourismus,Freizeit,Sonstiges",True
+CH0004959471,495947,Casino de Montreux SA Nom 50,"Tourismus,Freizeit,Sonstiges",True
+CH0004959505,495950,Casino de Montreux SA Nom 100,"Tourismus,Freizeit,Sonstiges",True
+CH0004960180,496018,Weleda N-PS,Industrie,True
+CH0005051021,505102,Gurtenbahn AG N,Bergbahnen,True
+CH0005701708,570170,Stoosbahnen N,Bergbahnen,False
+CH0006234014,623401,Schweizer Zucker AG,Nahrungsmittel und Getraenke,True
+CH0006524265,652426,"ADEV Wasserkraftwerk AG, Liestal",Energie,True
+CH0006532565,653256,"Griesser Holding AG, Aadorf",Industrie,True
+CH0006668930,666893,"ADEV Solarstrom AG, Liestal",Energie,True
+CH0006980079,698007,Gondelbahn Grindelwald N,Bergbahnen,True
+CH0009005973,900597,"Pilatus-Bahnen AG, Kriens",Bergbahnen,True
+CH0009219186,921918,sitEX Properties Hldg N,Immobilien,True
+CH0009319721,931972,"Stadtcasino Baden AG, Baden","Tourismus,Freizeit,Sonstiges",True
+CH0009438109,943810,"BS Bank, Schaffhausen",Banken,True
+CH0010173182,1017318,Welinvest AG in Liquidation,Beteiligungsgesellschaften,True
+CH0010497532,1049753,"ADEV Windkraft AG, Liestal",Energie,True
+CH0010583448,1058344,Clientis Bank Aareland N,Banken,True
+CH0010621925,1062192,Clientis Bank Toggenburg,Banken,True
+CH0010726963,1072696,"Beau-Rivage Palace SA, Lausanne-Ouchy","Tourismus,Freizeit,Sonstiges",True
+CH0010756531,1075653,BBO Bank Brienz-Oberhasli,Banken,True
+CH0010923875,1092387,Hoher Kasten Drehrestaurant und Seilbahn AG,Bergbahnen,True
+CH0011100341,1110034,BERNEXPO N,"Tourismus,Freizeit,Sonstiges",True
+CH0011322200,1132220,"Alpha Rheintal Bank, Heerbrugg",Banken,True
+CH0012457633,1245763,Plaston Holding AG,Industrie,True
+CH0012684657,1268465,Bobst Group N,Industrie,True
+CH0013283368,1328336,Precious Woods Hldg N,Industrie,True
+CH0013592248,1359224,NORINVEST HLDG N,Beteiligungsgesellschaften,True
+CH0013792848,1379284,Bank Oberaargau N,Banken,True
+CH0014069212,1406921,Menzi Muck Gruppe N,Industrie,True
+CH0014386996,1438699,Energie Zürichsee Linth N,Energie,True
+CH0014874918,1487491,"Bernerland Bank, Sumiswald",Banken,True
+CH0016016849,1601684,Hoch-Ybrig N,"Tourismus,Freizeit,Sonstiges",True
+CH0016049881,1604988,Patiswiss AG,Nahrungsmittel und Getraenke,True
+CH0016290014,1629001,"Rigi Bahnen AG, Goldau",Bergbahnen,True
+CH0016376714,1637671,Matterhorn Gotthard Verkehr AG,"Transport,Verkehr,Logistik",True
+CH0016523125,1652312,Griston Holding AG,Industrie,True
+CH0016568880,1656888,Bergbahnen Splügen-Tambo N,Bergbahnen,True
+CH0017915635,1791563,OTC-X Transport/Verkehr/Logistik,Index,True
+CH0017915643,1791564,OTC-X Tourismus/Freizeit/Sonstiges,Index,True
+CH0017915668,1791566,OTC-X Medien,Index,True
+CH0017915684,1791568,OTC-X Industrie,Index,True
+CH0017915692,1791569,OTC-X Energie,Index,True
+CH0017915718,1791571,OTC-X Banken,Index,True
+CH0017915726,1791572,OTC-X TOP50,Index,True
+CH0017915742,1791574,OTC-X All Share,Index,True
+CH0018043619,1804361,Biene-Bank im Rheintal,Banken,True
+CH0018384120,1838412,Bergbahnen Destination Gstaad N,Bergbahnen,True
+CH0018525532,1852553,Raststätte Walensee AG,"Tourismus,Freizeit,Sonstiges",True
+CH0019556908,1955690,Cresta Palace Celerina N,"Tourismus,Freizeit,Sonstiges",True
+CH0020502743,2050274,Holdinova N,Energie,True
+CH0020603475,2060347,CKW N,Energie,True
+CH0023124214,2312421,HBB Holding AG,Industrie,True
+CH0023497271,2349727,Lenzerheide Bergbahnen,Bergbahnen,True
+CH0023777235,2377723,aventron N,Energie,True
+CH0024700483,2470048,"Belalp-Bahnen, Naters",Bergbahnen,True
+CH0025889160,2588916,BLS N,"Transport,Verkehr,Logistik",True
+CH0026212446,2621244,Appenzeller Bahnen,"Transport,Verkehr,Logistik",True
+CH0027315818,2731581,"Raststätte Rheintal AG, Sevelen","Tourismus,Freizeit,Sonstiges",True
+CH0029706766,2970676,Auto AG Uri,"Transport,Verkehr,Logistik",True
+CH0029910939,2991093,VOe holding N,Energie,True
+CH0030333360,3033336,Rapid Holding N,Industrie,True
+CH0030693185,3069318,Seilbahn Weissenstein AG,Bergbahnen,True
+CH0031151084,3115108,SeeBeteiligungs AG,Banken,True
+CH0031926105,3192610,Engadin Mountains AG,Bergbahnen,True
+CH0032018688,3201868,Auto Hldg N,"Transport,Verkehr,Logistik",True
+CH0032462910,3246291,"Corvatsch AG Nom 3, Silvaplana",Bergbahnen,True
+CH0033136596,3313659,Viamala Raststätte Thusis AG,"Tourismus,Freizeit,Sonstiges",True
+CH0034900248,3490024,AG für Erstellung billiger Wohnhäuser in Winterthu,Immobilien,True
+CH0036505888,3650588,Bergbahnen Meiringen-Hasliberg N,Bergbahnen,True
+CH0039074692,3907469,Bank Leerau,Banken,True
+CH0039576753,3957675,OTC-X Bergbahnen,Index,True
+CH0039576787,3957678,OTC-X Beteiligungsgesellschaften,Index,True
+CH0039576837,3957683,OTC-X Immobilien,Index,True
+CH0039576852,3957685,OTC-X Nahrung und Getraenke,Index,True
+CH0039576860,3957686,OTC-X Liquidity,Index,True
+CH0045885032,4588503,Bergbahnen Wildhaus AG,Bergbahnen,True
+CH0049588129,4958812,Bank von Roll AG,Banken,True
+CH0102022560,10202256,CasaInvest N,Immobilien,True
+CH0102699540,10269954,Energ Elec du Simplon E.E.S.,Energie,True
+CH0105175175,10517517,Lorze AG,Industrie,True
+CH0107020692,10702069,Montana Tech N,Industrie,True
+CH0109916244,10991624,Diavolezza Lagalb N,Bergbahnen,True
+CH0114457390,11445739,"Rottal Auto AG, Ruswil","Transport,Verkehr,Logistik",True
+CH0115029545,11502954,Konkordia AG N,Immobilien,True
+CH0121640970,12164097,SWS Medien N,Medien,True
+CH0122303669,12230366,Prayon Switzerland N,Industrie,True
+CH0126517975,12651797,"Neue Zürcher Zeitung, Zürich",Medien,True
+CH0129442221,12944222,Eniwa Holding AG,Energie,True
+CH0136182570,13618257,acrevis Bank N,Banken,False
+CH0148052118,14805211,Zug Estates N Serie A,Immobilien,True
+CH0185254742,18525474,Andermatt-Sedrun Sport AG,Bergbahnen,True
+CH0187392300,18739230,Bellwald Sportbahnen N,Bergbahnen,True
+CH0187475709,18747570,Nexus Gr Hold N,Beteiligungsgesellschaften,True
+CH0197490847,19749084,Sunstar-Holding N -A-,"Tourismus,Freizeit,Sonstiges",True
+CH0198963503,19896350,Magazzini Generali N,"Transport,Verkehr,Logistik",True
+CH0199383602,19938360,Remontées Mécaniques de Grimentz,Bergbahnen,True
+CH0212936964,21293696,Weiss+Appetito N,Industrie,True
+CH0213109793,21310979,OTC-X Premium,Index,True
+CH0223260743,22326074,Toggenburg Bergbahnen N,Bergbahnen,True
+CH0263939958,26393995,Klosters-Madrisa N,Bergbahnen,True
+CH0284143929,28414392,PLAZZA-B-N,Immobilien,True
+CH0286266488,28626648,Ports Francs et Entrepôts de Genève,"Transport,Verkehr,Logistik",True
+CH0292081723,29208172,Bergbahnen Disentis N,Bergbahnen,True
+CH0303601253,30360125,BB Adelboden N,Bergbahnen,True
+CH0304280636,30428063,Helvetic Star Holding,Beteiligungsgesellschaften,True
+CH0304449611,30444961,Lagerhäuser der Centralschweiz N,"Transport,Verkehr,Logistik",True
+CH0305002096,30500209,Skilifte Brunni-Haggenegg N,Bergbahnen,True
+CH0306293272,30629327,Usines Metallurgiques de Vallorbe N,Industrie,True
+CH0318681860,31868186,Spar- und Leihkasse Bucheggberg N,Banken,True
+CH0320093559,32009355,Sportbahnen Atzmaennig N,Bergbahnen,True
+CH0320096990,32009699,Repower N,Energie,True
+CH0322776573,32277657,Berner Oberland-Bahnen N,"Transport,Verkehr,Logistik",True
+CH0324791133,32479113,Chemholding N,Industrie,True
+CH0324793667,32479366,Immobiliare Pharmapark N,Immobilien,True
+CH0326380885,32638088,Unipharma N,Industrie,True
+CH0326691679,32669167,Unione Farmaceutica Distr N,Industrie,True
+CH0341319801,34131980,Sursee-Triengen Bahn N,"Transport,Verkehr,Logistik",True
+CH0341320114,34132011,Schifffahrtsges. Hallwilersee,"Transport,Verkehr,Logistik",True
+CH0342342653,34234265,LSB Unterterzen-Flumserberg,Bergbahnen,False
+CH0342666572,34266657,Bergbahnen Scuol N,Bergbahnen,True
+CH0375446173,37544617,Gondrand Hldg Vz N,"Transport,Verkehr,Logistik",True
+CH0421720779,42172077,SGV Holding N,"Transport,Verkehr,Logistik",True
+CH0433137400,43313740,Davos Klosters Bergbahnen N,Bergbahnen,True
+CH0467707490,46770749,Outdoor Switzerland N,"Tourismus,Freizeit,Sonstiges",False
+CH0487871656,48787165,STI Hldg N,"Transport,Verkehr,Logistik",True
+CH0545753953,54575395,Bondpartners N,Banken,True
+CH0547027570,54702757,SIA-Haus Vz N,Immobilien,True
+CH0553343069,55334306,Zürichsee-Schifffahrtsgesellschaft,"Transport,Verkehr,Logistik",True
+CH0563381901,56338190,LSB Dallenwil-Wirzweli N,Bergbahnen,True
+CH0572824867,57282486,Niederhornbahn N,Bergbahnen,True
+CH0574732894,57473289,BB Lauterbrunnen-Muerren N,Bergbahnen,True
+CH0578688241,57868824,Drahtseilbahn Marzili N,"Transport,Verkehr,Logistik",True
+CH0580517032,58051703,Bergbahnen Hohsaas N,Bergbahnen,True
+CH0586455245,58645524,Stanserhorn-Bahn N -250-,Bergbahnen,True
+CH0586685981,58668598,Stanserhorn-Bahn N -10-,Bergbahnen,True
+CH0596918380,59691838,Thermalbad Zurzach N,"Tourismus,Freizeit,Sonstiges",True
+CH1100211528,110021152,Crédit Mutuel de la Vallée N,Banken,True
+CH1102090151,110209015,WWZ N,Energie,True
+CH1104949586,110494958,Funi Lugano-Paradiso N,Bergbahnen,True
+CH1104984104,110498410,Niesenbahn N,Bergbahnen,True
+CH1106247997,110624799,Funi Locarno-Madonna N,Bergbahnen,True
+CH1112956201,111295620,Regiobank Solothurn N,Banken,True
+CH1127803547,112780354,Casale Holding Rg,Industrie,True
+CH1159308571,115930857,EcoRenova N,Immobilien,True
+CH1204218437,120421843,WIR Bank BS N,Banken,True
+CH1350861261,135086126,Perlen Industrieholding N,Industrie,True
+CH1387788180,138778818,Raurica Wald N-B,Energie,True
+CH1405847034,140584703,Geoterra Holding Rg,Industrie,True
+CH1559311092,155931109,acrevis Bank N,Banken,True
+CH1582436247,158243624,Outdoor Switzerland N,"Tourismus,Freizeit,Sonstiges",True

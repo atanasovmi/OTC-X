@@ -15,11 +15,11 @@ from frontend.operations.config import ANOMALY_LABELS, ANOMALY_COLORS
 from frontend.operations.utils import fmt_chf, fmt_num, fmt_pct, pct_cls, score_badge
 
 
-def render_header(latest_date: str) -> None:
+def render_header(latest_date: str, freshness: dict | None = None) -> None:
     """Render the branded OTC|X page header with live-status indicator.
 
     Outputs a full-width header bar containing the logo, tagline, a
-    pulsing "Live" dot, and the date of the most recent data refresh.
+    refresh-health indicator and the latest market trade date separately.
 
     Parameters
     ----------
@@ -27,6 +27,11 @@ def render_header(latest_date: str) -> None:
         Human-readable date string (e.g. ``"31.12.2024"``) shown next
         to the live indicator.
     """
+    freshness = freshness or {"state": "unknown", "refreshed_at_utc": None}
+    state = freshness["state"]
+    status_label = {"current": "Current", "overdue": "Refresh overdue", "unknown": "Refresh unverified"}[state]
+    refreshed = freshness.get("refreshed_at_utc")
+    refresh_text = refreshed.strftime("%d.%m.%Y %H:%M UTC") if refreshed is not None else "Unknown"
     st.markdown(
         f"""
         <div class="otcx-header">
@@ -35,15 +40,20 @@ def render_header(latest_date: str) -> None:
             <div class="otcx-tagline">Market Intelligence Platform</div>
           </div>
           <div style="margin-left:auto;display:flex;align-items:center;gap:2rem;">
-            <span class="live-dot"><span class="dot"></span> Live</span>
+            <span class="live-dot">{status_label}</span>
             <span style="font-size:0.72rem;color:#1A1A2E;">
-              Last data: <strong>{latest_date}</strong>
+              Latest trade: <strong>{_esc(latest_date)}</strong><br>
+              Refreshed: <strong>{refresh_text}</strong>
             </span>
           </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
+    if state == "overdue":
+        st.warning("The last successful data refresh is more than 36 hours old. Displayed data may be outdated.")
+    elif state == "unknown":
+        st.warning("The last successful data refresh is unverified. Displayed trading dates do not confirm refresh health.")
 
 
 def render_kpis(today: pd.DataFrame, total_securities: int,
@@ -85,7 +95,7 @@ def render_kpis(today: pd.DataFrame, total_securities: int,
     data = [
         ("Market Volume", fmt_chf(total_vol),
          f"{total_trades:,} trades today"),
-        ("Active Securities", str(active_30d_count),
+        ("Securities Traded · 30d", str(active_30d_count),
          f"of {total_sec} listed · {active_today} today"),
         ("Avg Price Change",
          f"{'+' if avg_chg >= 0 else ''}{avg_chg:.2f}%",

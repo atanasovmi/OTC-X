@@ -319,7 +319,9 @@ class TestISINFetcherIntegration:
         mock_session = MagicMock()
         mock_response = MagicMock()
         mock_response.status_code = 200
-        mock_response.content = b"Isin,Datum,Zeit,Kurs,Volumen,Off Book\nCH001,01.01.2024,09:00:00,100.0,10,\n"
+        mock_response.content = (
+            f"Isin,Datum,Zeit,Kurs,Volumen,Off Book\n{isin},01.01.2024,09:00:00,100.0,10,\n"
+        ).encode()
         mock_session.get.return_value = mock_response
 
         with patch("backend.operations.fetcher.OUTPUT_DIR", tmp_path):
@@ -355,12 +357,15 @@ class TestISINFetcherIntegration:
 
         response_200 = MagicMock()
         response_200.status_code = 200
-        response_200.content = b"header\ndata\n"
+        isin = "CH0001574596"
+        response_200.content = (
+            f"Isin,Datum,Zeit,Kurs,Volumen,Off Book\n{isin},01.01.2024,09:00,100.0,10,\n"
+        ).encode()
 
         mock_session.get.side_effect = [response_429, response_200]
 
-        with patch("backend.operations.fetcher.OUTPUT_DIR", tmp_path):
-            result = download_trades("CH0000000001", mock_session)
+        with patch("backend.operations.fetcher.OUTPUT_DIR", tmp_path), patch("backend.operations.fetcher.time.sleep"):
+            result = download_trades(isin, mock_session)
 
         assert result == "success"
         assert mock_session.get.call_count == 2
