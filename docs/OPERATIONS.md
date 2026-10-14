@@ -1,6 +1,8 @@
 # Operating the OTC-X pipeline
 
-The daily GitHub workflow collects data, computes metrics, and publishes one validated Git commit. The Streamlit app reads those files. Container images contain a snapshot from their build; running partner containers require a separately approved image rollout to receive newer code or data.
+The live dashboard runs on Streamlit Community Cloud. Cloud monitors the connected GitHub repository and branch and automatically copies committed code and data; changes to `requirements.txt` trigger dependency installation. The documented production branch is `main`, with `frontend/app.py` as the entrypoint. Keep that existing app configuration and URL.
+
+The daily GitHub workflow collects data, computes metrics, and publishes one validated data commit. The dashboard reads those files; merging application code alone does not collect new trades. To recover missed daily updates, merge the tested patch and dispatch the existing daily workflow once. Its data commit is then automatically picked up by Streamlit. Dashboard users continue using the same URL.
 
 ## Data and listing contract
 
@@ -43,14 +45,20 @@ The orchestrator alone installs a validated local candidate but does not stamp a
 
 ## Rollout and rollback
 
-Before rollout, record the current deployed source revision, hosted Python version, data commit and container digest. Local verification cannot establish which revision partners currently run. Keep the existing app URL, repository/branch configuration and runtime minor version unless a separate reviewed change requires otherwise.
+Before rollout, record the current `main` source/data revision as the rollback reference. Keep the existing Streamlit app URL, repository/branch configuration and Python runtime. The production approval covers the reviewed merge and one controlled data refresh; Community Cloud performs the app update automatically.
 
 1. Publish the reviewed patch branch and inspect Python 3.12/3.13/3.14 CI results. Branch protection is a separate repository setting; new checks alone do not enforce it. Any future rule must accommodate the scoped daily bot writes.
-2. Merge only after checks pass, then dispatch the daily workflow on the production branch and verify the resulting data/status commit.
-3. Inspect all four hosted tabs, history/export access, inactive/new-listing states, and refresh clocks. Observe two consecutive scheduled refreshes and record their links in the recovery pull request.
-4. For container partners, build/sign the tested release, record source SHA plus image digest and retained `sha-<12-character-source-SHA>` tag, then roll out separately. Daily Git commits do not update existing containers.
+2. After owner approval, merge the tested PR into `main`. Streamlit picks up the code and resolves the changed dependency file automatically; allow that installation to finish.
+3. Dispatch **OTC-X Daily Pipeline** once on `main`; wait for all stages, post-refresh tests, validation and the data/status commit to succeed. Streamlit picks up the committed data automatically.
+4. Inspect all four hosted tabs, history/export access, inactive/new-listing states, and refresh clocks. Record the merge revision, successful run/data commit and UI result in the recovery PR. Keep the incident in Monitoring until two scheduled refreshes have succeeded.
 
-Roll back a failed application release using a reviewed revert on top of current data, or the recorded known-good container **digest**. For bad data, restore the complete previously validated `backend/data/` snapshot together; do not mix old metrics with new registry/raw files. Preserve any new raw history from the failed candidate before a deliberate data restoration. Never restore floating dependency ranges as a recovery step. Revalidate and keep the failure receipt.
+Roll back a failed Cloud application update using a reviewed revert on top of current data; Streamlit also picks up that corrective commit automatically. Preserve the tested dependency closure when reverting application behavior. For bad data, restore the complete previously validated `backend/data/` snapshot together; do not mix old metrics with new registry/raw files. Preserve any new raw history from the failed candidate before a deliberate data restoration. Revalidate and keep the failure receipt.
+
+## Optional container distribution
+
+Docker is an alternative distribution path, not a prerequisite for updating the live Cloud dashboard. A container contains the source and data from its build and requires explicit image replacement to update. Publishing a GitHub Release or pushing a `v*` tag triggers the container publication workflow; neither is needed for this Cloud recovery.
+
+For an explicitly requested container release, build/sign the tested source, record the image digest and retained `sha-<12-character-source-SHA>` tag, and verify the signature before upgrading an image-based deployment. Roll back that deployment using its recorded known-good digest.
 
 Package cleanup is currently a read-only retention reminder: untagged multiarchitecture child manifests and attestations can be required by tagged images. Do not delete them using a simple untagged-version rule. See [upstream issue 162](https://github.com/actions/delete-package-versions/issues/162).
 
@@ -60,8 +68,8 @@ Use recorded digests for partner upgrades: an older/manual release can move `lat
 
 The maintainer reviews dependencies, action SHA pins and the container base monthly, and sooner for relevant security fixes. Update the complete dependency closure in a separate review; run `pip check`, the Python matrix, chart/lifecycle tests and snapshot validation. Verify both container architectures and retain the previous digest. Python pins and a base digest prevent accidental drift; apt packages still follow the base distribution's repository during a new build.
 
-Keep the record small: **GitHub recovery PR** for impact, cause, owner, review, test evidence and rollout checklist; **CHANGELOG** for user-visible behavior; **operating guide** for repeatable procedures. Publish concise partner-facing **GitHub Release notes** after verification, with exact source/data versions and the signed image digest. Track Prepared → Monitoring → Resolved in the PR; merging alone is not recovery. Add exact workflow/source/digest links as rollout happens and keep unresolved checks pending.
+Keep the record small: **GitHub recovery PR** for impact, cause, owner, review, test evidence and rollout checklist; **CHANGELOG** for user-visible behavior; **operating guide** for repeatable procedures. For this Cloud recovery, record the exact merge/data revisions, Actions receipts, UTC refresh time and hosted UI result in the PR; mark the change log as deployed only after verification. Track Prepared → Monitoring → Resolved; merging alone is not recovery. Release notes are optional for a separately requested versioned release, with its source/data versions and image digest where applicable.
 
 The local Windows deletion error was separate: the abandoned outer checkout had a deny ACL for the sandbox identity, while the user's account retained FullControl. Its Git status represented local missing files, not remote deletion. The active patch is in the inner `OTC-X` checkout. Do not commit the outer deletions, change ownership broadly, or use folder deletion to repair CI.
 
-References: [GitHub scheduled workflows](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule), [concurrency/queue behavior](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#concurrency), [Streamlit application updates](https://docs.streamlit.io/deploy/streamlit-community-cloud/manage-your-app/update-your-app).
+References: [GitHub scheduled workflows](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule), [concurrency/queue behavior](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#concurrency), [Streamlit automatic code updates](https://docs.streamlit.io/deploy/streamlit-community-cloud/manage-your-app/edit-your-app), [Streamlit dependency updates](https://docs.streamlit.io/deploy/streamlit-community-cloud/manage-your-app).

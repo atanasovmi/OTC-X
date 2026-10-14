@@ -51,7 +51,7 @@ OTC-X's current development source is `main`; tagged container releases also exi
 | Streamlit Cloud (live dashboard) | ✅ Active | ✅ Supported |
 | Archived commits / forks | ❌ Unsupported | ❌ Not covered |
 
-> **Policy:** Security patches target `main` after validation and a reviewed rollout. Partner containers require explicit deployment of the patched image; a Git merge alone does not update them. Use of forked or archived copies remains subject to the [Proprietary Notice](LICENSE.md).
+> **Policy:** Security patches target `main` after validation and a reviewed rollout. The live Streamlit Community Cloud dashboard automatically picks up changes to its connected branch. Docker is an optional distribution path; image-based deployments require explicit image replacement. Use of forked or archived copies remains subject to the [Proprietary Notice](LICENSE.md).
 
 <br/>
 
