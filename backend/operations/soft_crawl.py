@@ -67,7 +67,8 @@ def run_crawl(data_dir: Path | None = None) -> pd.DataFrame:
          "VALOR": item.get("valor"), "ISIN": item.get("isin")}
         for item in items
     ], columns=SECURITIES_COLUMNS))
-    existing = load_registry(data_dir) if (data_dir / "securities.csv").exists() else None
+    has_metadata = (data_dir / "security_registry.csv").exists() or (data_dir / "securities.csv").exists()
+    existing = load_registry(data_dir) if has_metadata else None
     registry = build_registry(frame, existing=existing)
     atomic_write_bytes(data_dir / "securities.csv", frame.to_csv(index=False).encode("utf-8"))
     atomic_write_bytes(data_dir / "security_registry.csv", registry.to_csv(index=False).encode("utf-8"))

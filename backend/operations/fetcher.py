@@ -7,7 +7,6 @@ and incomplete cumulative histories fail the stage rather than reporting success
 from pathlib import Path
 import sys
 import logging
-import math
 import time
 from datetime import datetime
 
@@ -47,28 +46,75 @@ def setup_logging(log_dir: Path | None = None) -> logging.Logger:
 
 
 def calculate_isin_check_digit(isin_without_check: str) -> str:
-    """Calculate the compatible Swiss Valor conversion's Luhn check digit."""
-    digits = []
+    """Calculate the ISIN check digit using the Luhn algorithm.
+
+    Each letter in the ISIN prefix is expanded into two decimal digits
+    (A = 10 … Z = 35). The resulting digit sequence is then processed
+    right-to-left with alternating ×2 / ×1 weights, and the check
+    digit is ``(10 − (sum mod 10)) mod 10``.
+
+    Parameters
+    ----------
+    isin_without_check : str
+        The 11-character ISIN prefix **without** the final check digit
+        (e.g. ``"CH001629001"``).
+
+    Returns
+    -------
+    str
+        Single-character string containing the computed check digit
+        (``'0'`` – ``'9'``).
+    """
+    # Convert letters to numbers
+    digits: list[int] = []
     for char in isin_without_check:
-        digits.extend(int(digit) for digit in (char if char.isdigit() else str(ord(char.upper()) - 55)))
-    total = 0
-    for index, digit in enumerate(reversed(digits)):
-        product = digit * (2 if index % 2 == 0 else 1)
-        total += product // 10 + product % 10
-    return str((10 - total % 10) % 10)
+        if char.isdigit():
+            digits.append(int(char))
+        else:
+            # A=10, ..., Z=35
+            val = ord(char.upper()) - 55
+            digits.extend([int(d) for d in str(val)])
+
+    # Luhn double-add-double: weight alternates ×2, ×1 from the rightmost digit
+    total_sum: int = 0
+    for i, digit in enumerate(reversed(digits)):
+        weight = 2 if i % 2 == 0 else 1
+        product = digit * weight
+        total_sum += (product // 10) + (product % 10)
+
+    check_digit = (10 - (total_sum % 10)) % 10
+    return str(check_digit)
 
 
 def val_to_isin(valor: str | int | float) -> str | None:
-    """Retain Valor conversion for callers; downloads use the API's actual ISIN."""
+    """Convert a Swiss Valor number to a fully-qualified ISIN.
+
+    Pads the numeric Valor to 9 digits, prepends the ``CH`` country
+    code, and appends a Luhn check digit.
+
+    Parameters
+    ----------
+    valor : str | int | float
+        Valor number.  Accepts floats (e.g. ``123.0`` as read by
+        pandas) and stringified floats (``"123.0"``).
+
+    Returns
+    -------
+    str | None
+        12-character ISIN string (e.g. ``"CH0016290012"``), or
+        ``None`` if the input cannot be parsed as a numeric Valor.
+    """
     try:
-        number = float(valor)
-        if not math.isfinite(number) or not number.is_integer() or not 0 < number < 1_000_000_000:
-            return None
-        clean = str(int(number)).zfill(9)
-    except (ValueError, TypeError, OverflowError):
+        # Handle cases where pandas reads as float (e.g., 123.0) or string '123.0'
+        clean_valor = str(int(float(valor)))
+    except (ValueError, TypeError):
         return None
-    prefix = "CH" + clean
-    return prefix + calculate_isin_check_digit(prefix)
+
+    # Pad to 9 digits
+    padded_valor = clean_valor.zfill(9)
+    isin_prefix = "CH" + padded_valor
+    check_digit = calculate_isin_check_digit(isin_prefix)
+    return isin_prefix + check_digit
 
 
 def _save_trades(isin: str, content: bytes, output_dir: Path | None = None) -> bool:

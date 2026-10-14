@@ -412,15 +412,9 @@ def main() -> None:
             )
 
         # ── Data table ──
-        display_panel = df_filt.copy()
-        display_panel["Listing status"] = display_panel["Isin"].map(universe.set_index("Isin")["Listing status"])
-        render_native_dataframe(display_panel, n=n_display)
+        render_native_dataframe(df_filt, n=n_display)
 
         matching_listings = security_choices(universe, search, sel_sector)
-        matching_no_trades = matching_listings[matching_listings["is_active"] & ~matching_listings["has_trading_data"]]
-        if not matching_no_trades.empty:
-            st.markdown('<div class="sec-hdr">Active Listings — No Trading Data</div>', unsafe_allow_html=True)
-            st.dataframe(matching_no_trades[["Isin", "Name", "Sektor", "Trading data"]], hide_index=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
 

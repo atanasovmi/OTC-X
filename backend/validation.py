@@ -210,15 +210,12 @@ def validate_snapshot(data_dir: Path = DATA_DIR) -> ValidationReport:
 
 def write_refresh_status(data_dir: Path, report: ValidationReport) -> None:
     """Atomically mark a validated refresh; failures cannot replace the timestamp."""
+    from backend.operations.security_registry import atomic_write_bytes
+
     target = Path(data_dir) / "refresh_status.json"
-    temporary = target.with_suffix(".json.tmp")
     payload = {"refreshed_at_utc": datetime.now(timezone.utc).isoformat(),
                "latest_trade_date": report.latest_trade_date}
-    try:
-        temporary.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-        temporary.replace(target)
-    finally:
-        temporary.unlink(missing_ok=True)
+    atomic_write_bytes(target, (json.dumps(payload, indent=2) + "\n").encode("utf-8"))
 
 
 def main(argv: list[str] | None = None) -> int:

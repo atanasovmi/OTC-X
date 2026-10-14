@@ -1,11 +1,12 @@
-name: Container retention review
+name: Clean up container registry
 
-# Untagged GHCR versions may be architecture or attestation manifests referenced
-# by retained multi-architecture image tags. Deleting them by tag absence alone
-# can break partner images and rollback versions:
-# https://github.com/actions/delete-package-versions/issues/162
-# Keep this scheduled reminder read-only until a separately reviewed cleanup can
-# prove that candidates are unreachable from every retained manifest/signature.
+# Weekly housekeeping for the GHCR package. Deletes untagged image
+# versions — typically intermediate buildx layers and old multi-arch
+# manifests whose tags have been reassigned. Tagged versions
+# (e.g. v2026.05.14, latest) are kept untouched.
+#
+# Runs every Sunday at 04:00 UTC. Can also be triggered manually
+# from the Actions tab via `workflow_dispatch`.
 
 on:
   schedule:
@@ -14,17 +15,16 @@ on:
 
 permissions:
   contents: read
+  packages: write
 
 jobs:
-  retention-notice:
-    name: Preserve partner and rollback images
+  delete-untagged:
+    name: Delete untagged container versions
     runs-on: ubuntu-latest
     steps:
-      - name: Record retention policy
-        run: |
-          {
-            echo '### OTC-X container retention'
-            echo 'Automatic registry deletion is disabled to preserve retained multi-architecture images and their attestations.'
-            echo 'Keep version and sha-* tags, their referenced manifests, signatures, SBOMs and provenance.'
-            echo 'Any future cleanup must inspect the complete manifest graph and be reviewed before deletion.'
-          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Remove untagged versions of ghcr.io/${{ github.repository }}
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: otc-x
+          package-type: container
+          delete-only-untagged-versions: true

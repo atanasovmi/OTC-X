@@ -62,25 +62,13 @@ def build_registry(
     current: pd.DataFrame,
     *,
     existing: pd.DataFrame | None = None,
-    history: pd.DataFrame | None = None,
-    recovered: pd.DataFrame | None = None,
-    historical_isins: list[str] | None = None,
 ) -> pd.DataFrame:
-    """Merge by ISIN, preferring existing/current nonblank metadata.
-
-    Metrics contribute the last nonblank label independently for each field.
-    recovered supports an audited, one-off Git history seed; runtime operation
-    never requires Git or network metadata lookups.
-    """
+    """Merge the current universe into stored identities and nonblank labels."""
     current = validate_universe(current)
     records: dict[str, dict] = {}
-
-    def absorb(frame: pd.DataFrame | None) -> None:
+    for frame in (existing, current):
         if frame is None:
-            return
-        frame = frame.rename(columns={"Isin": "ISIN", "Name": "NAME", "Sektor": "SEKTOR"})
-        if "Datum" in frame:
-            frame = frame.sort_values("Datum")
+            continue
         for row in frame.to_dict("records"):
             isin = _label(row.get("ISIN"))
             if not is_valid_isin(isin):
@@ -90,15 +78,6 @@ def build_registry(
                 label = _label(row.get(column))
                 if label:
                     entry[column] = label
-
-    for isin in historical_isins or []:
-        if not is_valid_isin(isin):
-            raise ValueError(f"Invalid trade-file ISIN: {isin!r}")
-        records[isin] = {"ISIN": isin, "VALOR": "", "NAME": "", "SEKTOR": ""}
-    absorb(recovered)
-    absorb(history)
-    absorb(existing)
-    absorb(current)
     active = set(current["ISIN"])
     for isin, record in records.items():
         record["is_active"] = isin in active
@@ -106,16 +85,9 @@ def build_registry(
 
 
 def load_registry(data_dir: Path | None = None) -> pd.DataFrame:
-    """Load the registry, bootstrapping legacy snapshots in memory."""
+    """Load the committed registry; missing metadata requires explicit recovery."""
     data_dir = Path(data_dir) if data_dir is not None else DATA_DIR
-    path = data_dir / "security_registry.csv"
-    if path.exists():
-        return read_registry(path)
-    current = pd.read_csv(data_dir / "securities.csv", dtype=str, keep_default_na=False)
-    metrics_path = data_dir / "daily_metrics.parquet"
-    history = pd.read_parquet(metrics_path, columns=["Isin", "Name", "Sektor", "Datum"]) if metrics_path.exists() else None
-    historical_isins = [path.stem for path in (data_dir / "trades").glob("*.csv")]
-    return build_registry(current, history=history, historical_isins=historical_isins)
+    return read_registry(data_dir / "security_registry.csv")
 
 
 def atomic_write_bytes(path: Path, content: bytes) -> None:

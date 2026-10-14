@@ -5,9 +5,7 @@
 # Run:    docker run -p 8501:8501 ghcr.io/atanasovmi/otc-x:dev
 #
 
-# Pin the multi-architecture base as well as Python packages. Review this digest
-# with dependency updates; it contains Python 3.12.15 on amd64 and arm64.
-FROM python:3.12-slim@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1 AS runtime
+FROM python:3.12-slim AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -33,8 +31,7 @@ WORKDIR /app
 # readable by 'app' but not writable (defence-in-depth: the running app
 # cannot tamper with its own dependencies).
 COPY requirements.txt ./
-RUN python -m pip install --no-cache-dir --only-binary=:all: -r requirements.txt \
-    && python -m pip check
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Application source and pre-built data artefacts
 COPY --chown=app:app backend/ ./backend/

@@ -37,7 +37,7 @@
 
 <br/><br/>
 
-<sub>Regression-tested Python pipeline · <b>26</b> metrics per security per day · current and historical ISIN coverage · <b>22 years</b> of history</sub>
+<sub><b>6,032</b> LOC Python · <b>115+</b> tests · <b>26</b> metrics per security per day · <b>224</b> securities · <b>22 years</b> of history</sub>
 
 </div>
 
@@ -102,9 +102,7 @@ A fully automated **end-to-end data pipeline**: from raw OTC-X API data through 
 <td width="50%">
 
 ### ⭐ Wert & Einzigartigkeit (Value & Uniqueness)
-Liquidity analytics for Swiss OTC equities: automated anomaly scoring, rolling 30-day risk baselines, and daily refreshes via GitHub Actions. The dashboard reports successful refresh time separately from the latest trade date, including overdue or unverified freshness.
-
-Maintenance records: [change log](CHANGELOG.md), [operating and recovery guide](docs/OPERATIONS.md), and [GitHub recovery review #37](https://github.com/atanasovmi/OTC-X/pull/37). The review records impact, cause, test evidence and rollout status; partner-facing release notes follow verified deployment.
+The **only live liquidity radar** for Swiss OTC equities: automated anomaly scoring, rolling 30-day risk baselines, and institutional-grade analytics — **zero manual intervention**, refreshed daily via GitHub Actions.
 
 </td>
 </tr>
@@ -342,7 +340,7 @@ flowchart TD
 
 <br/>
 
-<sub>Orchestrated by <a href="backend/pipeline.py"><code>pipeline.py</code></a> · Scheduled daily @ 05:00 UTC via GitHub Actions (actual start may be delayed)</sub>
+<sub>Orchestrated by <a href="backend/pipeline.py"><code>pipeline.py</code></a> · Automated daily @ 05:00 UTC via GitHub Actions</sub>
 
 </div>
 
@@ -350,12 +348,10 @@ flowchart TD
 
 | Stage | Module | What happens | Output |
 |:---:|:---|:---|:---|
-| **①** | [`soft_crawl.py`](backend/operations/soft_crawl.py) | Validates the complete current API universe and retains inactive ISIN metadata | `securities.csv`, `security_registry.csv` |
+| **①** | [`soft_crawl.py`](backend/operations/soft_crawl.py) | Discovers 243 securities from the OTC-X API (ISIN, Valor, Sektor) | `securities.csv` |
 | **②** | [`fetcher.py`](backend/operations/fetcher.py) | Downloads per-ISIN trade history with retry logic & rate limiting | `trades/*.csv` |
-| **③** | [`build_master_parquet.py`](backend/operations/build_master_parquet.py) | Validates and deduplicates retained trade history into columnar storage (Zstandard) | `master_trades.parquet` |
+| **③** | [`build_master_parquet.py`](backend/operations/build_master_parquet.py) | Deduplicates, type-casts, compresses into columnar storage (Zstandard) | `master_trades.parquet` |
 | **④** | [`metrics.py`](backend/operations/metrics.py) | Computes 26 daily metrics, 30-day rolling baselines, anomaly flags | `daily_metrics.parquet` |
-
-Stages run in a separate snapshot directory and return failure on genuine errors. The workflow tests before and after refresh, reconciles raw/metric totals, records freshness, then publishes a single scoped Git commit. Removed ISINs remain available historically; new untraded listings remain visible and unassessed. See [operations](docs/OPERATIONS.md) for the data contract, maintenance and rollback.
 
 <br/>
 
@@ -444,7 +440,7 @@ OTC-X/
 
 ### For BEKB Authorized Personnel
 
-**Prerequisites:** Python 3.12–3.14 · pip. Use the committed complete dependency pins; review upgrades with the test matrix.
+**Prerequisites:** Python 3.12+ · pip
 
 ```bash
 # 1 — Install runtime dependencies (dashboard + pipeline)

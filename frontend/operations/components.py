@@ -266,9 +266,6 @@ def render_native_dataframe(df: pd.DataFrame, n: int = 50) -> None:
     def _f_flag(v: object, _r: pd.Series) -> str:
         return _flag_dot(bool(v))
 
-    def _f_listing(v: object, _r: pd.Series) -> str:
-        return _esc(str(v))
-
     def _f_vol_num(v: object, _r: pd.Series) -> str:
         return fmt_num(v, dec=0) if pd.notna(v) else "—"
 
@@ -277,7 +274,6 @@ def render_native_dataframe(df: pd.DataFrame, n: int = 50) -> None:
         ("Isin",                "ISIN",             "left", "isin",  _f_isin),
         ("Name",                "Security",         "left", "name left", _f_name),
         ("Sektor",              "Sector",           "left", "sektor left", _f_sektor),
-        ("Listing status",      "Listing",          "left", "", _f_listing),
         ("Datum",               "Date",             "",     "",      _f_date),
         ("price_last",          "Last",             "",     "",      _f_chf),
         ("price_change_pct",    "Δ%",               "",     "",      _f_pct),

@@ -12,7 +12,7 @@ import requests
 from backend.operations import fetcher, soft_crawl
 from backend.operations.build_master_parquet import build_master_parquet, parse_trade_csv
 from backend.operations.metrics import compute_daily_metrics, main as run_metrics
-from backend.operations.security_registry import build_registry, read_registry, validate_universe
+from backend.operations.security_registry import build_registry, load_registry, read_registry, validate_universe
 
 A = "CH0001574596"
 B = "CH0001574604"
@@ -73,18 +73,31 @@ def test_added_removed_and_reappearing_keep_identity_and_metadata():
     assert not restored.loc[B, "is_active"]
 
 
-def test_registry_uses_last_nonblank_history_fields_independently():
-    history = pd.DataFrame({
-        "Isin": [A, A, A], "Datum": [date(2020, 1, 1), date(2021, 1, 1), date(2022, 1, 1)],
-        "Name": ["Original", "Latest", None], "Sektor": ["Banken", None, " "],
-    })
-    result = build_registry(securities(B), history=history).set_index("ISIN")
+def test_registry_preserves_last_nonblank_fields_across_current_snapshots():
+    initial = securities(A)
+    initial.loc[0, "NAME"] = "Original"
+    stored = build_registry(initial)
+    renamed = securities(A)
+    renamed.loc[0, ["NAME", "SEKTOR"]] = ["Latest", None]
+    stored = build_registry(renamed, existing=stored)
+    result = build_registry(securities(B), existing=stored).set_index("ISIN")
     assert result.loc[A, "NAME"] == "Latest"
     assert result.loc[A, "SEKTOR"] == "Banken"
     current = securities(A)
     current.loc[0, ["NAME", "SEKTOR"]] = [" ", None]
     updated = build_registry(current, existing=result.reset_index()).set_index("ISIN")
     assert updated.loc[A, "NAME"] == "Latest" and updated.loc[A, "SEKTOR"] == "Banken"
+
+
+def test_missing_committed_registry_requires_recovery(tmp_path, monkeypatch):
+    securities(A).to_csv(tmp_path / "securities.csv", index=False)
+    with pytest.raises(FileNotFoundError):
+        load_registry(tmp_path)
+    monkeypatch.setattr(soft_crawl.requests, "get", lambda *a, **kw: response(payload=universe_payload(B)))
+    with pytest.raises(FileNotFoundError):
+        soft_crawl.run_crawl(tmp_path)
+    assert pd.read_csv(tmp_path / "securities.csv")["ISIN"].to_list() == [A]
+    assert not (tmp_path / "security_registry.csv").exists()
 
 
 @pytest.mark.parametrize("frame", [securities(A, A), securities("CH0001574597")])
@@ -134,6 +147,17 @@ def test_crawl_fetches_all_pages_before_marking_inactive(tmp_path, monkeypatch):
     assert mock.call_args.kwargs["params"] == {"page": 1, "size": 1}
     registry = read_registry(tmp_path / "security_registry.csv").set_index("ISIN")
     assert not registry.loc[A, "is_active"] and registry.loc[C, "is_active"]
+
+
+def test_crawl_preserves_registry_if_current_csv_is_missing(tmp_path, monkeypatch):
+    registry = build_registry(securities(B), existing=build_registry(securities(A, B)))
+    registry.to_csv(tmp_path / "security_registry.csv", index=False)
+    monkeypatch.setattr(soft_crawl.requests, "get", lambda *a, **kw: response(payload=universe_payload(C)))
+    soft_crawl.run_crawl(tmp_path)
+    restored = read_registry(tmp_path / "security_registry.csv").set_index("ISIN")
+    assert set(restored.index) == {A, B, C}
+    assert not restored.loc[A, "is_active"] and restored.loc[A, "NAME"] == f"Name {A}"
+    assert not restored.loc[B, "is_active"] and restored.loc[C, "is_active"]
 
 
 def test_crawl_rejects_changing_pagination_without_writes(tmp_path, monkeypatch):
@@ -272,7 +296,9 @@ def test_zero_volume_is_valid_and_amihud_remains_unassessed(tmp_path):
 
 def test_blank_unknown_historical_labels_keep_text_schema(tmp_path):
     parse_trade_csv(HEADER + trade()).write_parquet(tmp_path / "master_trades.parquet")
-    build_registry(securities(B), historical_isins=[A]).to_csv(tmp_path / "security_registry.csv", index=False)
+    unknown = securities(A)
+    unknown.loc[0, ["NAME", "SEKTOR"]] = ["", ""]
+    build_registry(securities(B), existing=build_registry(unknown)).to_csv(tmp_path / "security_registry.csv", index=False)
     run_metrics(tmp_path)
     result = pl.read_parquet(tmp_path / "daily_metrics.parquet")
     assert result.schema["Name"] == pl.String and result.schema["Sektor"] == pl.String
