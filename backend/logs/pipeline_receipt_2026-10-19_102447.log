@@ -1,0 +1,105 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                            OTC-X PIPELINE RECEIPT                            ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+  Run Date:     2026-10-19
+  Start Time:   10:24:47
+  End Time:     10:29:47
+  Duration:     0:04:59.167099
+  Status:       ALL STAGES PASSED
+
+────────────────────────────────────────────────────────────────────────────────
+  STAGE EXECUTION SUMMARY
+────────────────────────────────────────────────────────────────────────────────
+  Published snapshot validation
+    Status:   ✓ SUCCESS
+    Duration: 0.1s
+
+  Snapshot preparation
+    Status:   ✓ SUCCESS
+    Duration: 0.0s
+
+  Stage 1: Valor Extraction
+    Status:   ✓ SUCCESS
+    Duration: 5.5s
+
+  Stage 2: Trade Data Retrieval
+    Status:   ✓ SUCCESS
+    Duration: 290.7s
+
+  Stage 3: Data Consolidation (Parquet)
+    Status:   ✓ SUCCESS
+    Duration: 2.6s
+
+  Stage 4: Liquidity Metrics Engine
+    Status:   ✓ SUCCESS
+    Duration: 0.2s
+
+  Snapshot validation
+    Status:   ✓ SUCCESS
+    Duration: 0.1s
+
+  Install validated snapshot
+    Status:   ✓ SUCCESS
+    Duration: 0.0s
+
+────────────────────────────────────────────────────────────────────────────────
+  DATA PRODUCTS
+────────────────────────────────────────────────────────────────────────────────
+  Date Range:        2004-02-16 → 2026-10-19
+  Securities CSV:    239 securities
+  Trade CSVs:        245 files in data/trades/
+  Master Parquet:    146,816 rows, 227 ISINs (1.07 MB)
+  Daily Metrics:     79,563 rows, 227 ISINs, 10 sectors
+
+────────────────────────────────────────────────────────────────────────────────
+  HISTORICAL LATEST-SCORE SUMMARY (includes inactive ISINs)
+────────────────────────────────────────────────────────────────────────────────
+  Total ISINs:       227
+  Latest score 0:    129
+  Latest score >0:   98
+  Current assessed risk and unassessed listings are shown in the dashboard.
+
+  Score  Count
+  ─────  ─────
+      2      14
+      3      42
+      4       2
+      5      37
+      7       3
+
+────────────────────────────────────────────────────────────────────────────────
+  STAGE DETAIL LOGS
+────────────────────────────────────────────────────────────────────────────────
+  ┌─ Published snapshot validation
+  └─ OK (0.1s)
+
+  ┌─ Snapshot preparation
+  └─ OK (0.0s)
+
+  ┌─ Stage 1: Valor Extraction
+  │ Validated 239 current securities; retained 245 registry identities.
+  └─ OK (5.5s)
+
+  ┌─ Stage 2: Trade Data Retrieval
+  │ Trade download outcomes: {'total': 239, 'success': 221, 'not_found': 0, 'empty': 18, 'failed': 0, 'created_files': 221}; elapsed 290.7s
+  └─ OK (290.7s)
+
+  ┌─ Stage 3: Data Consolidation (Parquet)
+  │ Consolidated 146,816 trades from 227 files; 18 empty/header-only files.
+  │ Schema: Schema({'Isin': String, 'Datum': Date, 'Zeit': String, 'Kurs': Float64, 'Volumen': Float64, 'Off Book': Boolean})
+  └─ OK (2.6s)
+
+  ┌─ Stage 4: Liquidity Metrics Engine
+  │ Computed 79,563 daily metric rows for 227 ISINs; 2004-02-16 to 2026-10-19; 0.2s.
+  └─ OK (0.2s)
+
+  ┌─ Snapshot validation
+  └─ OK (0.1s)
+
+  ┌─ Install validated snapshot
+  └─ OK (0.0s)
+
+════════════════════════════════════════════════════════════════════════════════
+  End of receipt — 2026-10-19 10:29:47
+════════════════════════════════════════════════════════════════════════════════
